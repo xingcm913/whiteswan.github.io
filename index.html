@@ -8,26 +8,17 @@
 <title>课程表</title>
 <style>
   * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    margin: 0; padding: 0; box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
-    -webkit-user-select: none;
-    user-select: none;
+    -webkit-user-select: none; user-select: none;
   }
 
   :root {
-    --blue: #007AFF;
-    --blue-2: #5AC8FA;
-    --blue-soft: #E3F0FF;
-    --text: #1C1C1E;
-    --text-2: #8E8E93;
-    --text-3: #C7C7CC;
-    --card: rgba(255, 255, 255, 0.72);
-    --card-2: rgba(255, 255, 255, 0.55);
+    --blue: #007AFF; --blue-2: #5AC8FA; --blue-soft: #E3F0FF;
+    --text: #1C1C1E; --text-2: #8E8E93; --text-3: #C7C7CC;
+    --card: rgba(255, 255, 255, 0.72); --card-2: rgba(255, 255, 255, 0.55);
     --card-solid: rgba(255, 255, 255, 0.92);
-    --border: rgba(255, 255, 255, 0.6);
-    --border-2: rgba(0, 122, 255, 0.12);
+    --border: rgba(255, 255, 255, 0.6); --border-2: rgba(0, 122, 255, 0.12);
     --shadow: 0 8px 32px rgba(0, 122, 255, 0.08);
     --mask: rgba(28, 28, 30, 0.35);
     --bg-grad:
@@ -42,17 +33,11 @@
   }
 
   [data-theme="dark"] {
-    --blue: #0A84FF;
-    --blue-2: #64D2FF;
-    --blue-soft: #1B2A3A;
-    --text: #FFFFFF;
-    --text-2: #98989F;
-    --text-3: #636366;
-    --card: rgba(44, 44, 46, 0.72);
-    --card-2: rgba(58, 58, 60, 0.55);
+    --blue: #0A84FF; --blue-2: #64D2FF; --blue-soft: #1B2A3A;
+    --text: #FFFFFF; --text-2: #98989F; --text-3: #636366;
+    --card: rgba(44, 44, 46, 0.72); --card-2: rgba(58, 58, 60, 0.55);
     --card-solid: rgba(44, 44, 46, 0.92);
-    --border: rgba(84, 84, 88, 0.4);
-    --border-2: rgba(10, 132, 255, 0.25);
+    --border: rgba(84, 84, 88, 0.4); --border-2: rgba(10, 132, 255, 0.25);
     --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     --mask: rgba(0, 0, 0, 0.55);
     --bg-grad:
@@ -67,159 +52,99 @@
   html, body {
     height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif;
-    color: var(--text);
-    overflow: hidden;
+    color: var(--text); overflow: hidden;
     transition: background 0.4s, color 0.3s;
   }
-
-  body {
-    background: var(--bg-grad);
-    background-attachment: fixed;
-  }
+  body { background: var(--bg-grad); background-attachment: fixed; }
 
   body::before, body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(60px);
-    z-index: 0;
-    pointer-events: none;
+    content: ""; position: fixed; border-radius: 50%;
+    filter: blur(60px); z-index: 0; pointer-events: none;
     transition: background 0.4s;
   }
-  body::before {
-    width: 280px; height: 280px;
-    background: var(--blob-1);
-    top: -80px; left: -60px;
-  }
-  body::after {
-    width: 320px; height: 320px;
-    background: var(--blob-2);
-    bottom: -120px; right: -100px;
-  }
+  body::before { width: 280px; height: 280px; background: var(--blob-1); top: -80px; left: -60px; }
+  body::after { width: 320px; height: 320px; background: var(--blob-2); bottom: -120px; right: -100px; }
 
   .app {
-    position: relative;
-    z-index: 1;
-    max-width: 480px;
-    margin: 0 auto;
-    height: 100vh;
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    position: relative; z-index: 1;
+    max-width: 480px; margin: 0 auto;
+    height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column; overflow: hidden;
   }
-
   .status-bar { height: var(--safe-top); flex-shrink: 0; }
 
   header {
     position: relative;
     padding: 8px 20px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between;
     backdrop-filter: blur(30px) saturate(180%);
     -webkit-backdrop-filter: blur(30px) saturate(180%);
     background: var(--card-2);
     border-bottom: 0.5px solid var(--border);
-    flex-shrink: 0;
-    z-index: 10;
+    flex-shrink: 0; z-index: 10;
   }
-  header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, var(--text) 0%, var(--blue) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .header-actions { display: flex; gap: 10px; }
-  .icon-btn {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(0, 122, 255, 0.12);
-    color: var(--blue);
-    font-size: 18px;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+  .menu-btn {
+    width: 36px; height: 36px; border: none;
+    background: rgba(0, 122, 255, 0.12); color: var(--blue);
+    border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
     transition: transform 0.15s, background 0.2s;
   }
-  .icon-btn:active { transform: scale(0.88); background: rgba(0, 122, 255, 0.22); }
+  .menu-btn:active { transform: scale(0.88); background: rgba(0, 122, 255, 0.22); }
+  .menu-btn svg { width: 18px; height: 18px; }
+
+  .add-btn {
+    width: 36px; height: 36px; border-radius: 50%; border: none;
+    background: rgba(0, 122, 255, 0.12); color: var(--blue);
+    font-size: 22px; font-weight: 300; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: transform 0.15s, background 0.2s;
+  }
+  .add-btn:active { transform: scale(0.88); background: rgba(0, 122, 255, 0.22); }
 
   .segment {
-    display: flex;
-    margin: 14px 20px 0;
-    padding: 3px;
+    display: flex; margin: 14px 20px 0; padding: 3px;
     background: var(--card-2);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-radius: 14px;
-    border: 0.5px solid var(--border);
+    border-radius: 14px; border: 0.5px solid var(--border);
     flex-shrink: 0;
   }
   .segment button {
-    flex: 1;
-    padding: 8px 0;
-    border: none;
-    background: transparent;
-    color: var(--text-2);
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 11px;
-    cursor: pointer;
+    flex: 1; padding: 8px 0; border: none; background: transparent;
+    color: var(--text-2); font-size: 14px; font-weight: 600;
+    border-radius: 11px; cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .segment button.active {
-    background: var(--card-solid);
-    color: var(--blue);
+    background: var(--card-solid); color: var(--blue);
     box-shadow: 0 2px 8px rgba(0, 122, 255, 0.12);
   }
 
   .week-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 14px 20px 0;
-    padding: 10px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 14px 20px 0; padding: 10px 14px;
     background: var(--card);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 0.5px solid var(--border);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    flex-shrink: 0;
+    border: 0.5px solid var(--border); border-radius: 16px;
+    box-shadow: var(--shadow); flex-shrink: 0;
   }
   .week-bar button {
-    width: 32px; height: 32px;
-    border: none;
-    background: rgba(0, 122, 255, 0.1);
-    color: var(--blue);
-    border-radius: 50%;
-    font-size: 16px;
-    cursor: pointer;
+    width: 32px; height: 32px; border: none;
+    background: rgba(0, 122, 255, 0.1); color: var(--blue);
+    border-radius: 50%; font-size: 16px; cursor: pointer;
     transition: all 0.15s;
   }
   .week-bar button:active { transform: scale(0.88); background: rgba(0, 122, 255, 0.2); }
   .week-bar .week-label { font-size: 15px; font-weight: 600; color: var(--text); }
   .week-bar .week-label small {
-    display: block;
-    font-size: 11px;
-    font-weight: 400;
-    color: var(--text-2);
-    text-align: center;
-    margin-top: 1px;
+    display: block; font-size: 11px; font-weight: 400;
+    color: var(--text-2); text-align: center; margin-top: 1px;
   }
 
   .content {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+    flex: 1; overflow-y: auto; overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     padding: 14px 16px 100px;
     scrollbar-width: none;
@@ -228,64 +153,42 @@
 
   .view { display: none; animation: fade 0.3s ease; }
   .view.active { display: block; }
-  @keyframes fade {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
   .today-header { padding: 4px 4px 14px; }
   .today-header .date { font-size: 13px; color: var(--text-2); font-weight: 500; }
   .today-header .greeting { font-size: 20px; font-weight: 700; margin-top: 2px; letter-spacing: -0.3px; }
 
   .course-card {
-    position: relative;
-    margin-bottom: 12px;
+    position: relative; margin-bottom: 12px;
     padding: 14px 16px 14px 18px;
     background: var(--card);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 0.5px solid var(--border);
-    border-radius: 18px;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    overflow: hidden;
+    border: 0.5px solid var(--border); border-radius: 18px;
+    box-shadow: var(--shadow); cursor: pointer; overflow: hidden;
     transition: transform 0.18s, box-shadow 0.2s;
   }
   .course-card:active { transform: scale(0.985); }
   .course-card::before {
-    content: "";
-    position: absolute;
-    left: 0; top: 12px; bottom: 12px;
-    width: 4px;
-    border-radius: 0 4px 4px 0;
+    content: ""; position: absolute; left: 0; top: 12px; bottom: 12px;
+    width: 4px; border-radius: 0 4px 4px 0;
     background: var(--c-color, var(--blue));
     box-shadow: 0 0 12px var(--c-color, var(--blue));
   }
-  .course-card .c-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 10px;
-  }
+  .course-card .c-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
   .course-card .c-name { font-size: 17px; font-weight: 600; color: var(--text); flex: 1; }
   .course-card .c-time { font-size: 13px; font-weight: 500; color: var(--blue); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .course-card .c-period { font-size: 11px; color: var(--text-2); margin-left: 4px; }
   .course-card .c-meta {
-    margin-top: 6px;
-    font-size: 13px;
-    color: var(--text-2);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 14px;
+    margin-top: 6px; font-size: 13px; color: var(--text-2);
+    display: flex; flex-wrap: wrap; gap: 4px 14px;
   }
   .course-card .c-meta span { display: inline-flex; align-items: center; gap: 4px; }
   .course-card .c-note {
-    margin-top: 8px;
-    padding-top: 8px;
+    margin-top: 8px; padding-top: 8px;
     border-top: 0.5px dashed var(--border-2);
-    font-size: 12px;
-    color: var(--text-2);
-    line-height: 1.5;
+    font-size: 12px; color: var(--text-2); line-height: 1.5;
   }
   .course-card .c-note::before { content: "📝 "; filter: grayscale(0.3); }
 
@@ -293,170 +196,278 @@
   .empty .emoji { font-size: 52px; margin-bottom: 12px; display: block; filter: grayscale(0.2); opacity: 0.7; }
   .empty p { font-size: 14px; line-height: 1.6; }
   .empty .hint {
-    margin-top: 14px;
-    font-size: 13px;
-    color: var(--blue);
-    background: rgba(0, 122, 255, 0.08);
-    padding: 8px 16px;
-    border-radius: 20px;
-    display: inline-block;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    margin-top: 14px; font-size: 13px; color: var(--blue);
+    background: rgba(0, 122, 255, 0.08); padding: 8px 16px;
+    border-radius: 20px; display: inline-block;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   }
 
-  /* ===== 节次表格视图 ===== */
+  /* ===== 表格视图(支持缩放) ===== */
   .table-wrap {
-    border-radius: 16px;
-    overflow: hidden;
+    border-radius: 16px; overflow: hidden;
     background: var(--card);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 0.5px solid var(--border);
-    box-shadow: var(--shadow);
+    border: 0.5px solid var(--border); box-shadow: var(--shadow);
   }
   .table-scroll {
-    overflow-x: auto;
+    overflow: auto;
     scrollbar-width: none;
+    touch-action: pan-x pan-y pinch-zoom;
   }
   .table-scroll::-webkit-scrollbar { display: none; }
+  .table-inner {
+    transform-origin: top left;
+    transition: transform 0.05s linear;
+    will-change: transform;
+  }
   table.schedule {
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    min-width: 560px;
+    border-collapse: separate; border-spacing: 0;
+    width: 100%; min-width: 560px;
   }
   table.schedule th, table.schedule td {
     border-right: 0.5px solid var(--border-2);
     border-bottom: 0.5px solid var(--border-2);
-    padding: 6px 4px;
-    vertical-align: top;
+    padding: 6px 4px; vertical-align: top;
   }
   table.schedule th:first-child, table.schedule td:first-child {
-    width: 52px;
-    min-width: 52px;
-    background: var(--card-2);
+    width: 52px; min-width: 52px; background: var(--card-2);
   }
   table.schedule thead th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
+    position: sticky; top: 0; z-index: 2;
     background: var(--card-solid);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-2);
-    text-align: center;
-    padding: 8px 4px;
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    font-size: 11px; font-weight: 600; color: var(--text-2);
+    text-align: center; padding: 8px 4px;
   }
   table.schedule thead th .dn { font-size: 10px; color: var(--text-2); }
   table.schedule thead th .dd { font-size: 14px; font-weight: 700; color: var(--text); margin-top: 2px; }
   table.schedule thead th.today-h .dd { color: var(--blue); }
   table.schedule thead th.today-h::after {
-    content: "";
-    display: block;
-    width: 5px; height: 5px;
-    background: var(--blue);
-    border-radius: 50%;
-    margin: 3px auto 0;
+    content: ""; display: block;
+    width: 5px; height: 5px; background: var(--blue);
+    border-radius: 50%; margin: 3px auto 0;
   }
-  table.schedule td.period-cell {
-    text-align: center;
-    font-size: 10px;
-    color: var(--text-2);
-    line-height: 1.3;
-  }
+  table.schedule td.period-cell { text-align: center; font-size: 10px; color: var(--text-2); line-height: 1.3; }
   table.schedule td.period-cell .pn { font-size: 12px; font-weight: 600; color: var(--text); }
   table.schedule td.period-cell .pt { font-size: 9px; margin-top: 2px; font-variant-numeric: tabular-nums; }
-  table.schedule td.slot {
-    cursor: pointer;
-    transition: background 0.15s;
-  }
+  table.schedule td.slot { cursor: pointer; transition: background 0.15s; }
   table.schedule td.slot:active { background: rgba(0, 122, 255, 0.08); }
   table.schedule td.slot.today-col { background: rgba(0, 122, 255, 0.05); }
   .cell-course {
-    border-radius: 8px;
-    padding: 5px 6px;
+    border-radius: 8px; padding: 5px 6px;
     background: rgba(255,255,255,0.5);
     border-left: 3px solid var(--c-color, var(--blue));
-    font-size: 10.5px;
-    line-height: 1.3;
-    color: var(--text);
-    overflow: hidden;
+    font-size: 10.5px; line-height: 1.3; color: var(--text); overflow: hidden;
   }
   [data-theme="dark"] .cell-course { background: rgba(255,255,255,0.08); }
   .cell-course .cc-name {
-    font-weight: 600;
-    font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-weight: 600; font-size: 11px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .cell-course .cc-loc {
-    font-size: 9.5px;
-    color: var(--text-2);
-    margin-top: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 9.5px; color: var(--text-2); margin-top: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .cell-empty { color: var(--text-3); font-size: 10px; text-align: center; padding: 8px 0; }
 
+  .zoom-hint {
+    text-align: center; font-size: 11px; color: var(--text-2);
+    margin-top: 10px; padding: 6px;
+    background: var(--card-2); border-radius: 10px;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  .zoom-reset {
+    display: inline-block; color: var(--blue); font-weight: 600;
+    margin-left: 8px; cursor: pointer;
+  }
+
   .tabbar {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
+    position: fixed; bottom: 0; left: 50%;
     transform: translateX(-50%);
-    width: 100%;
-    max-width: 480px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+    width: 100%; max-width: 480px;
+    display: flex; justify-content: space-around; align-items: center;
     padding: 8px 10px calc(8px + var(--safe-bottom));
     background: var(--card-2);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border-top: 0.5px solid var(--border);
-    z-index: 20;
+    border-top: 0.5px solid var(--border); z-index: 20;
   }
   .tabbar button {
-    flex: 1;
-    border: none;
-    background: transparent;
-    color: var(--text-2);
-    font-size: 11px;
-    font-weight: 500;
-    padding: 6px 4px;
-    border-radius: 12px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
+    flex: 1; border: none; background: transparent;
+    color: var(--text-2); font-size: 11px; font-weight: 500;
+    padding: 6px 4px; border-radius: 12px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
     transition: color 0.2s;
   }
   .tabbar button.active { color: var(--blue); }
   .tabbar button .icon { font-size: 20px; line-height: 1; }
 
-  /* ===== 模态弹窗 ===== */
-  .modal-mask {
-    position: fixed;
-    inset: 0;
+  /* ===== 侧边栏 ===== */
+  .drawer-mask {
+    position: fixed; inset: 0;
     background: var(--mask);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 100;
-    display: none;
-    align-items: flex-end;
-    justify-content: center;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    z-index: 90; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .drawer-mask.show { opacity: 1; pointer-events: auto; }
+
+  .drawer {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: 86%; max-width: 360px;
+    background: var(--card-solid);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    z-index: 95;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    overflow-y: auto;
+    scrollbar-width: none;
+    padding: calc(20px + var(--safe-top)) 16px calc(40px + var(--safe-bottom));
+    box-shadow: 4px 0 32px rgba(0,0,0,0.18);
+  }
+  .drawer::-webkit-scrollbar { display: none; }
+  .drawer.show { transform: translateX(0); }
+
+  .drawer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .drawer-header .dh-title {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.4px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--blue) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .drawer-close {
+    width: 32px; height: 32px; border: none;
+    background: var(--card-2); color: var(--text-2);
+    border-radius: 50%; font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* 设置区块(侧边栏内通用) */
+  .settings-section {
+    background: var(--card);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 0.5px solid var(--border); border-radius: 16px;
+    box-shadow: var(--shadow); margin-bottom: 14px; overflow: hidden;
+  }
+  .settings-section .sec-title {
+    font-size: 12px; font-weight: 600; color: var(--text-2);
+    padding: 14px 16px 6px; letter-spacing: 0.3px; text-transform: uppercase;
+  }
+  .settings-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-top: 0.5px solid var(--border-2);
+    cursor: pointer; transition: background 0.15s;
+  }
+  .settings-row:active { background: var(--card-2); }
+  .settings-row .s-label { font-size: 15px; color: var(--text); }
+  .settings-row .s-value { font-size: 14px; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
+  .settings-row .s-value .chev { color: var(--text-3); font-size: 14px; }
+
+  .switch { position: relative; width: 51px; height: 31px; flex-shrink: 0; }
+  .switch input { display: none; }
+  .switch .slider {
+    position: absolute; inset: 0; background: var(--text-3);
+    border-radius: 16px; transition: background 0.25s;
+  }
+  .switch .slider::before {
+    content: ""; position: absolute;
+    width: 27px; height: 27px; left: 2px; top: 2px;
+    background: #fff; border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .switch input:checked + .slider { background: var(--blue); }
+  .switch input:checked + .slider::before { transform: translateX(20px); }
+
+  .theme-pick { display: flex; gap: 10px; padding: 4px 16px 14px; }
+  .theme-opt {
+    flex: 1; border: 2px solid var(--border-2);
+    border-radius: 12px; padding: 12px 8px; text-align: center;
+    cursor: pointer; background: var(--card-2); transition: all 0.2s;
+  }
+  .theme-opt.active { border-color: var(--blue); background: rgba(0,122,255,0.08); }
+  .theme-opt .preview { width: 100%; height: 40px; border-radius: 8px; margin-bottom: 6px; }
+  .theme-opt.light .preview { background: linear-gradient(180deg, #F7FAFF, #EAF2FF); border: 1px solid #DCEEFF; }
+  .theme-opt.dark .preview { background: linear-gradient(180deg, #1C1C1E, #000); border: 1px solid #2C2C2E; }
+  .theme-opt .t-name { font-size: 13px; font-weight: 600; color: var(--text); }
+
+  .period-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 16px; border-top: 0.5px solid var(--border-2);
+  }
+  .period-item .p-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(0,122,255,0.12); color: var(--blue);
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .period-item .p-name { flex: 0 0 64px; font-size: 14px; color: var(--text); }
+  .period-item input[type="time"] {
+    flex: 1; padding: 8px 10px; font-size: 14px;
+    border: 0.5px solid var(--border-2); border-radius: 10px;
+    background: var(--card-2); color: var(--text);
+    -webkit-appearance: none; appearance: none;
+  }
+  .period-item .p-del {
+    width: 28px; height: 28px; border: none;
+    background: rgba(255,59,48,0.1); color: #FF3B30;
+    border-radius: 50%; font-size: 16px; cursor: pointer; flex-shrink: 0;
+  }
+  .period-add {
+    display: block; text-align: center; padding: 12px;
+    color: var(--blue); font-size: 14px; font-weight: 600;
+    cursor: pointer; border-top: 0.5px solid var(--border-2);
+  }
+
+  .import-area textarea {
+    width: 100%; min-height: 140px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px; padding: 12px;
+    border: 0.5px solid var(--border-2); border-radius: 12px;
+    background: var(--card-2); color: var(--text); resize: none; line-height: 1.5;
+  }
+  .import-area .imp-hint { font-size: 12px; color: var(--text-2); margin-top: 8px; line-height: 1.5; }
+  .import-mode { display: flex; gap: 8px; margin: 10px 0; }
+  .import-mode label {
+    flex: 1; text-align: center; padding: 8px;
+    border: 0.5px solid var(--border-2); border-radius: 10px;
+    font-size: 13px; color: var(--text-2); cursor: pointer; background: var(--card-2);
+  }
+  .import-mode input { display: none; }
+  .import-mode input:checked + span { color: var(--blue); font-weight: 600; }
+  .import-mode label:has(input:checked) { border-color: var(--blue); background: rgba(0,122,255,0.08); }
+
+  /* 语言列表 */
+  .lang-list { padding: 4px 0 10px; }
+  .lang-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; cursor: pointer;
+    border-top: 0.5px solid var(--border-2);
+  }
+  .lang-item:first-child { border-top: none; }
+  .lang-item:active { background: var(--card-2); }
+  .lang-item .li-name { font-size: 15px; color: var(--text); }
+  .lang-item .li-native { font-size: 13px; color: var(--text-2); margin-left: 6px; }
+  .lang-item .li-check { color: var(--blue); font-size: 16px; }
+
+  /* ===== 通用模态 ===== */
+  .modal-mask {
+    position: fixed; inset: 0; background: var(--mask);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    z-index: 100; display: none;
+    align-items: flex-end; justify-content: center;
     animation: maskIn 0.25s ease;
   }
   .modal-mask.show { display: flex; }
   @keyframes maskIn { from { opacity: 0; } to { opacity: 1; } }
-
   .modal {
-    width: 100%;
-    max-width: 480px;
+    width: 100%; max-width: 480px;
     background: var(--card-solid);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
@@ -465,80 +476,48 @@
     box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
     border-top: 0.5px solid var(--border);
     animation: sheetUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-    max-height: 88vh;
-    overflow-y: auto;
-    scrollbar-width: none;
+    max-height: 88vh; overflow-y: auto; scrollbar-width: none;
   }
   .modal::-webkit-scrollbar { display: none; }
   @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
   .modal .grabber {
-    width: 36px; height: 5px;
-    background: var(--text-3);
-    border-radius: 3px;
-    margin: 6px auto 12px;
-    opacity: 0.4;
+    width: 36px; height: 5px; background: var(--text-3);
+    border-radius: 3px; margin: 6px auto 12px; opacity: 0.4;
   }
   .modal h2 {
-    font-size: 20px;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 16px;
-    letter-spacing: -0.3px;
-    color: var(--text);
+    font-size: 20px; font-weight: 700; text-align: center;
+    margin-bottom: 16px; letter-spacing: -0.3px; color: var(--text);
   }
 
   .form-row { margin-bottom: 12px; }
   .form-row label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-2);
-    margin-bottom: 6px;
-    padding-left: 4px;
-    letter-spacing: 0.3px;
+    display: block; font-size: 12px; font-weight: 600;
+    color: var(--text-2); margin-bottom: 6px; padding-left: 4px; letter-spacing: 0.3px;
   }
-  .form-row input,
-  .form-row select,
-  .form-row textarea {
-    width: 100%;
-    padding: 12px 14px;
-    font-size: 15px;
-    font-family: inherit;
-    border: 0.5px solid var(--border-2);
-    border-radius: 12px;
-    background: var(--card-2);
-    color: var(--text);
-    outline: none;
-    transition: all 0.2s;
-    -webkit-appearance: none;
-    appearance: none;
+  .form-row input, .form-row select, .form-row textarea {
+    width: 100%; padding: 12px 14px; font-size: 15px;
+    font-family: inherit; border: 0.5px solid var(--border-2);
+    border-radius: 12px; background: var(--card-2); color: var(--text);
+    outline: none; transition: all 0.2s;
+    -webkit-appearance: none; appearance: none;
   }
-  .form-row input:focus,
-  .form-row select:focus,
-  .form-row textarea:focus {
-    border-color: var(--blue);
-    background: var(--card-solid);
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+    border-color: var(--blue); background: var(--card-solid);
     box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
   }
   .form-row textarea { resize: none; min-height: 60px; line-height: 1.5; }
   .form-row select {
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23007AFF' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 36px;
+    background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
   }
 
   .color-pick { display: flex; gap: 10px; flex-wrap: wrap; }
   .color-pick label { cursor: pointer; margin: 0; }
   .color-pick input { display: none; }
   .color-dot {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: var(--c);
-    border: 3px solid transparent;
-    transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--c); border: 3px solid transparent;
+    transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
   .color-pick input:checked + .color-dot {
     border-color: var(--card-solid);
@@ -548,255 +527,36 @@
 
   .weeks-pick { display: flex; flex-wrap: wrap; gap: 6px; }
   .weeks-pick .wk-chip {
-    padding: 6px 10px;
-    font-size: 12px;
-    border-radius: 14px;
-    background: var(--card-2);
-    border: 0.5px solid var(--border-2);
-    color: var(--text-2);
-    cursor: pointer;
-    transition: all 0.15s;
-    min-width: 38px;
-    text-align: center;
+    padding: 6px 10px; font-size: 12px; border-radius: 14px;
+    background: var(--card-2); border: 0.5px solid var(--border-2);
+    color: var(--text-2); cursor: pointer; transition: all 0.15s;
+    min-width: 38px; text-align: center;
   }
-  .weeks-pick .wk-chip.active {
-    background: var(--blue);
-    color: #fff;
-    border-color: var(--blue);
-  }
-  .weeks-pick .wk-chip.all {
-    background: rgba(0,122,255,0.1);
-    color: var(--blue);
-    font-weight: 600;
-    width: 100%;
-  }
+  .weeks-pick .wk-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .weeks-pick .wk-chip.all { background: rgba(0,122,255,0.1); color: var(--blue); font-weight: 600; width: 100%; }
   .weeks-pick .wk-chip.all.active { background: var(--blue); color: #fff; }
 
   .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
   .btn {
-    flex: 1;
-    padding: 14px;
-    border: none;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
+    flex: 1; padding: 14px; border: none; border-radius: 14px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; font-family: inherit;
   }
   .btn:active { transform: scale(0.97); }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--blue) 0%, #0091FF 100%);
-    color: #fff;
-    box-shadow: 0 4px 14px rgba(0,122,255,0.3);
-  }
+  .btn-primary { background: linear-gradient(135deg, var(--blue) 0%, #0091FF 100%); color: #fff; box-shadow: 0 4px 14px rgba(0,122,255,0.3); }
   .btn-cancel { background: var(--card-2); color: var(--text-2); }
   .btn-danger { background: rgba(255, 59, 48, 0.1); color: #FF3B30; flex: 0 0 40%; }
 
   .toast {
-    position: fixed;
-    top: 60px;
-    left: 50%;
+    position: fixed; top: 60px; left: 50%;
     transform: translateX(-50%) translateY(-20px);
-    background: rgba(28,28,30,0.9);
-    color: #fff;
-    padding: 10px 18px;
-    border-radius: 20px;
-    font-size: 14px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    z-index: 200;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.3s;
-    white-space: nowrap;
+    background: rgba(28,28,30,0.9); color: #fff;
+    padding: 10px 18px; border-radius: 20px; font-size: 14px;
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    z-index: 200; opacity: 0; pointer-events: none;
+    transition: all 0.3s; white-space: nowrap;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  /* ===== 设置页 ===== */
-  .settings-section {
-    background: var(--card);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 0.5px solid var(--border);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    margin-bottom: 14px;
-    overflow: hidden;
-  }
-  .settings-section .sec-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-2);
-    padding: 14px 16px 6px;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-  }
-  .settings-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-top: 0.5px solid var(--border-2);
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .settings-row:active { background: var(--card-2); }
-  .settings-row .s-label { font-size: 15px; color: var(--text); }
-  .settings-row .s-value { font-size: 14px; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
-  .settings-row .s-value .chev { color: var(--text-3); font-size: 14px; }
-
-  /* iOS 开关 */
-  .switch {
-    position: relative;
-    width: 51px; height: 31px;
-    flex-shrink: 0;
-  }
-  .switch input { display: none; }
-  .switch .slider {
-    position: absolute;
-    inset: 0;
-    background: var(--text-3);
-    border-radius: 16px;
-    transition: background 0.25s;
-  }
-  .switch .slider::before {
-    content: "";
-    position: absolute;
-    width: 27px; height: 27px;
-    left: 2px; top: 2px;
-    background: #fff;
-    border-radius: 50%;
-    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
-  .switch input:checked + .slider { background: var(--blue); }
-  .switch input:checked + .slider::before { transform: translateX(20px); }
-
-  /* 主题选择 */
-  .theme-pick { display: flex; gap: 10px; padding: 4px 16px 14px; }
-  .theme-opt {
-    flex: 1;
-    border: 2px solid var(--border-2);
-    border-radius: 12px;
-    padding: 12px 8px;
-    text-align: center;
-    cursor: pointer;
-    background: var(--card-2);
-    transition: all 0.2s;
-  }
-  .theme-opt.active { border-color: var(--blue); background: rgba(0,122,255,0.08); }
-  .theme-opt .preview {
-    width: 100%; height: 40px;
-    border-radius: 8px;
-    margin-bottom: 6px;
-  }
-  .theme-opt.light .preview { background: linear-gradient(180deg, #F7FAFF, #EAF2FF); border: 1px solid #DCEEFF; }
-  .theme-opt.dark .preview { background: linear-gradient(180deg, #1C1C1E, #000); border: 1px solid #2C2C2E; }
-  .theme-opt .t-name { font-size: 13px; font-weight: 600; color: var(--text); }
-
-  /* 节次管理 */
-  .period-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border-top: 0.5px solid var(--border-2);
-  }
-  .period-item .p-num {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: rgba(0,122,255,0.12);
-    color: var(--blue);
-    font-size: 12px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .period-item .p-name {
-    flex: 0 0 64px;
-    font-size: 14px;
-    color: var(--text);
-  }
-  .period-item input[type="time"] {
-    flex: 1;
-    padding: 8px 10px;
-    font-size: 14px;
-    border: 0.5px solid var(--border-2);
-    border-radius: 10px;
-    background: var(--card-2);
-    color: var(--text);
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .period-item .p-del {
-    width: 28px; height: 28px;
-    border: none;
-    background: rgba(255,59,48,0.1);
-    color: #FF3B30;
-    border-radius: 50%;
-    font-size: 16px;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .period-add {
-    display: block;
-    text-align: center;
-    padding: 12px;
-    color: var(--blue);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    border-top: 0.5px solid var(--border-2);
-  }
-
-  /* 导入文本框 */
-  .import-area textarea {
-    width: 100%;
-    min-height: 140px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 12px;
-    padding: 12px;
-    border: 0.5px solid var(--border-2);
-    border-radius: 12px;
-    background: var(--card-2);
-    color: var(--text);
-    resize: none;
-    line-height: 1.5;
-  }
-  .import-area .imp-hint {
-    font-size: 12px;
-    color: var(--text-2);
-    margin-top: 8px;
-    line-height: 1.5;
-  }
-  .import-mode {
-    display: flex;
-    gap: 8px;
-    margin: 10px 0;
-  }
-  .import-mode label {
-    flex: 1;
-    text-align: center;
-    padding: 8px;
-    border: 0.5px solid var(--border-2);
-    border-radius: 10px;
-    font-size: 13px;
-    color: var(--text-2);
-    cursor: pointer;
-    background: var(--card-2);
-  }
-  .import-mode input { display: none; }
-  .import-mode input:checked + span {
-    color: var(--blue);
-    font-weight: 600;
-  }
-  .import-mode label:has(input:checked) {
-    border-color: var(--blue);
-    background: rgba(0,122,255,0.08);
-  }
 </style>
 </head>
 <body>
@@ -804,16 +564,19 @@
   <div class="status-bar"></div>
 
   <header>
-    <h1>课程表</h1>
-    <div class="header-actions">
-      <button class="icon-btn" id="addBtn" aria-label="添加课程">+</button>
-      <button class="icon-btn" id="settingsBtn" aria-label="设置">⚙</button>
-    </div>
+    <button class="menu-btn" id="menuBtn" aria-label="菜单">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <line x1="4" y1="7" x2="20" y2="7"/>
+        <line x1="4" y1="12" x2="20" y2="12"/>
+        <line x1="4" y1="17" x2="20" y2="17"/>
+      </svg>
+    </button>
+    <button class="add-btn" id="addBtn" aria-label="添加">+</button>
   </header>
 
   <div class="segment">
-    <button data-view="today" class="active">今日列表</button>
-    <button data-view="table">周表格</button>
+    <button data-view="table" class="active" data-i18n="tab_week">本周表格</button>
+    <button data-view="today" data-i18n="tab_today">今日列表</button>
   </div>
 
   <div class="week-bar">
@@ -823,161 +586,161 @@
   </div>
 
   <div class="content">
+    <!-- 表格周视图(默认) -->
+    <section class="view active" id="view-table">
+      <div class="table-wrap">
+        <div class="table-scroll" id="tableScroll">
+          <div class="table-inner" id="tableInner">
+            <table class="schedule" id="scheduleTable"></table>
+          </div>
+        </div>
+      </div>
+      <div class="zoom-hint">
+        <span data-i18n="zoom_hint">双指缩放表格</span>
+        <span class="zoom-reset" id="zoomReset" data-i18n="zoom_reset">重置</span>
+      </div>
+    </section>
+
     <!-- 今日列表视图 -->
-    <section class="view active" id="view-today">
+    <section class="view" id="view-today">
       <div class="today-header">
         <div class="date" id="todayDate"></div>
         <div class="greeting" id="todayGreeting"></div>
       </div>
       <div id="todayList"></div>
     </section>
-
-    <!-- 周表格视图 -->
-    <section class="view" id="view-table">
-      <div class="table-wrap">
-        <div class="table-scroll">
-          <table class="schedule" id="scheduleTable"></table>
-        </div>
-      </div>
-    </section>
   </div>
 
   <nav class="tabbar">
-    <button data-view="today" class="active"><span class="icon">☀️</span>今日</button>
-    <button data-view="table"><span class="icon">📋</span>表格</button>
-    <button id="settingsBtn2"><span class="icon">⚙</span>设置</button>
+    <button data-view="table" class="active"><span class="icon">📋</span><span data-i18n="tab_week">本周</span></button>
+    <button data-view="today"><span class="icon">☀️</span><span data-i18n="tab_today">今日</span></button>
+    <button id="addBtn2"><span class="icon">＋</span><span data-i18n="add">添加</span></button>
   </nav>
 </div>
+
+<!-- 侧边栏 -->
+<div class="drawer-mask" id="drawerMask"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="dh-title" data-i18n="menu">菜单</div>
+    <button class="drawer-close" id="drawerClose">×</button>
+  </div>
+
+  <!-- 主题 -->
+  <div class="settings-section">
+    <div class="sec-title" data-i18n="theme">外观主题</div>
+    <div class="theme-pick">
+      <div class="theme-opt light" data-theme-val="light">
+        <div class="preview"></div>
+        <div class="t-name" data-i18n="light">明色</div>
+      </div>
+      <div class="theme-opt dark" data-theme-val="dark">
+        <div class="preview"></div>
+        <div class="t-name" data-i18n="dark">暗色</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 语言 -->
+  <div class="settings-section">
+    <div class="sec-title" data-i18n="language">语言</div>
+    <div class="lang-list" id="langList"></div>
+  </div>
+
+  <!-- 提醒 -->
+  <div class="settings-section">
+    <div class="sec-title" data-i18n="reminder">课程提醒</div>
+    <div class="settings-row">
+      <span class="s-label" data-i18n="remind_enable">开启上课提醒</span>
+      <label class="switch"><input type="checkbox" id="remindEnable"><span class="slider"></span></label>
+    </div>
+    <div class="settings-row" id="remindMinRow">
+      <span class="s-label" data-i18n="remind_min">提前提醒时间</span>
+      <span class="s-value"><span id="remindMinVal">5</span> <span data-i18n="minutes">分钟</span><span class="chev">›</span></span>
+    </div>
+    <div class="settings-row" id="notifyPermRow">
+      <span class="s-label" data-i18n="notify_perm">通知权限</span>
+      <span class="s-value"><span id="notifyPermVal" data-i18n="notify_off">未开启</span><span class="chev">›</span></span>
+    </div>
+  </div>
+
+  <!-- 节次 -->
+  <div class="settings-section">
+    <div class="sec-title" data-i18n="periods">节次与时间</div>
+    <div id="periodList"></div>
+    <div class="period-add" id="periodAdd"><span data-i18n="period_add">+ 添加节次</span></div>
+  </div>
+
+  <!-- 数据 -->
+  <div class="settings-section">
+    <div class="sec-title" data-i18n="data">课程表数据</div>
+    <div class="settings-row" id="importRow">
+      <span class="s-label" data-i18n="import">导入课程表</span>
+      <span class="s-value"><span class="chev">›</span></span>
+    </div>
+    <div class="settings-row" id="exportRow">
+      <span class="s-label" data-i18n="export">导出课程表</span>
+      <span class="s-value"><span class="chev">›</span></span>
+    </div>
+    <div class="settings-row" id="resetDataRow">
+      <span class="s-label" style="color:#FF3B30;" data-i18n="reset">重置全部数据</span>
+      <span class="s-value"><span class="chev">›</span></span>
+    </div>
+  </div>
+</aside>
 
 <!-- 课程编辑弹窗 -->
 <div class="modal-mask" id="courseModalMask">
   <div class="modal">
     <div class="grabber"></div>
-    <h2 id="courseModalTitle">添加课程</h2>
+    <h2 id="courseModalTitle" data-i18n="add_course">添加课程</h2>
     <input type="hidden" id="f-id">
     <div class="form-row">
-      <label>课程名称</label>
-      <input type="text" id="f-name" placeholder="如:高等数学" maxlength="20">
+      <label data-i18n="course_name">课程名称</label>
+      <input type="text" id="f-name" maxlength="20">
     </div>
     <div class="form-row">
-      <label>星期</label>
+      <label data-i18n="weekday">星期</label>
       <select id="f-day">
-        <option value="1">周一</option>
-        <option value="2">周二</option>
-        <option value="3">周三</option>
-        <option value="4">周四</option>
-        <option value="5">周五</option>
-        <option value="6">周六</option>
-        <option value="0">周日</option>
+        <option value="1" data-i18n="mon">周一</option>
+        <option value="2" data-i18n="tue">周二</option>
+        <option value="3" data-i18n="wed">周三</option>
+        <option value="4" data-i18n="thu">周四</option>
+        <option value="5" data-i18n="fri">周五</option>
+        <option value="6" data-i18n="sat">周六</option>
+        <option value="0" data-i18n="sun">周日</option>
       </select>
     </div>
     <div class="form-row">
-      <label>节次</label>
+      <label data-i18n="period">节次</label>
       <select id="f-period"></select>
     </div>
     <div class="form-row">
-      <label>教室地点</label>
-      <input type="text" id="f-location" placeholder="如:教三楼301" maxlength="30">
+      <label data-i18n="location">教室地点</label>
+      <input type="text" id="f-location" maxlength="30">
     </div>
     <div class="form-row">
-      <label>授课老师</label>
-      <input type="text" id="f-teacher" placeholder="如:张老师" maxlength="20">
+      <label data-i18n="teacher">授课老师</label>
+      <input type="text" id="f-teacher" maxlength="20">
     </div>
     <div class="form-row">
-      <label>颜色标识</label>
+      <label data-i18n="color">颜色标识</label>
       <div class="color-pick" id="colorPick"></div>
     </div>
     <div class="form-row">
-      <label>备注</label>
-      <textarea id="f-note" placeholder="可选:如带上教材、机房课等" maxlength="100"></textarea>
+      <label data-i18n="note">备注</label>
+      <textarea id="f-note" maxlength="100"></textarea>
     </div>
     <div class="form-row">
-      <label>上课周次</label>
+      <label data-i18n="weeks">上课周次</label>
       <div class="weeks-pick" id="weeksPick"></div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-cancel" id="cancelCourseBtn">取消</button>
-      <button class="btn btn-primary" id="saveCourseBtn">保存</button>
+      <button class="btn btn-cancel" id="cancelCourseBtn" data-i18n="cancel">取消</button>
+      <button class="btn btn-primary" id="saveCourseBtn" data-i18n="save">保存</button>
     </div>
     <div class="modal-actions" id="deleteWrap" style="display:none;">
-      <button class="btn btn-danger" id="deleteCourseBtn">删除该课程</button>
-    </div>
-  </div>
-</div>
-
-<!-- 设置弹窗 -->
-<div class="modal-mask" id="settingsModalMask">
-  <div class="modal">
-    <div class="grabber"></div>
-    <h2>设置</h2>
-
-    <!-- 主题 -->
-    <div class="settings-section">
-      <div class="sec-title">外观主题</div>
-      <div class="theme-pick">
-        <div class="theme-opt light" data-theme-val="light">
-          <div class="preview"></div>
-          <div class="t-name">明色</div>
-        </div>
-        <div class="theme-opt dark" data-theme-val="dark">
-          <div class="preview"></div>
-          <div class="t-name">暗色</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 提醒 -->
-    <div class="settings-section">
-      <div class="sec-title">课程提醒</div>
-      <div class="settings-row">
-        <span class="s-label">开启上课提醒</span>
-        <label class="switch">
-          <input type="checkbox" id="remindEnable">
-          <span class="slider"></span>
-        </label>
-      </div>
-      <div class="settings-row" id="remindMinRow">
-        <span class="s-label">提前提醒时间</span>
-        <span class="s-value">
-          <span id="remindMinVal">5 分钟</span>
-          <span class="chev">›</span>
-        </span>
-      </div>
-      <div class="settings-row" id="notifyPermRow">
-        <span class="s-label">通知权限</span>
-        <span class="s-value">
-          <span id="notifyPermVal">未开启</span>
-          <span class="chev">›</span>
-        </span>
-      </div>
-    </div>
-
-    <!-- 节次管理 -->
-    <div class="settings-section">
-      <div class="sec-title">节次与时间</div>
-      <div id="periodList"></div>
-      <div class="period-add" id="periodAdd">+ 添加节次</div>
-    </div>
-
-    <!-- 导入导出 -->
-    <div class="settings-section">
-      <div class="sec-title">课程表数据</div>
-      <div class="settings-row" id="importRow">
-        <span class="s-label">导入课程表</span>
-        <span class="s-value"><span class="chev">›</span></span>
-      </div>
-      <div class="settings-row" id="exportRow">
-        <span class="s-label">导出课程表</span>
-        <span class="s-value"><span class="chev">›</span></span>
-      </div>
-      <div class="settings-row" id="resetDataRow">
-        <span class="s-label" style="color:#FF3B30;">重置全部数据</span>
-        <span class="s-value"><span class="chev">›</span></span>
-      </div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn btn-primary" id="closeSettingsBtn">完成</button>
+      <button class="btn btn-danger" id="deleteCourseBtn" data-i18n="delete">删除该课程</button>
     </div>
   </div>
 </div>
@@ -986,37 +749,34 @@
 <div class="modal-mask" id="importModalMask">
   <div class="modal">
     <div class="grabber"></div>
-    <h2>导入课程表</h2>
+    <h2 data-i18n="import">导入课程表</h2>
     <div class="import-area">
-      <textarea id="importText" placeholder='粘贴 JSON 数据,例如:&#10;{&#10;  "periods": [...],&#10;  "courses": [...]&#10;}'></textarea>
-      <div class="imp-hint">
-        支持 JSON 格式。可选择"覆盖"现有数据或"合并"添加。<br>
-        也可点击下方按钮选择本地 .json 文件导入。
-      </div>
+      <textarea id="importText"></textarea>
+      <div class="imp-hint" data-i18n="import_hint">支持 JSON 格式。可选择"覆盖"现有数据或"合并"添加。也可点击下方按钮选择本地 .json 文件导入。</div>
       <div class="import-mode">
-        <label><input type="radio" name="impMode" value="merge" checked><span>合并添加</span></label>
-        <label><input type="radio" name="impMode" value="overwrite"><span>覆盖全部</span></label>
+        <label><input type="radio" name="impMode" value="merge" checked><span data-i18n="merge">合并添加</span></label>
+        <label><input type="radio" name="impMode" value="overwrite"><span data-i18n="overwrite">覆盖全部</span></label>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-cancel" id="cancelImportBtn">取消</button>
-        <button class="btn btn-primary" id="chooseFileBtn">选文件</button>
+        <button class="btn btn-cancel" id="cancelImportBtn" data-i18n="cancel">取消</button>
+        <button class="btn btn-primary" id="chooseFileBtn" data-i18n="choose_file">选文件</button>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-primary" id="confirmImportBtn" style="background:linear-gradient(135deg,#34C759,#30D158);box-shadow:0 4px 14px rgba(52,199,89,0.3);">确认导入</button>
+        <button class="btn btn-primary" id="confirmImportBtn" style="background:linear-gradient(135deg,#34C759,#30D158);box-shadow:0 4px 14px rgba(52,199,89,0.3);" data-i18n="confirm_import">确认导入</button>
       </div>
       <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
     </div>
   </div>
 </div>
 
-<!-- 提醒分钟选择弹窗 -->
+<!-- 提醒分钟选择 -->
 <div class="modal-mask" id="minModalMask">
   <div class="modal">
     <div class="grabber"></div>
-    <h2>提前提醒时间</h2>
+    <h2 data-i18n="remind_min">提前提醒时间</h2>
     <div id="minOptions"></div>
     <div class="modal-actions">
-      <button class="btn btn-primary" id="closeMinBtn">完成</button>
+      <button class="btn btn-primary" id="closeMinBtn" data-i18n="done">完成</button>
     </div>
   </div>
 </div>
@@ -1024,45 +784,78 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  // ===== 多语言 =====
+  const LANGS = [
+    { code: 'zh', name: '中文', native: '简体' },
+    { code: 'en', name: 'English', native: 'English' },
+    { code: 'es', name: 'Español', native: 'Spanish' },
+    { code: 'hi', name: 'हिन्दी', native: 'Hindi' },
+    { code: 'ar', name: 'العربية', native: 'Arabic' },
+    { code: 'pt', name: 'Português', native: 'Portuguese' },
+    { code: 'ru', name: 'Русский', native: 'Russian' },
+    { code: 'ja', name: '日本語', native: 'Japanese' },
+    { code: 'de', name: 'Deutsch', native: 'German' },
+    { code: 'fr', name: 'Français', native: 'French' }
+  ];
+
+  const I18N = {
+    zh: { menu:'菜单', tab_week:'本周表格', tab_today:'今日列表', add:'添加', week:'周', week_of:'第', weeks_total:'周', year:'年', today:'今日', no_course:'今天没有课程', enjoy:'享受悠闲的一天吧', click_add:'点击右上角 + 添加课程', morning:'早上好', noon:'中午好', afternoon:'下午好', evening:'晚上好', night:'夜深了,注意休息', cheer:',今天也要加油哦', month:'月', day:'日', sun:'周日', mon:'周一', tue:'周二', wed:'周三', thu:'周四', fri:'周五', sat:'周六', period_short:'节', empty:'无课', add_course:'添加课程', edit_course:'编辑课程', course_name:'课程名称', weekday:'星期', period:'节次', location:'教室地点', teacher:'授课老师', color:'颜色标识', note:'备注', weeks:'上课周次', all_weeks:'全周上课', cancel:'取消', save:'保存', delete:'删除该课程', theme:'外观主题', light:'明色', dark:'暗色', language:'语言', reminder:'课程提醒', remind_enable:'开启上课提醒', remind_min:'提前提醒时间', minutes:'分钟', notify_perm:'通知权限', notify_on:'已开启', notify_off:'未开启', notify_denied:'已拒绝', notify_unsupport:'不支持', periods:'节次与时间', period_add:'+ 添加节次', period_name:'节次名称', data:'课程表数据', import:'导入课程表', export:'导出课程表', reset:'重置全部数据', import_hint:'支持 JSON 格式。可选择"覆盖"现有数据或"合并"添加。也可点击下方按钮选择本地 .json 文件导入。', merge:'合并添加', overwrite:'覆盖全部', choose_file:'选文件', confirm_import:'确认导入', done:'完成', zoom_hint:'双指缩放表格', zoom_reset:'重置', toast_added:'已添加', toast_updated:'已更新', toast_deleted:'已删除', toast_exported:'已导出', toast_reset:'已重置', toast_file_read:'文件已读取,请确认导入', toast_imported:'已导入', courses:'门课程', toast_no_name:'请输入课程名称', toast_no_period:'请先在设置中添加节次', toast_first_week:'已是第1周', toast_last_week:'已是最后一周', confirm_delete:'确定删除该课程?', confirm_delete_period:'删除该节次?关联的课程将转为第一节。', confirm_reset:'确定重置全部数据为示例数据?此操作不可恢复。', keep_one_period:'至少保留1个节次', toast_remind_on:'提醒已开启', toast_notify_denied:'未授权通知,请在浏览器设置中允许', toast_notify_unsupport:'当前浏览器不支持通知', toast_notify_on:'通知权限已开启', toast_notify_manual:'通知已被拒绝,请在浏览器设置中手动允许', toast_min_set:'已设为提前', toast_min_remind:'分钟提醒', upcoming:'即将开始', remain_min:'分钟上课', remind_on:'提醒已开启', last_week:'最后一周' },
+    en: { menu:'Menu', tab_week:'Week Table', tab_today:'Today List', add:'Add', week:'W', week_of:'Week', weeks_total:'weeks', year:'', today:'Today', no_course:'No classes today', enjoy:'Enjoy your free day', click_add:'Tap + at top right to add', morning:'Good morning', noon:'Good noon', afternoon:'Good afternoon', evening:'Good evening', night:'Late night, rest well', cheer:', keep it up!', month:'/', day:' ', sun:'Sun', mon:'Mon', tue:'Tue', wed:'Wed', thu:'Thu', fri:'Fri', sat:'Sat', period_short:'P', empty:'—', add_course:'Add Course', edit_course:'Edit Course', course_name:'Course Name', weekday:'Weekday', period:'Period', location:'Location', teacher:'Teacher', color:'Color', note:'Note', weeks:'Weeks', all_weeks:'All weeks', cancel:'Cancel', save:'Save', delete:'Delete Course', theme:'Theme', light:'Light', dark:'Dark', language:'Language', reminder:'Reminder', remind_enable:'Enable reminder', remind_min:'Remind ahead', minutes:'min', notify_perm:'Notification', notify_on:'On', notify_off:'Off', notify_denied:'Denied', notify_unsupport:'Unsupported', periods:'Periods & Time', period_add:'+ Add period', period_name:'Period name', data:'Data', import:'Import', export:'Export', reset:'Reset all data', import_hint:'Supports JSON. Choose "Overwrite" or "Merge". You can also pick a local .json file.', merge:'Merge', overwrite:'Overwrite', choose_file:'Pick file', confirm_import:'Confirm', done:'Done', zoom_hint:'Pinch to zoom', zoom_reset:'Reset', toast_added:'Added', toast_updated:'Updated', toast_deleted:'Deleted', toast_exported:'Exported', toast_reset:'Reset done', toast_file_read:'File loaded, please confirm', toast_imported:'Imported', courses:'courses', toast_no_name:'Please enter course name', toast_no_period:'Please add a period first', toast_first_week:'First week', toast_last_week:'Last week', confirm_delete:'Delete this course?', confirm_delete_period:'Delete this period? Related courses move to period 1.', confirm_reset:'Reset all data to demo? Cannot be undone.', keep_one_period:'Keep at least 1 period', toast_remind_on:'Reminder on', toast_notify_denied:'Notification denied, allow in browser settings', toast_notify_unsupport:'Notifications unsupported', toast_notify_on:'Notification enabled', toast_notify_manual:'Notification denied, allow manually', toast_min_set:'Set to remind', toast_min_remind:'min ahead', upcoming:'starting soon', remain_min:'min to class', remind_on:'Reminder on', last_week:'last week' },
+    es: { menu:'Menú', tab_week:'Semana', tab_today:'Hoy', add:'Añadir', week:'S', week_of:'Semana', weeks_total:'sem', year:'', today:'Hoy', no_course:'Sin clases hoy', enjoy:'Disfruta tu día', click_add:'Toca + para añadir', morning:'Buenos días', noon:'Buen mediodía', afternoon:'Buenas tardes', evening:'Buenas noches', night:'Es tarde, descansa', cheer:', ¡ánimo!', month:'/', day:' ', sun:'Dom', mon:'Lun', tue:'Mar', wed:'Mié', thu:'Jue', fri:'Vie', sat:'Sáb', period_short:'P', empty:'—', add_course:'Añadir curso', edit_course:'Editar curso', course_name:'Nombre', weekday:'Día', period:'Periodo', location:'Aula', teacher:'Profesor', color:'Color', note:'Nota', weeks:'Semanas', all_weeks:'Todas', cancel:'Cancelar', save:'Guardar', delete:'Eliminar', theme:'Tema', light:'Claro', dark:'Oscuro', language:'Idioma', reminder:'Recordatorio', remind_enable:'Activar', remind_min:'Anticipación', minutes:'min', notify_perm:'Notificación', notify_on:'On', notify_off:'Off', notify_denied:'Denegado', notify_unsupport:'No soportado', periods:'Periodos', period_add:'+ Añadir', period_name:'Nombre', data:'Datos', import:'Importar', export:'Exportar', reset:'Restablecer', import_hint:'JSON. Elige Sobrescribir o Combinar. También archivo .json.', merge:'Combinar', overwrite:'Sobrescribir', choose_file:'Archivo', confirm_import:'Confirmar', done:'Hecho', zoom_hint:'Pellizca para zoom', zoom_reset:'Reset', toast_added:'Añadido', toast_updated:'Actualizado', toast_deleted:'Eliminado', toast_exported:'Exportado', toast_reset:'Restablecido', toast_file_read:'Archivo cargado, confirma', toast_imported:'Importado', courses:'cursos', toast_no_name:'Ingresa nombre', toast_no_period:'Añade un periodo', toast_first_week:'Primera semana', toast_last_week:'Última semana', confirm_delete:'¿Eliminar curso?', confirm_delete_period:'¿Eliminar periodo?', confirm_reset:'¿Restablecer todo?', keep_one_period:'Mantén 1 periodo', toast_remind_on:'Recordatorio on', toast_notify_denied:'Notif. denegada', toast_notify_unsupport:'No soportado', toast_notify_on:'Notif. activada', toast_notify_manual:'Permite manualmente', toast_min_set:'Recordar', toast_min_remind:'min antes', upcoming:'empieza pronto', remain_min:'min', remind_on:'On', last_week:'última' },
+    hi: { menu:'मेन्यू', tab_week:'सप्ताह', tab_today:'आज', add:'जोड़ें', week:'व', week_of:'सप्ताह', weeks_total:'सप्ताह', year:'', today:'आज', no_course:'आज कोई कक्षा नहीं', enjoy:'आज़ाद दिन का आनंद लें', click_add:'जोड़ने के लिए + दबाएँ', morning:'सुप्रभात', noon:'नमस्कार', afternoon:'शुभ अपराह्न', evening:'शुभ संध्या', night:'रात हो रही है, आराम करें', cheer:', आगे बढ़ते रहें!', month:'/', day:' ', sun:'रवि', mon:'सोम', tue:'मंगल', wed:'बुध', thu:'गुरु', fri:'शुक्र', sat:'शनि', period_short:'पी', empty:'—', add_course:'कक्षा जोड़ें', edit_course:'कक्षा संपादित करें', course_name:'कक्षा नाम', weekday:'दिन', period:'अवधि', location:'स्थान', teacher:'शिक्षक', color:'रंग', note:'टिप्पणी', weeks:'सप्ताह', all_weeks:'सभी', cancel:'रद्द', save:'सहेजें', delete:'हटाएँ', theme:'थीम', light:'हल्का', dark:'गहरा', language:'भाषा', reminder:'अनुस्मारक', remind_enable:'सक्षम करें', remind_min:'पूर्व अनुस्मारक', minutes:'मिनट', notify_perm:'सूचना', notify_on:'चालू', notify_off:'बंद', notify_denied:'अस्वीकृत', notify_unsupport:'असमर्थित', periods:'अवधि', period_add:'+ जोड़ें', period_name:'नाम', data:'डेटा', import:'आयात', export:'निर्यात', reset:'रीसेट', import_hint:'JSON. ओवरराइट या मर्ज करें। .json फ़ाइल भी।', merge:'मर्ज', overwrite:'ओवरराइट', choose_file:'फ़ाइल', confirm_import:'पुष्टि', done:'पूर्ण', zoom_hint:'ज़ूम के लिए पिंच', zoom_reset:'रीसेट', toast_added:'जोड़ा', toast_updated:'अपडेट', toast_deleted:'हटाया', toast_exported:'निर्यात', toast_reset:'रीसेट', toast_file_read:'फ़ाइल लोड, पुष्टि करें', toast_imported:'आयात', courses:'कक्षाएँ', toast_no_name:'नाम दर्ज करें', toast_no_period:'अवधि जोड़ें', toast_first_week:'पहला सप्ताह', toast_last_week:'अंतिम', confirm_delete:'हटाएँ?', confirm_delete_period:'अवधि हटाएँ?', confirm_reset:'रीसेट?', keep_one_period:'1 अवधि रखें', toast_remind_on:'अनुस्मारक चालू', toast_notify_denied:'अस्वीकृत', toast_notify_unsupport:'असमर्थित', toast_notify_on:'सूचना चालू', toast_notify_manual:'मैन्युअल अनुमति', toast_min_set:'अनुस्मारक', toast_min_remind:'मिनट पहले', upcoming:'जल्द शुरू', remain_min:'मिनट', remind_on:'चालू', last_week:'अंतिम' },
+    ar: { menu:'القائمة', tab_week:'الأسبوع', tab_today:'اليوم', add:'إضافة', week:'أ', week_of:'أسبوع', weeks_total:'أسبوع', year:'', today:'اليوم', no_course:'لا حصص اليوم', enjoy:'استمتع بيومك', click_add:'اضغط + للإضافة', morning:'صباح الخير', noon:'مساء الخير', afternoon:'مساء الخير', evening:'مساء الخير', night:'وقت متأخر، استرح', cheer:'، واصل!', month:'/', day:' ', sun:'أحد', mon:'إثن', tue:'ثلا', wed:'أرب', thu:'خمي', fri:'جمع', sat:'سبت', period_short:'ح', empty:'—', add_course:'إضافة حصة', edit_course:'تعديل', course_name:'الاسم', weekday:'اليوم', period:'الحصة', location:'المكان', teacher:'المعلم', color:'اللون', note:'ملاحظة', weeks:'الأسابيع', all_weeks:'الكل', cancel:'إلغاء', save:'حفظ', delete:'حذف', theme:'السمة', light:'فاتح', dark:'داكن', language:'اللغة', reminder:'تذكير', remind_enable:'تفعيل', remind_min:'قبل', minutes:'د', notify_perm:'إشعار', notify_on:'مفعّل', notify_off:'متوقف', notify_denied:'مرفوض', notify_unsupport:'غير مدعوم', periods:'الحصص', period_add:'+ إضافة', period_name:'الاسم', data:'البيانات', import:'استيراد', export:'تصدير', reset:'إعادة تعيين', import_hint:'JSON. الكتابة فوق أو الدمج. ملف .json أيضاً.', merge:'دمج', overwrite:'كتابة فوق', choose_file:'ملف', confirm_import:'تأكيد', done:'تم', zoom_hint:'قرّب بإصبعين', zoom_reset:'إعادة', toast_added:'أُضيف', toast_updated:'حُدّث', toast_deleted:'حُذف', toast_exported:'صُدّر', toast_reset:'إعادة تعيين', toast_file_read:'الملف محمّل، أكد', toast_imported:'استيراد', courses:'حصص', toast_no_name:'أدخل الاسم', toast_no_period:'أضف حصة', toast_first_week:'الأول', toast_last_week:'الأخير', confirm_delete:'حذف؟', confirm_delete_period:'حذف الحصة؟', confirm_reset:'إعادة تعيين؟', keep_one_period:'احتفظ بواحدة', toast_remind_on:'مفعّل', toast_notify_denied:'مرفوض', toast_notify_unsupport:'غير مدعوم', toast_notify_on:'مفعّل', toast_notify_manual:'اسمح يدوياً', toast_min_set:'تذكير', toast_min_remind:'د قبل', upcoming:'قريباً', remain_min:'د', remind_on:'مفعّل', last_week:'الأخير' },
+    pt: { menu:'Menu', tab_week:'Semana', tab_today:'Hoje', add:'Adicionar', week:'S', week_of:'Semana', weeks_total:'sem', year:'', today:'Hoje', no_course:'Sem aulas hoje', enjoy:'Aproveite o dia', click_add:'Toque + para adicionar', morning:'Bom dia', noon:'Boa tarde', afternoon:'Boa tarde', evening:'Boa noite', night:'Tarde, descanse', cheer:', continue!', month:'/', day:' ', sun:'Dom', mon:'Seg', tue:'Ter', wed:'Qua', thu:'Qui', fri:'Sex', sat:'Sáb', period_short:'P', empty:'—', add_course:'Adicionar', edit_course:'Editar', course_name:'Nome', weekday:'Dia', period:'Período', location:'Local', teacher:'Professor', color:'Cor', note:'Nota', weeks:'Semanas', all_weeks:'Todas', cancel:'Cancelar', save:'Salvar', delete:'Excluir', theme:'Tema', light:'Claro', dark:'Escuro', language:'Idioma', reminder:'Lembrete', remind_enable:'Ativar', remind_min:'Antecipar', minutes:'min', notify_perm:'Notificação', notify_on:'On', notify_off:'Off', notify_denied:'Negado', notify_unsupport:'Sem suporte', periods:'Períodos', period_add:'+ Adicionar', period_name:'Nome', data:'Dados', import:'Importar', export:'Exportar', reset:'Resetar', import_hint:'JSON. Sobrescrever ou combinar. Arquivo .json.', merge:'Combinar', overwrite:'Sobrescrever', choose_file:'Arquivo', confirm_import:'Confirmar', done:'Feito', zoom_hint:'Pinça para zoom', zoom_reset:'Reset', toast_added:'Adicionado', toast_updated:'Atualizado', toast_deleted:'Excluído', toast_exported:'Exportado', toast_reset:'Resetado', toast_file_read:'Arquivo carregado', toast_imported:'Importado', courses:'aulas', toast_no_name:'Insira nome', toast_no_period:'Adicione período', toast_first_week:'Primeira', toast_last_week:'Última', confirm_delete:'Excluir?', confirm_delete_period:'Excluir período?', confirm_reset:'Resetar?', keep_one_period:'Mantenha 1', toast_remind_on:'On', toast_notify_denied:'Negado', toast_notify_unsupport:'Sem suporte', toast_notify_on:'On', toast_notify_manual:'Permita manualmente', toast_min_set:'Lembrar', toast_min_remind:'min antes', upcoming:'em breve', remain_min:'min', remind_on:'On', last_week:'última' },
+    ru: { menu:'Меню', tab_week:'Неделя', tab_today:'Сегодня', add:'Добавить', week:'Н', week_of:'Неделя', weeks_total:'нед', year:'', today:'Сегодня', no_course:'Сегодня занятий нет', enjoy:'Отдыхайте', click_add:'Нажмите + для добавления', morning:'Доброе утро', noon:'Добрый день', afternoon:'Добрый день', evening:'Добрый вечер', night:'Поздно, отдохните', cheer:', продолжайте!', month:'/', day:' ', sun:'Вс', mon:'Пн', tue:'Вт', wed:'Ср', thu:'Чт', fri:'Пт', sat:'Сб', period_short:'П', empty:'—', add_course:'Добавить', edit_course:'Изменить', course_name:'Название', weekday:'День', period:'Пара', location:'Аудитория', teacher:'Преподаватель', color:'Цвет', note:'Заметка', weeks:'Недели', all_weeks:'Все', cancel:'Отмена', save:'Сохранить', delete:'Удалить', theme:'Тема', light:'Светлая', dark:'Тёмная', language:'Язык', reminder:'Напоминание', remind_enable:'Включить', remind_min:'Заранее', minutes:'мин', notify_perm:'Уведомления', notify_on:'Вкл', notify_off:'Выкл', notify_denied:'Отклонено', notify_unsupport:'Нет поддержки', periods:'Пары', period_add:'+ Добавить', period_name:'Название', data:'Данные', import:'Импорт', export:'Экспорт', reset:'Сброс', import_hint:'JSON. Заменить или объединить. Файл .json.', merge:'Объединить', overwrite:'Заменить', choose_file:'Файл', confirm_import:'Подтвердить', done:'Готово', zoom_hint:'Щипок для зума', zoom_reset:'Сброс', toast_added:'Добавлено', toast_updated:'Обновлено', toast_deleted:'Удалено', toast_exported:'Экспортировано', toast_reset:'Сброс', toast_file_read:'Файл загружен', toast_imported:'Импортировано', courses:'занятий', toast_no_name:'Введите название', toast_no_period:'Добавьте пару', toast_first_week:'Первая', toast_last_week:'Последняя', confirm_delete:'Удалить?', confirm_delete_period:'Удалить пару?', confirm_reset:'Сбросить?', keep_one_period:'Оставьте 1', toast_remind_on:'Вкл', toast_notify_denied:'Отклонено', toast_notify_unsupport:'Нет поддержки', toast_notify_on:'Вкл', toast_notify_manual:'Разрешите вручную', toast_min_set:'Напоминать', toast_min_remind:'мин до', upcoming:'скоро', remain_min:'мин', remind_on:'Вкл', last_week:'последняя' },
+    ja: { menu:'メニュー', tab_week:'週表', tab_today:'本日', add:'追加', week:'週', week_of:'第', weeks_total:'週', year:'年', today:'今日', no_course:'今日は授業なし', enjoy:'のんびりしよう', click_add:'右上の + で追加', morning:'おはよう', noon:'こんにちは', afternoon:'こんにちは', evening:'こんばんは', night:'夜更けです、お休みを', cheer:',頑張りましょう!', month:'月', day:'日', sun:'日', mon:'月', tue:'火', wed:'水', thu:'木', fri:'金', sat:'土', period_short:'限', empty:'—', add_course:'授業追加', edit_course:'編集', course_name:'授業名', weekday:'曜日', period:'時限', location:'教室', teacher:'先生', color:'色', note:'メモ', weeks:'週', all_weeks:'全週', cancel:'キャンセル', save:'保存', delete:'削除', theme:'テーマ', light:'ライト', dark:'ダーク', language:'言語', reminder:'リマインダー', remind_enable:'有効化', remind_min:'事前', minutes:'分', notify_perm:'通知', notify_on:'オン', notify_off:'オフ', notify_denied:'拒否', notify_unsupport:'非対応', periods:'時限', period_add:'+ 追加', period_name:'名前', data:'データ', import:'インポート', export:'エクスポート', reset:'リセット', import_hint:'JSON。上書き/統合。.json ファイル可。', merge:'統合', overwrite:'上書き', choose_file:'ファイル', confirm_import:'確認', done:'完了', zoom_hint:'ピンチで拡大', zoom_reset:'リセット', toast_added:'追加', toast_updated:'更新', toast_deleted:'削除', toast_exported:'出力', toast_reset:'リセット', toast_file_read:'読込完了、確認を', toast_imported:'取込', courses:'件', toast_no_name:'名前を入力', toast_no_period:'時限を追加', toast_first_week:'第1週', toast_last_week:'最終週', confirm_delete:'削除しますか?', confirm_delete_period:'時限を削除?', confirm_reset:'リセットしますか?', keep_one_period:'1時限は必須', toast_remind_on:'オン', toast_notify_denied:'拒否', toast_notify_unsupport:'非対応', toast_notify_on:'オン', toast_notify_manual:'手動で許可', toast_min_set:'通知', toast_min_remind:'分前', upcoming:'開始間近', remain_min:'分', remind_on:'オン', last_week:'最終' },
+    de: { menu:'Menü', tab_week:'Woche', tab_today:'Heute', add:'Hinzufügen', week:'W', week_of:'Woche', weeks_total:'Wochen', year:'', today:'Heute', no_course:'Heute keine Stunden', enjoy:'Genieße den Tag', click_add:'+ tippen zum Hinzufügen', morning:'Guten Morgen', noon:'Guten Tag', afternoon:'Guten Tag', evening:'Guten Abend', night:'Spät, ruh dich aus', cheer,', weiter so!', month:'/', day:' ', sun:'So', mon:'Mo', tue:'Di', wed:'Mi', thu:'Do', fri:'Fr', sat:'Sa', period_short:'S', empty:'—', add_course:'Hinzufügen', edit_course:'Bearbeiten', course_name:'Name', weekday:'Tag', period:'Stunde', location:'Raum', teacher:'Lehrer', color:'Farbe', note:'Notiz', weeks:'Wochen', all_weeks:'Alle', cancel:'Abbrechen', save:'Speichern', delete:'Löschen', theme:'Design', light:'Hell', dark:'Dunkel', language:'Sprache', reminder:'Erinnerung', remind_enable:'Aktivieren', remind_min:'Vorab', minutes:'Min', notify_perm:'Benachrichtigung', notify_on:'An', notify_off:'Aus', notify_denied:'Abgelehnt', notify_unsupport:'Nicht unterstützt', periods:'Stunden', period_add:'+ Hinzufügen', period_name:'Name', data:'Daten', import:'Import', export:'Export', reset:'Zurücksetzen', import_hint:'JSON. Überschreiben oder Zusammenführen. .json Datei.', merge:'Zusammenführen', overwrite:'Überschreiben', choose_file:'Datei', confirm_import:'Bestätigen', done:'Fertig', zoom_hint:'Pinch-Zoom', zoom_reset:'Reset', toast_added:'Hinzugefügt', toast_updated:'Aktualisiert', toast_deleted:'Gelöscht', toast_exported:'Exportiert', toast_reset:'Reset', toast_file_read:'Datei geladen', toast_imported:'Importiert', courses:'Stunden', toast_no_name:'Name eingeben', toast_no_period:'Stunde hinzufügen', toast_first_week:'Erste', toast_last_week:'Letzte', confirm_delete:'Löschen?', confirm_delete_period:'Stunde löschen?', confirm_reset:'Reset?', keep_one_period:'1 behalten', toast_remind_on:'An', toast_notify_denied:'Abgelehnt', toast_notify_unsupport:'Nicht unterstützt', toast_notify_on:'An', toast_notify_manual:'Manuell erlauben', toast_min_set:'Erinnern', toast_min_remind:'Min vor', upcoming:'beginnt bald', remain_min:'Min', remind_on:'An', last_week:'letzte' },
+    fr: { menu:'Menu', tab_week:'Semaine', tab_today:'Aujourd', add:'Ajouter', week:'S', week_of:'Semaine', weeks_total:'sem', year:'', today:"Aujourd'hui", no_course:'Pas de cours', enjoy:'Profite du jour', click_add:'Touche + pour ajouter', morning:'Bonjour', noon:'Bonjour', afternoon:'Bon après-midi', evening:'Bonsoir', night:'Tard, repose-toi', cheer:', continue !', month:'/', day:' ', sun:'Dim', mon:'Lun', tue:'Mar', wed:'Mer', thu:'Jeu', fri:'Ven', sat:'Sam', period_short:'C', empty:'—', add_course:'Ajouter', edit_course:'Modifier', course_name:'Nom', weekday:'Jour', period:'Créneau', location:'Salle', teacher:'Prof', color:'Couleur', note:'Note', weeks:'Semaines', all_weeks:'Toutes', cancel:'Annuler', save:'Enregistrer', delete:'Supprimer', theme:'Thème', light:'Clair', dark:'Sombre', language:'Langue', reminder:'Rappel', remind_enable:'Activer', remind_min:'Avance', minutes:'min', notify_perm:'Notification', notify_on:'On', notify_off:'Off', notify_denied:'Refusé', notify_unsupport:'Non supporté', periods:'Créneaux', period_add:'+ Ajouter', period_name:'Nom', data:'Données', import:'Importer', export:'Exporter', reset:'Réinitialiser', import_hint:'JSON. Écraser ou fusionner. Fichier .json.', merge:'Fusionner', overwrite:'Écraser', choose_file:'Fichier', confirm_import:'Confirmer', done:'Fait', zoom_hint:'Pincer pour zoom', zoom_reset:'Reset', toast_added:'Ajouté', toast_updated:'Mis à jour', toast_deleted:'Supprimé', toast_exported:'Exporté', toast_reset:'Réinitialisé', toast_file_read:'Fichier chargé', toast_imported:'Importé', courses:'cours', toast_no_name:'Entrez le nom', toast_no_period:'Ajoutez un créneau', toast_first_week:'Première', toast_last_week:'Dernière', confirm_delete:'Supprimer ?', confirm_delete_period:'Supprimer créneau ?', confirm_reset:'Réinitialiser ?', keep_one_period:'Gardez 1', toast_remind_on:'On', toast_notify_denied:'Refusé', toast_notify_unsupport:'Non supporté', toast_notify_on:'On', toast_notify_manual:'Autoriser manuellement', toast_min_set:'Rappel', toast_min_remind:'min avant', upcoming:'bientôt', remain_min:'min', remind_on:'On', last_week:'dernière' }
+  };
+
+  function t(key) {
+    const lang = state.lang || 'zh';
+    return (I18N[lang] && I18N[lang][key]) || (I18N.zh[key]) || key;
+  }
+
+  function applyI18n() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      el.textContent = t(key);
+    });
+    document.documentElement.setAttribute('lang', state.lang || 'zh');
+  }
+
   // ===== 常量 =====
-  const STORAGE_KEY = 'ios26_schedule_v2';
+  const STORAGE_KEY = 'ios26_schedule_v3';
   const COLORS = ['#007AFF','#5AC8FA','#34C759','#FF9500','#FF2D55','#AF52DE','#FF3B30','#5856D6'];
-  const DAY_NAMES = ['周日','周一','周二','周三','周四','周五','周六'];
-  const DAY_SHORT = ['日','一','二','三','四','五','六'];
   const TOTAL_WEEKS = 20;
   const REMIND_OPTIONS = [1, 3, 5, 10, 15, 20, 30];
 
-  // ===== 默认节次 =====
   function defaultPeriods() {
     return [
-      { id: pid(), name: '第1节', start: '08:00', end: '08:45' },
-      { id: pid(), name: '第2节', start: '08:55', end: '09:40' },
-      { id: pid(), name: '第3节', start: '10:00', end: '10:45' },
-      { id: pid(), name: '第4节', start: '10:55', end: '11:40' },
-      { id: pid(), name: '第5节', start: '14:00', end: '14:45' },
-      { id: pid(), name: '第6节', start: '14:55', end: '15:40' },
-      { id: pid(), name: '第7节', start: '16:00', end: '16:45' },
-      { id: pid(), name: '第8节', start: '16:55', end: '17:40' },
-      { id: pid(), name: '第9节', start: '19:00', end: '19:45' },
-      { id: pid(), name: '第10节', start: '19:55', end: '20:40' },
-      { id: pid(), name: '第11节', start: '20:50', end: '21:35' },
-      { id: pid(), name: '第12节', start: '21:45', end: '22:30' }
+      { id: pid(), name: t('period_short')+'1', start: '08:00', end: '08:45' },
+      { id: pid(), name: t('period_short')+'2', start: '08:55', end: '09:40' },
+      { id: pid(), name: t('period_short')+'3', start: '10:00', end: '10:45' },
+      { id: pid(), name: t('period_short')+'4', start: '10:55', end: '11:40' },
+      { id: pid(), name: t('period_short')+'5', start: '14:00', end: '14:45' },
+      { id: pid(), name: t('period_short')+'6', start: '14:55', end: '15:40' },
+      { id: pid(), name: t('period_short')+'7', start: '16:00', end: '16:45' },
+      { id: pid(), name: t('period_short')+'8', start: '16:55', end: '17:40' },
+      { id: pid(), name: t('period_short')+'9', start: '19:00', end: '19:45' },
+      { id: pid(), name: t('period_short')+'10', start: '19:55', end: '20:40' },
+      { id: pid(), name: t('period_short')+'11', start: '20:50', end: '21:35' },
+      { id: pid(), name: t('period_short')+'12', start: '21:45', end: '22:30' }
     ];
   }
-
   function pid() { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
   // ===== 状态 =====
   let state = {
-    periods: [],
-    courses: [],
-    currentWeek: 1,
-    view: 'today',
-    theme: 'light',
-    remindEnable: false,
-    remindMinutes: 5,
-    remindedToday: { date: '', ids: [] }
+    periods: [], courses: [], currentWeek: 1, view: 'table',
+    theme: 'light', lang: 'zh',
+    remindEnable: false, remindMinutes: 5,
+    remindedToday: { date: '', ids: [] },
+    zoom: 1
   };
 
   function loadState() {
@@ -1071,32 +864,34 @@
       if (raw) {
         const d = JSON.parse(raw);
         Object.assign(state, {
-          periods: d.periods || defaultPeriods(),
+          periods: d.periods || [],
           courses: d.courses || [],
           currentWeek: d.currentWeek || 1,
           theme: d.theme || 'light',
+          lang: d.lang || 'zh',
           remindEnable: !!d.remindEnable,
           remindMinutes: d.remindMinutes || 5,
           remindedToday: d.remindedToday || { date: '', ids: [] }
         });
         if (!d.periods || d.periods.length === 0) {
+          state.periods = defaultPeriods();
           migrateLegacyCourses(d.courses || []);
         }
       } else {
+        state.periods = defaultPeriods();
         seedDemo();
       }
     } catch(e) {
+      state.periods = defaultPeriods();
       seedDemo();
     }
     applyTheme();
+    applyI18n();
   }
 
-  // 迁移旧版(自由时间)课程数据
   function migrateLegacyCourses(oldCourses) {
-    if (state.periods.length === 0) state.periods = defaultPeriods();
     state.courses = (oldCourses || []).map(c => {
       if (c.periodId) return c;
-      // 旧字段 start/end -> 匹配节次
       const matched = state.periods.find(p => p.start === c.start && p.end === c.end)
         || state.periods.find(p => p.start === c.start);
       return Object.assign({}, c, { periodId: matched ? matched.id : state.periods[0].id });
@@ -1105,12 +900,9 @@
 
   function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      periods: state.periods,
-      courses: state.courses,
-      currentWeek: state.currentWeek,
-      theme: state.theme,
-      remindEnable: state.remindEnable,
-      remindMinutes: state.remindMinutes,
+      periods: state.periods, courses: state.courses,
+      currentWeek: state.currentWeek, theme: state.theme, lang: state.lang,
+      remindEnable: state.remindEnable, remindMinutes: state.remindMinutes,
       remindedToday: state.remindedToday
     }));
   }
@@ -1133,32 +925,24 @@
 
   // ===== 辅助 =====
   function getPeriod(id) { return state.periods.find(p => p.id === id); }
-  function courseInWeek(c, week) {
-    if (!c.weeks || c.weeks.length === 0) return true;
-    return c.weeks.includes(week);
-  }
-  function escapeHTML(s) {
-    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
-  function applyTheme() {
-    document.documentElement.setAttribute('data-theme', state.theme);
-  }
+  function courseInWeek(c, week) { return (!c.weeks || c.weeks.length === 0) || c.weeks.includes(week); }
+  function escapeHTML(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function applyTheme() { document.documentElement.setAttribute('data-theme', state.theme); }
+
+  const WEEK_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
+  function dayShort(d) { return t(WEEK_KEYS[d]); }
 
   // ===== 渲染 =====
-  function render() {
-    renderToday();
-    renderTable();
-    renderWeekBar();
-  }
+  function render() { renderToday(); renderTable(); renderWeekBar(); }
 
   function getTodayDateStr() {
     const d = new Date();
-    return `${d.getMonth()+1}月${d.getDate()}日 ${DAY_NAMES[d.getDay()]}`;
+    return `${d.getMonth()+1}${t('month')}${d.getDate()}${t('day')} ${dayShort(d.getDay())}`;
   }
   function getGreeting() {
     const h = new Date().getHours();
-    let g = h < 6 ? '夜深了,注意休息' : h < 11 ? '早上好' : h < 13 ? '中午好' : h < 18 ? '下午好' : '晚上好';
-    return g + ',今天也要加油哦';
+    let g = h < 6 ? t('night') : h < 11 ? t('morning') : h < 13 ? t('noon') : h < 18 ? t('afternoon') : t('evening');
+    return g + t('cheer');
   }
 
   function renderToday() {
@@ -1172,13 +956,8 @@
         const pa = getPeriod(a.periodId), pb = getPeriod(b.periodId);
         return (pa ? pa.start : '99:99').localeCompare(pb ? pb.start : '99:99');
       });
-
     if (courses.length === 0) {
-      list.innerHTML = `<div class="empty">
-        <span class="emoji">🎉</span>
-        <p>今天没有课程<br>享受悠闲的一天吧</p>
-        <div class="hint">点击右上角 + 添加课程</div>
-      </div>`;
+      list.innerHTML = `<div class="empty"><span class="emoji">🎉</span><p>${t('no_course')}<br>${t('enjoy')}</p><div class="hint">${t('click_add')}</div></div>`;
       return;
     }
     list.innerHTML = courses.map(c => {
@@ -1190,17 +969,10 @@
       if (c.location) meta.push(`<span>📍 ${escapeHTML(c.location)}</span>`);
       if (c.teacher) meta.push(`<span>👤 ${escapeHTML(c.teacher)}</span>`);
       return `<div class="course-card" data-id="${c.id}" style="--c-color:${c.color}">
-        <div class="c-top">
-          <div class="c-name">${escapeHTML(c.name)}</div>
-          <div class="c-time">${time}${periodName}</div>
-        </div>
-        <div class="c-meta">${meta.join('')}</div>
-        ${note}
-      </div>`;
+        <div class="c-top"><div class="c-name">${escapeHTML(c.name)}</div><div class="c-time">${time}${periodName}</div></div>
+        <div class="c-meta">${meta.join('')}</div>${note}</div>`;
     }).join('');
-    list.querySelectorAll('.course-card').forEach(el => {
-      el.addEventListener('click', () => openEdit(el.dataset.id));
-    });
+    list.querySelectorAll('.course-card').forEach(el => el.addEventListener('click', () => openEdit(el.dataset.id)));
   }
 
   function renderTable() {
@@ -1211,72 +983,107 @@
     const diff = now.getDay() === 0 ? -6 : 1 - now.getDay();
     monday.setDate(now.getDate() + diff);
 
-    // 表头: 节次 + 周一到周日
-    let head = '<thead><tr><th>节次</th>';
+    let head = '<thead><tr><th>' + t('period') + '</th>';
     for (let i = 1; i <= 7; i++) {
       const dayIdx = i === 7 ? 0 : i;
       const date = new Date(monday);
       date.setDate(monday.getDate() + (i - 1));
       const isToday = dayIdx === today;
-      head += `<th class="${isToday ? 'today-h' : ''}">
-        <div class="dn">周${DAY_SHORT[dayIdx]}</div>
-        <div class="dd">${date.getDate()}</div>
-      </th>`;
+      head += `<th class="${isToday ? 'today-h' : ''}"><div class="dn">${dayShort(dayIdx)}</div><div class="dd">${date.getDate()}</div></th>`;
     }
     head += '</tr></thead>';
 
-    // 表体: 每行一个节次
     let body = '<tbody>';
     state.periods.forEach(p => {
-      body += `<tr><td class="period-cell">
-        <div class="pn">${escapeHTML(p.name)}</div>
-        <div class="pt">${p.start}<br>${p.end}</div>
-      </td>`;
+      body += `<tr><td class="period-cell"><div class="pn">${escapeHTML(p.name)}</div><div class="pt">${p.start}<br>${p.end}</div></td>`;
       for (let i = 1; i <= 7; i++) {
         const dayIdx = i === 7 ? 0 : i;
         const isToday = dayIdx === today;
         const course = state.courses.find(c => c.day === dayIdx && c.periodId === p.id && courseInWeek(c, state.currentWeek));
         let cell;
         if (course) {
-          cell = `<div class="cell-course" data-id="${course.id}" style="--c-color:${course.color}">
-            <div class="cc-name">${escapeHTML(course.name)}</div>
-            ${course.location ? `<div class="cc-loc">${escapeHTML(course.location)}</div>` : ''}
-          </div>`;
+          cell = `<div class="cell-course" data-id="${course.id}" style="--c-color:${course.color}"><div class="cc-name">${escapeHTML(course.name)}</div>${course.location ? `<div class="cc-loc">${escapeHTML(course.location)}</div>` : ''}</div>`;
         } else {
-          cell = '<div class="cell-empty">—</div>';
+          cell = `<div class="cell-empty">${t('empty')}</div>`;
         }
         body += `<td class="slot ${isToday ? 'today-col' : ''}" data-day="${dayIdx}" data-period="${p.id}">${cell}</td>`;
       }
       body += '</tr>';
     });
     body += '</tbody>';
-
     tbl.innerHTML = head + body;
 
-    // 点击有课单元格 -> 编辑; 空单元格 -> 添加该位置课程
     tbl.querySelectorAll('.slot').forEach(td => {
       td.addEventListener('click', (e) => {
+        if (pinching) return;
         const courseEl = e.target.closest('.cell-course');
-        if (courseEl) {
-          openEdit(courseEl.dataset.id);
-        } else {
-          openAddAt(parseInt(td.dataset.day), td.dataset.period);
-        }
+        if (courseEl) openEdit(courseEl.dataset.id);
+        else openAddAt(parseInt(td.dataset.day), td.dataset.period);
       });
     });
+    applyZoom();
   }
 
   function renderWeekBar() {
     document.getElementById('weekLabel').innerHTML =
-      `第 ${state.currentWeek} 周<small>${new Date().getFullYear()}年 · 共${TOTAL_WEEKS}周</small>`;
+      `${t('week_of')} ${state.currentWeek} ${t('week')}<small>${new Date().getFullYear()}${t('year')} · ${TOTAL_WEEKS}${t('weeks_total')}</small>`;
   }
 
-  // ===== 视图切换 =====
   function switchView(v) {
     state.view = v;
     document.querySelectorAll('.segment button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
     document.querySelectorAll('.tabbar button[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === v));
     document.querySelectorAll('.view').forEach(el => el.classList.toggle('active', el.id === 'view-' + v));
+  }
+
+  // ===== 表格缩放 =====
+  let pinching = false;
+  function applyZoom() {
+    const inner = document.getElementById('tableInner');
+    if (inner) inner.style.transform = `scale(${state.zoom})`;
+  }
+  function setupPinchZoom() {
+    const el = document.getElementById('tableScroll');
+    let initialDist = 0;
+    let initialZoom = 1;
+    function dist(touches) {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.hypot(dx, dy);
+    }
+    el.addEventListener('touchstart', e => {
+      if (e.touches.length === 2) {
+        pinching = true;
+        initialDist = dist(e.touches);
+        initialZoom = state.zoom;
+      }
+    }, { passive: true });
+    el.addEventListener('touchmove', e => {
+      if (e.touches.length === 2 && pinching) {
+        e.preventDefault();
+        const d = dist(e.touches);
+        let z = initialZoom * (d / initialDist);
+        z = Math.max(0.6, Math.min(2.5, z));
+        state.zoom = z;
+        applyZoom();
+      }
+    }, { passive: false });
+    el.addEventListener('touchend', e => {
+      if (e.touches.length < 2) {
+        setTimeout(() => pinching = false, 200);
+      }
+    }, { passive: true });
+
+    // 鼠标滚轮缩放(桌面调试)
+    el.addEventListener('wheel', e => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        let z = state.zoom * (e.deltaY < 0 ? 1.05 : 0.95);
+        z = Math.max(0.6, Math.min(2.5, z));
+        state.zoom = z;
+        applyZoom();
+      }
+    }, { passive: false });
   }
 
   // ===== 课程弹窗 =====
@@ -1287,50 +1094,38 @@
     const sel = document.getElementById('f-period');
     sel.innerHTML = state.periods.map(p => `<option value="${p.id}">${escapeHTML(p.name)} (${p.start}-${p.end})</option>`).join('');
   }
-
   function renderColorPick() {
     const wrap = document.getElementById('colorPick');
-    wrap.innerHTML = COLORS.map(c => `
-      <label>
-        <input type="radio" name="color" value="${c}" ${c === selectedColor ? 'checked' : ''}>
-        <div class="color-dot" style="--c:${c}"></div>
-      </label>`).join('');
-    wrap.querySelectorAll('input').forEach(inp => {
-      inp.addEventListener('change', () => selectedColor = inp.value);
-    });
+    wrap.innerHTML = COLORS.map(c => `<label><input type="radio" name="color" value="${c}" ${c === selectedColor ? 'checked' : ''}><div class="color-dot" style="--c:${c}"></div></label>`).join('');
+    wrap.querySelectorAll('input').forEach(inp => inp.addEventListener('change', () => selectedColor = inp.value));
   }
-
   function renderWeeksPick() {
     const wrap = document.getElementById('weeksPick');
-    let html = `<div class="wk-chip all ${selectedWeeks.length === 0 ? 'active' : ''}" data-all="1">全周上课</div>`;
+    let html = `<div class="wk-chip all ${selectedWeeks.length === 0 ? 'active' : ''}" data-all="1">${t('all_weeks')}</div>`;
     for (let i = 1; i <= TOTAL_WEEKS; i++) {
-      const on = selectedWeeks.includes(i);
-      html += `<div class="wk-chip ${on ? 'active' : ''}" data-w="${i}">${i}</div>`;
+      html += `<div class="wk-chip ${selectedWeeks.includes(i) ? 'active' : ''}" data-w="${i}">${i}</div>`;
     }
     wrap.innerHTML = html;
     wrap.querySelectorAll('.wk-chip').forEach(chip => {
       chip.addEventListener('click', () => {
-        if (chip.dataset.all) {
-          selectedWeeks = [];
-        } else {
+        if (chip.dataset.all) selectedWeeks = [];
+        else {
           const w = parseInt(chip.dataset.w);
           const idx = selectedWeeks.indexOf(w);
-          if (idx >= 0) selectedWeeks.splice(idx, 1);
-          else selectedWeeks.push(w);
+          if (idx >= 0) selectedWeeks.splice(idx, 1); else selectedWeeks.push(w);
           selectedWeeks.sort((a,b)=>a-b);
         }
         renderWeeksPick();
       });
     });
   }
-
   function openAdd() {
     const today = new Date().getDay();
     openAddAt(today === 0 ? 1 : today, state.periods[0] ? state.periods[0].id : null);
   }
   function openAddAt(day, periodId) {
     state.editingId = null;
-    document.getElementById('courseModalTitle').textContent = '添加课程';
+    document.getElementById('courseModalTitle').textContent = t('add_course');
     document.getElementById('f-id').value = '';
     document.getElementById('f-name').value = '';
     document.getElementById('f-day').value = day;
@@ -1339,19 +1134,16 @@
     document.getElementById('f-location').value = '';
     document.getElementById('f-teacher').value = '';
     document.getElementById('f-note').value = '';
-    selectedColor = COLORS[0];
-    selectedWeeks = [];
-    renderColorPick();
-    renderWeeksPick();
+    selectedColor = COLORS[0]; selectedWeeks = [];
+    renderColorPick(); renderWeeksPick();
     document.getElementById('deleteWrap').style.display = 'none';
     showModal('courseModalMask');
   }
-
   function openEdit(id) {
     const c = state.courses.find(x => x.id === id);
     if (!c) return;
     state.editingId = id;
-    document.getElementById('courseModalTitle').textContent = '编辑课程';
+    document.getElementById('courseModalTitle').textContent = t('edit_course');
     document.getElementById('f-id').value = c.id;
     document.getElementById('f-name').value = c.name;
     fillPeriodSelect();
@@ -1362,20 +1154,18 @@
     document.getElementById('f-note').value = c.note || '';
     selectedColor = c.color || COLORS[0];
     selectedWeeks = (c.weeks || []).slice();
-    renderColorPick();
-    renderWeeksPick();
+    renderColorPick(); renderWeeksPick();
     document.getElementById('deleteWrap').style.display = 'flex';
     showModal('courseModalMask');
   }
-
   function showModal(id) { document.getElementById(id).classList.add('show'); }
   function hideModal(id) { document.getElementById(id).classList.remove('show'); }
 
   function saveCourse() {
     const name = document.getElementById('f-name').value.trim();
-    if (!name) { toast('请输入课程名称'); return; }
+    if (!name) { toast(t('toast_no_name')); return; }
     const periodId = document.getElementById('f-period').value;
-    if (!periodId) { toast('请先在设置中添加节次'); return; }
+    if (!periodId) { toast(t('toast_no_period')); return; }
     const data = {
       id: state.editingId || uid(),
       name,
@@ -1390,57 +1180,66 @@
     if (state.editingId) {
       const idx = state.courses.findIndex(c => c.id === state.editingId);
       state.courses[idx] = data;
-      toast('已更新');
+      toast(t('toast_updated'));
     } else {
       state.courses.push(data);
-      toast('已添加');
+      toast(t('toast_added'));
     }
-    saveState();
-    render();
-    hideModal('courseModalMask');
+    saveState(); render(); hideModal('courseModalMask');
   }
-
   function deleteCourse() {
     if (!state.editingId) return;
-    if (!confirm('确定删除该课程?')) return;
+    if (!confirm(t('confirm_delete'))) return;
     state.courses = state.courses.filter(c => c.id !== state.editingId);
-    saveState();
-    render();
-    hideModal('courseModalMask');
-    toast('已删除');
+    saveState(); render(); hideModal('courseModalMask');
+    toast(t('toast_deleted'));
   }
 
-  // ===== 设置页 =====
-  function openSettings() {
-    renderSettings();
-    showModal('settingsModalMask');
+  // ===== 侧边栏 =====
+  function openDrawer() {
+    renderDrawer();
+    document.getElementById('drawerMask').classList.add('show');
+    document.getElementById('drawer').classList.add('show');
   }
-
-  function renderSettings() {
-    // 主题
-    document.querySelectorAll('.theme-opt').forEach(el => {
-      el.classList.toggle('active', el.dataset.themeVal === state.theme);
-    });
-    // 提醒
+  function closeDrawer() {
+    document.getElementById('drawerMask').classList.remove('show');
+    document.getElementById('drawer').classList.remove('show');
+  }
+  function renderDrawer() {
+    document.querySelectorAll('.theme-opt').forEach(el => el.classList.toggle('active', el.dataset.themeVal === state.theme));
     document.getElementById('remindEnable').checked = state.remindEnable;
-    document.getElementById('remindMinVal').textContent = `${state.remindMinutes} 分钟`;
-    // 通知权限状态
+    document.getElementById('remindMinVal').textContent = state.remindMinutes;
     updateNotifyPerm();
-    // 节次列表
     renderPeriodList();
+    renderLangList();
+    applyI18n();
+  }
+
+  function renderLangList() {
+    const list = document.getElementById('langList');
+    list.innerHTML = LANGS.map(l => `
+      <div class="lang-item" data-lang="${l.code}">
+        <span><span class="li-name">${l.name}</span><span class="li-native">${l.native}</span></span>
+        <span class="li-check">${state.lang === l.code ? '✓' : ''}</span>
+      </div>`).join('');
+    list.querySelectorAll('.lang-item').forEach(item => {
+      item.addEventListener('click', () => {
+        state.lang = item.dataset.lang;
+        saveState();
+        applyI18n();
+        renderDrawer();
+        render();
+        toast(LANGS.find(l => l.code === state.lang).name);
+      });
+    });
   }
 
   function updateNotifyPerm() {
     const el = document.getElementById('notifyPermVal');
-    if (!('Notification' in window)) {
-      el.textContent = '不支持';
-    } else if (Notification.permission === 'granted') {
-      el.textContent = '已开启';
-    } else if (Notification.permission === 'denied') {
-      el.textContent = '已拒绝';
-    } else {
-      el.textContent = '未开启';
-    }
+    if (!('Notification' in window)) el.textContent = t('notify_unsupport');
+    else if (Notification.permission === 'granted') el.textContent = t('notify_on');
+    else if (Notification.permission === 'denied') el.textContent = t('notify_denied');
+    else el.textContent = t('notify_off');
   }
 
   function renderPeriodList() {
@@ -1451,35 +1250,26 @@
         <input type="text" class="p-name" value="${escapeHTML(p.name)}" maxlength="8">
         <input type="time" class="p-start" value="${p.start}">
         <input type="time" class="p-end" value="${p.end}">
-        <button class="p-del" aria-label="删除节次">×</button>
-      </div>
-    `).join('');
+        <button class="p-del" aria-label="del">×</button>
+      </div>`).join('');
     list.querySelectorAll('.period-item').forEach(item => {
       const id = item.dataset.id;
-      item.querySelector('.p-name').addEventListener('change', e => {
-        const p = getPeriod(id); if (p) { p.name = e.target.value || p.name; saveState(); }
-      });
-      item.querySelector('.p-start').addEventListener('change', e => {
-        const p = getPeriod(id); if (p) { p.start = e.target.value; saveState(); }
-      });
-      item.querySelector('.p-end').addEventListener('change', e => {
-        const p = getPeriod(id); if (p) { p.end = e.target.value; saveState(); }
-      });
+      item.querySelector('.p-name').addEventListener('change', e => { const p = getPeriod(id); if (p) { p.name = e.target.value || p.name; saveState(); } });
+      item.querySelector('.p-start').addEventListener('change', e => { const p = getPeriod(id); if (p) { p.start = e.target.value; saveState(); } });
+      item.querySelector('.p-end').addEventListener('change', e => { const p = getPeriod(id); if (p) { p.end = e.target.value; saveState(); } });
       item.querySelector('.p-del').addEventListener('click', () => {
-        if (state.periods.length <= 1) { toast('至少保留1个节次'); return; }
-        if (!confirm('删除该节次?关联的课程将转为第一节。')) return;
-        const p = getPeriod(id);
+        if (state.periods.length <= 1) { toast(t('keep_one_period')); return; }
+        if (!confirm(t('confirm_delete_period'))) return;
         state.periods = state.periods.filter(x => x.id !== id);
         const fallback = state.periods[0].id;
         state.courses.forEach(c => { if (c.periodId === id) c.periodId = fallback; });
-        saveState();
-        renderPeriodList();
-        toast('已删除');
+        saveState(); renderPeriodList();
+        toast(t('toast_deleted'));
       });
     });
   }
 
-  // ===== 提醒功能 =====
+  // ===== 提醒 =====
   function resetRemindedIfNewDay() {
     const today = new Date().toDateString();
     if (state.remindedToday.date !== today) {
@@ -1487,7 +1277,6 @@
       saveState();
     }
   }
-
   function checkReminders() {
     if (!state.remindEnable || state.remindMinutes <= 0) return;
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
@@ -1506,76 +1295,55 @@
       if (diffMin > 0 && diffMin <= state.remindMinutes) {
         const loc = c.location ? `(${c.location})` : '';
         const teacher = c.teacher ? ` · ${c.teacher}` : '';
-        const note = c.note ? `\n备注:${c.note}` : '';
+        const note = c.note ? `\n${t('note')}:${c.note}` : '';
         try {
-          new Notification(`${c.name} 即将开始`, {
-            body: `${p.name} ${p.start}-${p.end} ${loc}${teacher}${note}\n还有 ${Math.ceil(diffMin)} 分钟上课`,
+          new Notification(`${c.name} ${t('upcoming')}`, {
+            body: `${p.name} ${p.start}-${p.end} ${loc}${teacher}${note}\n${Math.ceil(diffMin)} ${t('remain_min')}`,
             tag: c.id
           });
-        } catch(e) {
-          // 某些环境需要 service worker,降级用 toast
-          toast(`📢 ${c.name} 即将开始 · 还有${Math.ceil(diffMin)}分钟`);
-        }
+        } catch(e) { toast(`📢 ${c.name} · ${Math.ceil(diffMin)}${t('remain_min')}`); }
         state.remindedToday.ids.push(c.id);
         saveState();
-        toast(`📢 ${c.name} 还有${Math.ceil(diffMin)}分钟上课`);
+        toast(`📢 ${c.name} ${Math.ceil(diffMin)}${t('remain_min')}`);
       }
     }
   }
-
   function startReminderLoop() {
     resetRemindedIfNewDay();
     checkReminders();
-    setInterval(checkReminders, 30000); // 每30秒检查
+    setInterval(checkReminders, 30000);
   }
 
   // ===== 导入导出 =====
   function exportData() {
-    const data = {
-      periods: state.periods,
-      courses: state.courses,
-      _exportedAt: new Date().toISOString(),
-      _version: 2
-    };
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
+    const data = { periods: state.periods, courses: state.courses, _exportedAt: new Date().toISOString(), _version: 3 };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `课程表_${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    a.href = url; a.download = `schedule_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast('已导出');
+    toast(t('toast_exported'));
   }
-
   function doImport(text, mode) {
     try {
       const data = JSON.parse(text);
-      if (!data || (!data.courses && !data.periods)) {
-        toast('JSON 格式不正确');
-        return false;
-      }
+      if (!data || (!data.courses && !data.periods)) { toast('JSON ✗'); return false; }
       let newPeriods = data.periods || state.periods;
       let newCourses = data.courses || [];
-      // 确保课程有 periodId,若没有则尝试按 start 匹配
       newCourses = newCourses.map(c => {
         if (!c.periodId && c.start) {
-          const matched = newPeriods.find(p => p.start === c.start && p.end === c.end)
-            || newPeriods.find(p => p.start === c.start);
+          const matched = newPeriods.find(p => p.start === c.start && p.end === c.end) || newPeriods.find(p => p.start === c.start);
           c.periodId = matched ? matched.id : (newPeriods[0] ? newPeriods[0].id : c.periodId);
         }
         if (!c.id) c.id = uid();
         if (!c.weeks) c.weeks = [];
         return c;
       });
-
       if (mode === 'overwrite') {
         state.periods = newPeriods.length ? newPeriods : state.periods;
         state.courses = newCourses;
       } else {
-        // 合并:节次合并(按 name 去重),课程追加
         const existingNames = new Set(state.periods.map(p => p.name));
         const periodMap = {};
         newPeriods.forEach(np => {
@@ -1594,15 +1362,10 @@
           state.courses.push(c);
         });
       }
-      saveState();
-      render();
-      renderSettings();
-      toast(`已导入 ${newCourses.length} 门课程`);
+      saveState(); render(); renderDrawer();
+      toast(`${t('toast_imported')} ${newCourses.length} ${t('courses')}`);
       return true;
-    } catch(e) {
-      toast('解析失败: ' + e.message);
-      return false;
-    }
+    } catch(e) { toast('JSON ✗ ' + e.message); return false; }
   }
 
   // ===== Toast =====
@@ -1615,169 +1378,121 @@
     toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
   }
 
-  // ===== 事件绑定 =====
+  // ===== 事件 =====
+  document.getElementById('menuBtn').addEventListener('click', openDrawer);
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+  document.getElementById('drawerMask').addEventListener('click', closeDrawer);
   document.getElementById('addBtn').addEventListener('click', openAdd);
-  document.getElementById('settingsBtn').addEventListener('click', openSettings);
-  document.getElementById('settingsBtn2').addEventListener('click', openSettings);
+  document.getElementById('addBtn2').addEventListener('click', openAdd);
 
   document.getElementById('saveCourseBtn').addEventListener('click', saveCourse);
   document.getElementById('cancelCourseBtn').addEventListener('click', () => hideModal('courseModalMask'));
   document.getElementById('deleteCourseBtn').addEventListener('click', deleteCourse);
-  document.getElementById('courseModalMask').addEventListener('click', e => {
-    if (e.target === e.currentTarget) hideModal('courseModalMask');
-  });
+  document.getElementById('courseModalMask').addEventListener('click', e => { if (e.target === e.currentTarget) hideModal('courseModalMask'); });
 
-  document.querySelectorAll('.segment button').forEach(b => {
-    b.addEventListener('click', () => switchView(b.dataset.view));
-  });
-  document.querySelectorAll('.tabbar button[data-view]').forEach(b => {
-    b.addEventListener('click', () => switchView(b.dataset.view));
-  });
+  document.querySelectorAll('.segment button').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
+  document.querySelectorAll('.tabbar button[data-view]').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
 
   document.getElementById('prevWeek').addEventListener('click', () => {
     if (state.currentWeek > 1) { state.currentWeek--; saveState(); render(); }
-    else toast('已是第1周');
+    else toast(t('toast_first_week'));
   });
   document.getElementById('nextWeek').addEventListener('click', () => {
     if (state.currentWeek < TOTAL_WEEKS) { state.currentWeek++; saveState(); render(); }
-    else toast('已是最后一周');
+    else toast(t('toast_last_week'));
   });
 
-  // 设置:主题
   document.querySelectorAll('.theme-opt').forEach(el => {
     el.addEventListener('click', () => {
       state.theme = el.dataset.themeVal;
-      applyTheme();
-      saveState();
-      renderSettings();
+      applyTheme(); saveState(); renderDrawer();
     });
   });
 
-  // 设置:提醒开关
   document.getElementById('remindEnable').addEventListener('change', e => {
     state.remindEnable = e.target.checked;
     saveState();
     if (state.remindEnable && 'Notification' in window && Notification.permission !== 'granted') {
       Notification.requestPermission().then(() => {
         updateNotifyPerm();
-        if (Notification.permission === 'granted') {
-          toast('提醒已开启');
-          checkReminders();
-        } else {
-          toast('未授权通知,请在浏览器设置中允许');
-        }
+        if (Notification.permission === 'granted') { toast(t('toast_remind_on')); checkReminders(); }
+        else toast(t('toast_notify_denied'));
       });
-    } else if (state.remindEnable) {
-      toast('提醒已开启');
-      checkReminders();
-    }
+    } else if (state.remindEnable) { toast(t('toast_remind_on')); checkReminders(); }
   });
 
-  // 设置:提醒分钟
-  document.getElementById('remindMinRow').addEventListener('click', () => {
-    renderMinOptions();
-    showModal('minModalMask');
-  });
+  document.getElementById('remindMinRow').addEventListener('click', () => { renderMinOptions(); showModal('minModalMask'); });
   function renderMinOptions() {
     const wrap = document.getElementById('minOptions');
     wrap.innerHTML = REMIND_OPTIONS.map(m => `
       <div class="settings-row" data-min="${m}">
-        <span class="s-label">提前 ${m} 分钟</span>
+        <span class="s-label">${m} ${t('minutes')}</span>
         <span class="s-value">${state.remindMinutes === m ? '✓' : ''}</span>
-      </div>
-    `).join('');
+      </div>`).join('');
     wrap.querySelectorAll('.settings-row').forEach(row => {
       row.addEventListener('click', () => {
         state.remindMinutes = parseInt(row.dataset.min);
-        saveState();
-        renderSettings();
-        hideModal('minModalMask');
-        toast(`已设为提前 ${state.remindMinutes} 分钟提醒`);
+        saveState(); renderDrawer(); hideModal('minModalMask');
+        toast(`${t('toast_min_set')} ${state.remindMinutes} ${t('toast_min_remind')}`);
       });
     });
   }
   document.getElementById('closeMinBtn').addEventListener('click', () => hideModal('minModalMask'));
-  document.getElementById('minModalMask').addEventListener('click', e => {
-    if (e.target === e.currentTarget) hideModal('minModalMask');
-  });
+  document.getElementById('minModalMask').addEventListener('click', e => { if (e.target === e.currentTarget) hideModal('minModalMask'); });
 
-  // 设置:通知权限
   document.getElementById('notifyPermRow').addEventListener('click', () => {
-    if (!('Notification' in window)) { toast('当前浏览器不支持通知'); return; }
-    if (Notification.permission === 'granted') {
-      toast('通知权限已开启');
-    } else if (Notification.permission === 'denied') {
-      toast('通知已被拒绝,请在浏览器设置中手动允许');
-    } else {
-      Notification.requestPermission().then(p => {
-        updateNotifyPerm();
-        toast(p === 'granted' ? '已开启通知权限' : '未授权');
-      });
-    }
+    if (!('Notification' in window)) { toast(t('toast_notify_unsupport')); return; }
+    if (Notification.permission === 'granted') toast(t('toast_notify_on'));
+    else if (Notification.permission === 'denied') toast(t('toast_notify_manual'));
+    else Notification.requestPermission().then(p => { updateNotifyPerm(); toast(p === 'granted' ? t('toast_notify_on') : t('toast_notify_denied')); });
   });
 
-  // 设置:节次添加
   document.getElementById('periodAdd').addEventListener('click', () => {
     const n = state.periods.length + 1;
-    state.periods.push({ id: pid(), name: `第${n}节`, start: '08:00', end: '08:45' });
-    saveState();
-    renderPeriodList();
-    fillPeriodSelect();
+    state.periods.push({ id: pid(), name: t('period_short') + n, start: '08:00', end: '08:45' });
+    saveState(); renderPeriodList(); fillPeriodSelect();
   });
 
-  // 设置:导入
-  document.getElementById('importRow').addEventListener('click', () => {
-    document.getElementById('importText').value = '';
-    showModal('importModalMask');
-  });
+  document.getElementById('importRow').addEventListener('click', () => { document.getElementById('importText').value = ''; showModal('importModalMask'); });
   document.getElementById('cancelImportBtn').addEventListener('click', () => hideModal('importModalMask'));
-  document.getElementById('importModalMask').addEventListener('click', e => {
-    if (e.target === e.currentTarget) hideModal('importModalMask');
-  });
-  document.getElementById('chooseFileBtn').addEventListener('click', () => {
-    document.getElementById('fileInput').click();
-  });
+  document.getElementById('importModalMask').addEventListener('click', e => { if (e.target === e.currentTarget) hideModal('importModalMask'); });
+  document.getElementById('chooseFileBtn').addEventListener('click', () => document.getElementById('fileInput').click());
   document.getElementById('fileInput').addEventListener('change', e => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
-      document.getElementById('importText').value = reader.result;
-      toast('文件已读取,请确认导入');
-    };
+    reader.onload = () => { document.getElementById('importText').value = reader.result; toast(t('toast_file_read')); };
     reader.readAsText(file);
     e.target.value = '';
   });
   document.getElementById('confirmImportBtn').addEventListener('click', () => {
     const text = document.getElementById('importText').value.trim();
-    if (!text) { toast('请粘贴或选择JSON数据'); return; }
+    if (!text) { toast('JSON'); return; }
     const mode = document.querySelector('input[name="impMode"]:checked').value;
     if (doImport(text, mode)) hideModal('importModalMask');
   });
 
-  // 设置:导出
   document.getElementById('exportRow').addEventListener('click', exportData);
-
-  // 设置:重置
   document.getElementById('resetDataRow').addEventListener('click', () => {
-    if (confirm('确定重置全部数据为示例数据?此操作不可恢复。')) {
-      state.courses = [];
-      state.periods = [];
-      state.currentWeek = 1;
+    if (confirm(t('confirm_reset'))) {
+      state.courses = []; state.periods = []; state.currentWeek = 1;
+      state.periods = defaultPeriods();
       seedDemo();
-      render();
-      renderSettings();
-      toast('已重置');
+      render(); renderDrawer();
+      toast(t('toast_reset'));
     }
   });
-  document.getElementById('closeSettingsBtn').addEventListener('click', () => hideModal('settingsModalMask'));
-  document.getElementById('settingsModalMask').addEventListener('click', e => {
-    if (e.target === e.currentTarget) hideModal('settingsModalMask');
+
+  document.getElementById('zoomReset').addEventListener('click', () => {
+    state.zoom = 1; applyZoom();
   });
 
   // ===== 启动 =====
   loadState();
+  state.view = 'table';
+  switchView('table');
   render();
+  setupPinchZoom();
   startReminderLoop();
 </script>
 </body>
