@@ -53,14 +53,15 @@
     height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif;
     color: var(--text); overflow: hidden;
-    transition: background 0.4s, color 0.3s;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
   body { background: var(--bg-grad); background-attachment: fixed; }
 
   body::before, body::after {
     content: ""; position: fixed; border-radius: 50%;
     filter: blur(60px); z-index: 0; pointer-events: none;
-    transition: background 0.4s;
+    will-change: filter; contain: strict;
   }
   body::before { width: 280px; height: 280px; background: var(--blob-1); top: -80px; left: -60px; }
   body::after { width: 320px; height: 320px; background: var(--blob-2); bottom: -120px; right: -100px; }
@@ -70,6 +71,7 @@
     max-width: 480px; margin: 0 auto;
     height: 100vh; height: 100dvh;
     display: flex; flex-direction: column; overflow: hidden;
+    contain: layout style;
   }
   .status-bar { height: var(--safe-top); flex-shrink: 0; }
 
@@ -77,18 +79,20 @@
     position: relative;
     padding: 8px 20px 14px;
     display: flex; align-items: center; justify-content: space-between;
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
     background: var(--card-2);
     border-bottom: 0.5px solid var(--border);
     flex-shrink: 0; z-index: 10;
+    contain: layout paint;
   }
   .menu-btn {
     width: 36px; height: 36px; border: none;
     background: rgba(0, 122, 255, 0.12); color: var(--blue);
     border-radius: 50%; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    transition: transform 0.15s, background 0.2s;
+    transition: transform 0.12s ease, background 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
   }
   .menu-btn:active { transform: scale(0.88); background: rgba(0, 122, 255, 0.22); }
   .menu-btn svg { width: 18px; height: 18px; }
@@ -98,15 +102,16 @@
     background: rgba(0, 122, 255, 0.12); color: var(--blue);
     font-size: 22px; font-weight: 300; line-height: 1;
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: transform 0.15s, background 0.2s;
+    cursor: pointer; transition: transform 0.12s ease, background 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
   }
   .add-btn:active { transform: scale(0.88); background: rgba(0, 122, 255, 0.22); }
 
   .segment {
     display: flex; margin: 14px 20px 0; padding: 3px;
     background: var(--card-2);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
     border-radius: 14px; border: 0.5px solid var(--border);
     flex-shrink: 0;
   }
@@ -114,7 +119,8 @@
     flex: 1; padding: 8px 0; border: none; background: transparent;
     color: var(--text-2); font-size: 14px; font-weight: 600;
     border-radius: 11px; cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease, background 0.2s ease;
+    will-change: transform;
   }
   .segment button.active {
     background: var(--card-solid); color: var(--blue);
@@ -125,16 +131,19 @@
     display: flex; align-items: center; justify-content: space-between;
     margin: 14px 20px 0; padding: 10px 14px;
     background: var(--card);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
     border: 0.5px solid var(--border); border-radius: 16px;
     box-shadow: var(--shadow); flex-shrink: 0;
+    contain: layout paint;
   }
   .week-bar button {
     width: 32px; height: 32px; border: none;
     background: rgba(0, 122, 255, 0.1); color: var(--blue);
     border-radius: 50%; font-size: 16px; cursor: pointer;
-    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.12s ease, background 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
   }
   .week-bar button:active { transform: scale(0.88); background: rgba(0, 122, 255, 0.2); }
   .week-bar .week-label { font-size: 15px; font-weight: 600; color: var(--text); }
@@ -143,34 +152,43 @@
     color: var(--text-2); text-align: center; margin-top: 1px;
   }
 
+  /* 关键:滚动容器提升为合成层,内部 backdrop-filter 滚动时复用缓存 */
   .content {
     flex: 1; overflow-y: auto; overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     padding: 14px 16px 100px;
     scrollbar-width: none;
     overscroll-behavior: contain;
+    transform: translateZ(0);
+    will-change: transform;
+    contain: layout style;
   }
   .content::-webkit-scrollbar { display: none; }
 
   .view { display: none; }
-  .view.active { display: block; animation: viewIn 0.32s cubic-bezier(0.32, 0.72, 0, 1); }
-  @keyframes viewIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .view.active { display: block; animation: viewIn 0.28s cubic-bezier(0.32, 0.72, 0, 1); }
+  @keyframes viewIn { from { opacity: 0; transform: translateZ(0) translateY(6px); } to { opacity: 1; transform: translateZ(0) translateY(0); } }
 
   .today-header { padding: 4px 4px 14px; }
   .today-header .date { font-size: 13px; color: var(--text-2); font-weight: 500; }
   .today-header .greeting { font-size: 20px; font-weight: 700; margin-top: 2px; letter-spacing: -0.3px; }
 
+  /* 课程卡片:降低 blur 半径 + contain 独立绘制,滚动时合成层位图复用 */
   .course-card {
     position: relative; margin-bottom: 12px;
     padding: 14px 16px 14px 18px;
     background: var(--card);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
     border: 0.5px solid var(--border); border-radius: 18px;
     box-shadow: var(--shadow); cursor: pointer; overflow: hidden;
-    transition: transform 0.18s, box-shadow 0.2s;
+    transition: transform 0.15s ease;
+    transform: translateZ(0);
+    will-change: transform;
+    contain: layout paint;
+    -webkit-tap-highlight-color: transparent;
   }
-  .course-card:active { transform: scale(0.985); }
+  .course-card:active { transform: translateZ(0) scale(0.985); }
   .course-card::before {
     content: ""; position: absolute; left: 0; top: 12px; bottom: 12px;
     width: 4px; border-radius: 0 4px 4px 0;
@@ -197,13 +215,11 @@
     color: var(--text-3);
   }
   .course-card .c-meta svg { width: 13px; height: 13px; color: var(--text-2); flex-shrink: 0; }
-  /* 硬件加速提示,修复滑动时元素不显示 */
-  .course-card, .cell-course, table.schedule thead th {
+  /* 表头 sticky 单元格独立合成层 */
+  .cell-course, table.schedule thead th {
     transform: translateZ(0);
-    -webkit-transform: translateZ(0);
     will-change: transform;
     backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
   }
 
   .empty { text-align: center; padding: 60px 20px; color: var(--text-2); }
@@ -213,26 +229,29 @@
     margin-top: 14px; font-size: 13px; color: var(--blue);
     background: rgba(0, 122, 255, 0.08); padding: 8px 16px;
     border-radius: 20px; display: inline-block;
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   }
 
   /* ===== 表格视图(支持缩放) ===== */
   .table-wrap {
     border-radius: 16px; overflow: hidden;
     background: var(--card);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
     border: 0.5px solid var(--border); box-shadow: var(--shadow);
+    transform: translateZ(0);
+    contain: layout paint;
   }
   .table-scroll {
     overflow: auto;
     scrollbar-width: none;
     touch-action: pan-x pan-y pinch-zoom;
+    transform: translateZ(0);
+    will-change: transform;
+    overscroll-behavior: contain;
   }
   .table-scroll::-webkit-scrollbar { display: none; }
   .table-inner {
     transform-origin: top left;
-    transition: transform 0.05s linear;
     will-change: transform;
   }
   table.schedule {
@@ -250,7 +269,6 @@
   table.schedule thead th {
     position: sticky; top: 0; z-index: 2;
     background: var(--card-solid);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     font-size: 11px; font-weight: 600; color: var(--text-2);
     text-align: center; padding: 8px 4px;
   }
@@ -265,7 +283,7 @@
   table.schedule td.period-cell { text-align: center; font-size: 10px; color: var(--text-2); line-height: 1.3; }
   table.schedule td.period-cell .pn { font-size: 12px; font-weight: 600; color: var(--text); }
   table.schedule td.period-cell .pt { font-size: 9px; margin-top: 2px; font-variant-numeric: tabular-nums; }
-  table.schedule td.slot { cursor: pointer; transition: background 0.15s; }
+  table.schedule td.slot { cursor: pointer; transition: background 0.12s ease; -webkit-tap-highlight-color: transparent; }
   table.schedule td.slot:active { background: rgba(0, 122, 255, 0.08); }
   table.schedule td.slot.today-col { background: rgba(0, 122, 255, 0.05); }
   .cell-course {
@@ -289,7 +307,6 @@
     text-align: center; font-size: 11px; color: var(--text-2);
     margin-top: 10px; padding: 6px;
     background: var(--card-2); border-radius: 10px;
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   }
   .zoom-reset {
     display: inline-block; color: var(--blue); font-weight: 600;
@@ -303,17 +320,20 @@
     display: flex; justify-content: space-around; align-items: center;
     padding: 8px 10px calc(8px + var(--safe-bottom));
     background: var(--card-2);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
     border-top: 0.5px solid var(--border); z-index: 20;
+    contain: layout paint;
   }
   .tabbar button {
     flex: 1; border: none; background: transparent;
     color: var(--text-2); font-size: 11px; font-weight: 500;
     padding: 6px 4px; border-radius: 12px; cursor: pointer;
     display: flex; flex-direction: column; align-items: center; gap: 3px;
-    transition: color 0.2s;
+    transition: color 0.2s ease, transform 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
   }
+  .tabbar button:active { transform: scale(0.92); }
   .tabbar button.active { color: var(--blue); }
   .tabbar button .icon { font-size: 20px; line-height: 1; display: flex; align-items: center; justify-content: center; }
   .tabbar button .icon svg { width: 22px; height: 22px; }
@@ -326,7 +346,7 @@
     background: var(--mask);
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     z-index: 90; opacity: 0; pointer-events: none;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s ease;
   }
   .drawer-mask.show { opacity: 1; pointer-events: auto; }
 
@@ -334,18 +354,21 @@
     position: fixed; top: 0; left: 0; bottom: 0;
     width: 86%; max-width: 360px;
     background: var(--card-solid);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
     z-index: 95;
-    transform: translateX(-100%);
-    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    transform: translate3d(-100%, 0, 0);
+    transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     padding: calc(20px + var(--safe-top)) 16px calc(40px + var(--safe-bottom));
     box-shadow: 4px 0 32px rgba(0,0,0,0.18);
+    will-change: transform;
+    contain: layout style;
   }
   .drawer::-webkit-scrollbar { display: none; }
-  .drawer.show { transform: translateX(0); }
+  .drawer.show { transform: translate3d(0, 0, 0); }
 
   .drawer-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -362,13 +385,16 @@
     background: var(--card-2); color: var(--text-2);
     border-radius: 50%; font-size: 18px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
+    transition: transform 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
   }
+  .drawer-close:active { transform: scale(0.88); }
 
   /* 设置区块(侧边栏内通用) */
   .settings-section {
     background: var(--card);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
     border: 0.5px solid var(--border); border-radius: 16px;
     box-shadow: var(--shadow); margin-bottom: 14px; overflow: hidden;
   }
@@ -379,7 +405,8 @@
   .settings-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 16px; border-top: 0.5px solid var(--border-2);
-    cursor: pointer; transition: background 0.15s;
+    cursor: pointer; transition: background 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
   }
   .settings-row:active { background: var(--card-2); }
   .settings-row .s-label { font-size: 15px; color: var(--text); }
@@ -390,14 +417,15 @@
   .switch input { display: none; }
   .switch .slider {
     position: absolute; inset: 0; background: var(--text-3);
-    border-radius: 16px; transition: background 0.25s;
+    border-radius: 16px; transition: background 0.22s ease;
   }
   .switch .slider::before {
     content: ""; position: absolute;
     width: 27px; height: 27px; left: 2px; top: 2px;
     background: #fff; border-radius: 50%;
-    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    transition: transform 0.28s cubic-bezier(0.34, 1.3, 0.5, 1);
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    will-change: transform;
   }
   .switch input:checked + .slider { background: var(--blue); }
   .switch input:checked + .slider::before { transform: translateX(20px); }
@@ -406,7 +434,7 @@
   .theme-opt {
     flex: 1; border: 2px solid var(--border-2);
     border-radius: 12px; padding: 12px 8px; text-align: center;
-    cursor: pointer; background: var(--card-2); transition: all 0.2s;
+    cursor: pointer; background: var(--card-2); transition: border-color 0.2s ease, background 0.2s ease, transform 0.12s ease;
   }
   .theme-opt.active { border-color: var(--blue); background: rgba(0,122,255,0.08); }
   .theme-opt .preview { width: 100%; height: 40px; border-radius: 8px; margin-bottom: 6px; }
@@ -476,19 +504,19 @@
   /* ===== 通用模态 ===== */
   .modal-mask {
     position: fixed; inset: 0; background: var(--mask);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
     z-index: 100; display: none;
     align-items: flex-end; justify-content: center;
     opacity: 0;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.22s ease;
   }
   .modal-mask.show { display: flex; opacity: 1; }
   .modal {
     width: 100%; max-width: 480px;
     background: var(--card-solid);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
     border-radius: 24px 24px 0 0;
     padding: 8px 16px calc(20px + var(--safe-bottom));
     box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
@@ -496,6 +524,7 @@
     transform: translateY(100%) scale(0.95);
     opacity: 0;
     max-height: 88vh; overflow-y: auto; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
     will-change: transform, opacity;
   }
   .modal-mask.show .modal {
@@ -534,7 +563,7 @@
     width: 100%; padding: 12px 14px; font-size: 15px;
     font-family: inherit; border: 0.5px solid var(--border-2);
     border-radius: 12px; background: var(--card-2); color: var(--text);
-    outline: none; transition: all 0.2s;
+    outline: none; transition: border-color 0.2s ease, background 0.2s ease;
     -webkit-appearance: none; appearance: none;
   }
   .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
@@ -553,7 +582,7 @@
   .color-dot {
     width: 36px; height: 36px; border-radius: 50%;
     background: var(--c); border: 3px solid transparent;
-    transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: border-color 0.18s ease, transform 0.12s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
   .color-pick input:checked + .color-dot {
     border-color: var(--card-solid);
@@ -565,7 +594,7 @@
   .weeks-pick .wk-chip {
     padding: 6px 10px; font-size: 12px; border-radius: 14px;
     background: var(--card-2); border: 0.5px solid var(--border-2);
-    color: var(--text-2); cursor: pointer; transition: all 0.15s;
+    color: var(--text-2); cursor: pointer; transition: color 0.15s ease, transform 0.12s ease, background 0.18s ease;
     min-width: 38px; text-align: center;
   }
   .weeks-pick .wk-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
@@ -576,7 +605,8 @@
   .btn {
     flex: 1; padding: 14px; border: none; border-radius: 14px;
     font-size: 16px; font-weight: 600; cursor: pointer;
-    transition: transform 0.15s, background 0.2s, box-shadow 0.2s; font-family: inherit;
+    transition: transform 0.12s ease, background 0.2s ease; font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
   }
   .btn:active { transform: scale(0.97); }
   .btn-primary { background: linear-gradient(135deg, var(--blue) 0%, #0091FF 100%); color: #fff; box-shadow: 0 4px 14px rgba(0,122,255,0.3); }
@@ -588,8 +618,8 @@
     position: fixed; inset: 0; z-index: 300;
     display: none; align-items: center; justify-content: center;
     background: var(--mask);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
     opacity: 0; transition: opacity 0.22s ease;
     padding: 24px;
   }
@@ -598,8 +628,8 @@
   .confirm-card {
     width: 100%; max-width: 320px;
     background: var(--card-solid);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
     border: 0.5px solid var(--border);
     border-radius: 22px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4);
@@ -647,6 +677,15 @@
     white-space: nowrap;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+
+  /* 尊重用户的减少动画偏好 */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -1086,7 +1125,10 @@
         <div class="c-top"><div class="c-name">${escapeHTML(c.name)}</div><div class="c-time">${time}${periodName}</div></div>
         <div class="c-meta">${meta.join('')}</div>${note}</div>`;
     }).join('');
-    list.querySelectorAll('.course-card').forEach(el => el.addEventListener('click', () => openEdit(el.dataset.id)));
+    list.onclick = (e) => {
+      const card = e.target.closest('.course-card');
+      if (card) openEdit(card.dataset.id);
+    };
   }
 
   function renderTable() {
@@ -1096,6 +1138,14 @@
     const monday = new Date(now);
     const diff = now.getDay() === 0 ? -6 : 1 - now.getDay();
     monday.setDate(now.getDate() + diff);
+
+    // 预计算本周课程索引,避免每个单元格 find() 全量遍历
+    const courseMap = new Map();
+    state.courses.forEach(c => {
+      if (courseInWeek(c, state.currentWeek)) {
+        courseMap.set(c.day + ':' + c.periodId, c);
+      }
+    });
 
     let head = '<thead><tr><th>' + t('period') + '</th>';
     for (let i = 1; i <= 7; i++) {
@@ -1113,7 +1163,7 @@
       for (let i = 1; i <= 7; i++) {
         const dayIdx = i === 7 ? 0 : i;
         const isToday = dayIdx === today;
-        const course = state.courses.find(c => c.day === dayIdx && c.periodId === p.id && courseInWeek(c, state.currentWeek));
+        const course = courseMap.get(dayIdx + ':' + p.id);
         let cell;
         if (course) {
           cell = `<div class="cell-course" data-id="${course.id}" style="--c-color:${course.color}"><div class="cc-name">${escapeHTML(course.name)}</div>${course.location ? `<div class="cc-loc">${escapeHTML(course.location)}</div>` : ''}</div>`;
@@ -1127,14 +1177,15 @@
     body += '</tbody>';
     tbl.innerHTML = head + body;
 
-    tbl.querySelectorAll('.slot').forEach(td => {
-      td.addEventListener('click', (e) => {
-        if (pinching) return;
-        const courseEl = e.target.closest('.cell-course');
-        if (courseEl) openEdit(courseEl.dataset.id);
-        else openAddAt(parseInt(td.dataset.day), td.dataset.period);
-      });
-    });
+    // 事件委托:单监听器替代 N 个监听器
+    tbl.onclick = (e) => {
+      if (pinching) return;
+      const td = e.target.closest('.slot');
+      if (!td) return;
+      const courseEl = e.target.closest('.cell-course');
+      if (courseEl) openEdit(courseEl.dataset.id);
+      else openAddAt(parseInt(td.dataset.day), td.dataset.period);
+    };
     applyZoom();
   }
 
@@ -1152,9 +1203,14 @@
 
   // ===== 表格缩放 =====
   let pinching = false;
+  let zoomRaf = 0;
   function applyZoom() {
-    const inner = document.getElementById('tableInner');
-    if (inner) inner.style.transform = `scale(${state.zoom})`;
+    if (zoomRaf) cancelAnimationFrame(zoomRaf);
+    zoomRaf = requestAnimationFrame(() => {
+      const inner = document.getElementById('tableInner');
+      if (inner) inner.style.transform = `scale(${state.zoom})`;
+      zoomRaf = 0;
+    });
   }
   function setupPinchZoom() {
     const el = document.getElementById('tableScroll');
