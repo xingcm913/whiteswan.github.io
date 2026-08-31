@@ -148,12 +148,13 @@
     -webkit-overflow-scrolling: touch;
     padding: 14px 16px 100px;
     scrollbar-width: none;
+    overscroll-behavior: contain;
   }
   .content::-webkit-scrollbar { display: none; }
 
-  .view { display: none; animation: fade 0.3s ease; }
-  .view.active { display: block; }
-  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .view { display: none; }
+  .view.active { display: block; animation: viewIn 0.32s cubic-bezier(0.32, 0.72, 0, 1); }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
   .today-header { padding: 4px 4px 14px; }
   .today-header .date { font-size: 13px; color: var(--text-2); font-weight: 500; }
@@ -189,11 +190,24 @@
     margin-top: 8px; padding-top: 8px;
     border-top: 0.5px dashed var(--border-2);
     font-size: 12px; color: var(--text-2); line-height: 1.5;
+    display: flex; align-items: flex-start; gap: 5px;
   }
-  .course-card .c-note::before { content: "📝 "; filter: grayscale(0.3); }
+  .course-card .c-note svg {
+    width: 13px; height: 13px; flex-shrink: 0; margin-top: 1px;
+    color: var(--text-3);
+  }
+  .course-card .c-meta svg { width: 13px; height: 13px; color: var(--text-2); flex-shrink: 0; }
+  /* 硬件加速提示,修复滑动时元素不显示 */
+  .course-card, .cell-course, table.schedule thead th {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
 
   .empty { text-align: center; padding: 60px 20px; color: var(--text-2); }
-  .empty .emoji { font-size: 52px; margin-bottom: 12px; display: block; filter: grayscale(0.2); opacity: 0.7; }
+  .empty .icon { width: 56px; height: 56px; margin: 0 auto 14px; display: block; color: var(--blue); opacity: 0.6; }
   .empty p { font-size: 14px; line-height: 1.6; }
   .empty .hint {
     margin-top: 14px; font-size: 13px; color: var(--blue);
@@ -301,7 +315,10 @@
     transition: color 0.2s;
   }
   .tabbar button.active { color: var(--blue); }
-  .tabbar button .icon { font-size: 20px; line-height: 1; }
+  .tabbar button .icon { font-size: 20px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+  .tabbar button .icon svg { width: 22px; height: 22px; }
+  .icon-chev { color: var(--text-3); display: inline-flex; align-items: center; }
+  .icon-chev svg { width: 14px; height: 14px; }
 
   /* ===== 侧边栏 ===== */
   .drawer-mask {
@@ -459,13 +476,14 @@
   /* ===== 通用模态 ===== */
   .modal-mask {
     position: fixed; inset: 0; background: var(--mask);
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     z-index: 100; display: none;
     align-items: flex-end; justify-content: center;
-    animation: maskIn 0.25s ease;
+    opacity: 0;
+    transition: opacity 0.25s ease;
   }
-  .modal-mask.show { display: flex; }
-  @keyframes maskIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-mask.show { display: flex; opacity: 1; }
   .modal {
     width: 100%; max-width: 480px;
     background: var(--card-solid);
@@ -475,11 +493,29 @@
     padding: 8px 16px calc(20px + var(--safe-bottom));
     box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
     border-top: 0.5px solid var(--border);
-    animation: sheetUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    transform: translateY(100%) scale(0.95);
+    opacity: 0;
     max-height: 88vh; overflow-y: auto; scrollbar-width: none;
+    will-change: transform, opacity;
+  }
+  .modal-mask.show .modal {
+    animation: sheetBounce 0.55s cubic-bezier(0.34, 1.4, 0.5, 1) forwards;
+  }
+  .modal-mask.hide .modal {
+    animation: sheetDown 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+  .modal-mask.hide { opacity: 0; }
+  @keyframes sheetBounce {
+    0% { transform: translateY(100%) scale(0.92); opacity: 0; }
+    55% { transform: translateY(-6%) scale(1.02); opacity: 1; }
+    75% { transform: translateY(2%) scale(0.995); opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  @keyframes sheetDown {
+    from { transform: translateY(0) scale(1); opacity: 1; }
+    to { transform: translateY(100%) scale(0.95); opacity: 0; }
   }
   .modal::-webkit-scrollbar { display: none; }
-  @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .modal .grabber {
     width: 36px; height: 5px; background: var(--text-3);
     border-radius: 3px; margin: 6px auto 12px; opacity: 0.4;
@@ -540,23 +576,77 @@
   .btn {
     flex: 1; padding: 14px; border: none; border-radius: 14px;
     font-size: 16px; font-weight: 600; cursor: pointer;
-    transition: all 0.15s; font-family: inherit;
+    transition: transform 0.15s, background 0.2s, box-shadow 0.2s; font-family: inherit;
   }
   .btn:active { transform: scale(0.97); }
   .btn-primary { background: linear-gradient(135deg, var(--blue) 0%, #0091FF 100%); color: #fff; box-shadow: 0 4px 14px rgba(0,122,255,0.3); }
   .btn-cancel { background: var(--card-2); color: var(--text-2); }
   .btn-danger { background: rgba(255, 59, 48, 0.1); color: #FF3B30; flex: 0 0 40%; }
 
+  /* ===== 自定义确认弹窗(液态玻璃+Q弹) ===== */
+  .confirm-mask {
+    position: fixed; inset: 0; z-index: 300;
+    display: none; align-items: center; justify-content: center;
+    background: var(--mask);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    opacity: 0; transition: opacity 0.22s ease;
+    padding: 24px;
+  }
+  .confirm-mask.show { display: flex; opacity: 1; }
+  .confirm-mask.hide { opacity: 0; }
+  .confirm-card {
+    width: 100%; max-width: 320px;
+    background: var(--card-solid);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 0.5px solid var(--border);
+    border-radius: 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4);
+    padding: 22px 20px 16px;
+    transform: scale(0.7) translateY(20px);
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .confirm-mask.show .confirm-card {
+    animation: confirmBounce 0.5s cubic-bezier(0.34, 1.5, 0.5, 1) forwards;
+  }
+  .confirm-mask.hide .confirm-card {
+    animation: confirmOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+  @keyframes confirmBounce {
+    0% { transform: scale(0.7) translateY(20px); opacity: 0; }
+    60% { transform: scale(1.04) translateY(-4px); opacity: 1; }
+    78% { transform: scale(0.985) translateY(1px); opacity: 1; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  @keyframes confirmOut {
+    from { transform: scale(1) translateY(0); opacity: 1; }
+    to { transform: scale(0.85) translateY(10px); opacity: 0; }
+  }
+  .confirm-card .cf-icon {
+    width: 44px; height: 44px; margin: 0 auto 12px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: rgba(255,59,48,0.12); color: #FF3B30;
+  }
+  .confirm-card .cf-icon svg { width: 22px; height: 22px; }
+  .confirm-card.cf-info .cf-icon { background: rgba(0,122,255,0.12); color: var(--blue); }
+  .confirm-card .cf-title { font-size: 17px; font-weight: 700; text-align: center; color: var(--text); margin-bottom: 6px; }
+  .confirm-card .cf-msg { font-size: 14px; color: var(--text-2); text-align: center; line-height: 1.5; margin-bottom: 18px; }
+  .confirm-card .cf-actions { display: flex; gap: 10px; }
+  .confirm-card .cf-actions .btn { padding: 12px; font-size: 15px; }
+
   .toast {
     position: fixed; top: 60px; left: 50%;
-    transform: translateX(-50%) translateY(-20px);
-    background: rgba(28,28,30,0.9); color: #fff;
+    background: rgba(28,28,30,0.88); color: #fff;
     padding: 10px 18px; border-radius: 20px; font-size: 14px;
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     z-index: 200; opacity: 0; pointer-events: none;
-    transition: all 0.3s; white-space: nowrap;
+    transform: translateX(-50%) translateY(-30px) scale(0.85);
+    transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.5, 1), opacity 0.25s ease;
+    white-space: nowrap;
   }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 </style>
 </head>
 <body>
@@ -571,7 +661,9 @@
         <line x1="4" y1="17" x2="20" y2="17"/>
       </svg>
     </button>
-    <button class="add-btn" id="addBtn" aria-label="添加">+</button>
+    <button class="add-btn" id="addBtn" aria-label="添加">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
   </header>
 
   <div class="segment">
@@ -580,9 +672,13 @@
   </div>
 
   <div class="week-bar">
-    <button id="prevWeek" aria-label="上一周">‹</button>
+    <button id="prevWeek" aria-label="上一周">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 6 9 12 15 18"/></svg>
+    </button>
     <div class="week-label" id="weekLabel">第 1 周<small>2026年</small></div>
-    <button id="nextWeek" aria-label="下一周">›</button>
+    <button id="nextWeek" aria-label="下一周">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 6 15 12 9 18"/></svg>
+    </button>
   </div>
 
   <div class="content">
@@ -612,9 +708,9 @@
   </div>
 
   <nav class="tabbar">
-    <button data-view="table" class="active"><span class="icon">📋</span><span data-i18n="tab_week">本周</span></button>
-    <button data-view="today"><span class="icon">☀️</span><span data-i18n="tab_today">今日</span></button>
-    <button id="addBtn2"><span class="icon">＋</span><span data-i18n="add">添加</span></button>
+    <button data-view="table" class="active"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></span><span data-i18n="tab_week">本周</span></button>
+    <button data-view="today"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span><span data-i18n="tab_today">今日</span></button>
+    <button id="addBtn2"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span><span data-i18n="add">添加</span></button>
   </nav>
 </div>
 
@@ -623,7 +719,9 @@
 <aside class="drawer" id="drawer">
   <div class="drawer-header">
     <div class="dh-title" data-i18n="menu">菜单</div>
-    <button class="drawer-close" id="drawerClose">×</button>
+    <button class="drawer-close" id="drawerClose" aria-label="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+    </button>
   </div>
 
   <!-- 主题 -->
@@ -656,11 +754,11 @@
     </div>
     <div class="settings-row" id="remindMinRow">
       <span class="s-label" data-i18n="remind_min">提前提醒时间</span>
-      <span class="s-value"><span id="remindMinVal">5</span> <span data-i18n="minutes">分钟</span><span class="chev">›</span></span>
+      <span class="s-value"><span id="remindMinVal">5</span> <span data-i18n="minutes">分钟</span><span class="chev icon-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></span></span>
     </div>
     <div class="settings-row" id="notifyPermRow">
       <span class="s-label" data-i18n="notify_perm">通知权限</span>
-      <span class="s-value"><span id="notifyPermVal" data-i18n="notify_off">未开启</span><span class="chev">›</span></span>
+      <span class="s-value"><span id="notifyPermVal" data-i18n="notify_off">未开启</span><span class="chev icon-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></span></span>
     </div>
   </div>
 
@@ -676,15 +774,15 @@
     <div class="sec-title" data-i18n="data">课程表数据</div>
     <div class="settings-row" id="importRow">
       <span class="s-label" data-i18n="import">导入课程表</span>
-      <span class="s-value"><span class="chev">›</span></span>
+      <span class="s-value"><span class="chev icon-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></span></span>
     </div>
     <div class="settings-row" id="exportRow">
       <span class="s-label" data-i18n="export">导出课程表</span>
-      <span class="s-value"><span class="chev">›</span></span>
+      <span class="s-value"><span class="chev icon-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></span></span>
     </div>
     <div class="settings-row" id="resetDataRow">
       <span class="s-label" style="color:#FF3B30;" data-i18n="reset">重置全部数据</span>
-      <span class="s-value"><span class="chev">›</span></span>
+      <span class="s-value"><span class="chev icon-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></span></span>
     </div>
   </div>
 </aside>
@@ -783,6 +881,21 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- 自定义确认弹窗 -->
+<div class="confirm-mask" id="confirmMask">
+  <div class="confirm-card" id="confirmCard">
+    <div class="cf-icon" id="cfIcon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="cf-title" id="cfTitle"></div>
+    <div class="cf-msg" id="cfMsg"></div>
+    <div class="cf-actions">
+      <button class="btn btn-cancel" id="cfCancel"></button>
+      <button class="btn btn-primary" id="cfOk"></button>
+    </div>
+  </div>
+</div>
+
 <script>
   // ===== 多语言 =====
   const LANGS = [
@@ -799,15 +912,15 @@
   ];
 
   const I18N = {
-    zh: { menu:'菜单', tab_week:'本周表格', tab_today:'今日列表', add:'添加', week:'周', week_of:'第', weeks_total:'周', year:'年', today:'今日', no_course:'今天没有课程', enjoy:'享受悠闲的一天吧', click_add:'点击右上角 + 添加课程', morning:'早上好', noon:'中午好', afternoon:'下午好', evening:'晚上好', night:'夜深了,注意休息', cheer:',今天也要加油哦', month:'月', day:'日', sun:'周日', mon:'周一', tue:'周二', wed:'周三', thu:'周四', fri:'周五', sat:'周六', period_short:'节', empty:'无课', add_course:'添加课程', edit_course:'编辑课程', course_name:'课程名称', weekday:'星期', period:'节次', location:'教室地点', teacher:'授课老师', color:'颜色标识', note:'备注', weeks:'上课周次', all_weeks:'全周上课', cancel:'取消', save:'保存', delete:'删除该课程', theme:'外观主题', light:'明色', dark:'暗色', language:'语言', reminder:'课程提醒', remind_enable:'开启上课提醒', remind_min:'提前提醒时间', minutes:'分钟', notify_perm:'通知权限', notify_on:'已开启', notify_off:'未开启', notify_denied:'已拒绝', notify_unsupport:'不支持', periods:'节次与时间', period_add:'+ 添加节次', period_name:'节次名称', data:'课程表数据', import:'导入课程表', export:'导出课程表', reset:'重置全部数据', import_hint:'支持 JSON 格式。可选择"覆盖"现有数据或"合并"添加。也可点击下方按钮选择本地 .json 文件导入。', merge:'合并添加', overwrite:'覆盖全部', choose_file:'选文件', confirm_import:'确认导入', done:'完成', zoom_hint:'双指缩放表格', zoom_reset:'重置', toast_added:'已添加', toast_updated:'已更新', toast_deleted:'已删除', toast_exported:'已导出', toast_reset:'已重置', toast_file_read:'文件已读取,请确认导入', toast_imported:'已导入', courses:'门课程', toast_no_name:'请输入课程名称', toast_no_period:'请先在设置中添加节次', toast_first_week:'已是第1周', toast_last_week:'已是最后一周', confirm_delete:'确定删除该课程?', confirm_delete_period:'删除该节次?关联的课程将转为第一节。', confirm_reset:'确定重置全部数据为示例数据?此操作不可恢复。', keep_one_period:'至少保留1个节次', toast_remind_on:'提醒已开启', toast_notify_denied:'未授权通知,请在浏览器设置中允许', toast_notify_unsupport:'当前浏览器不支持通知', toast_notify_on:'通知权限已开启', toast_notify_manual:'通知已被拒绝,请在浏览器设置中手动允许', toast_min_set:'已设为提前', toast_min_remind:'分钟提醒', upcoming:'即将开始', remain_min:'分钟上课', remind_on:'提醒已开启', last_week:'最后一周' },
-    en: { menu:'Menu', tab_week:'Week Table', tab_today:'Today List', add:'Add', week:'W', week_of:'Week', weeks_total:'weeks', year:'', today:'Today', no_course:'No classes today', enjoy:'Enjoy your free day', click_add:'Tap + at top right to add', morning:'Good morning', noon:'Good noon', afternoon:'Good afternoon', evening:'Good evening', night:'Late night, rest well', cheer:', keep it up!', month:'/', day:' ', sun:'Sun', mon:'Mon', tue:'Tue', wed:'Wed', thu:'Thu', fri:'Fri', sat:'Sat', period_short:'P', empty:'—', add_course:'Add Course', edit_course:'Edit Course', course_name:'Course Name', weekday:'Weekday', period:'Period', location:'Location', teacher:'Teacher', color:'Color', note:'Note', weeks:'Weeks', all_weeks:'All weeks', cancel:'Cancel', save:'Save', delete:'Delete Course', theme:'Theme', light:'Light', dark:'Dark', language:'Language', reminder:'Reminder', remind_enable:'Enable reminder', remind_min:'Remind ahead', minutes:'min', notify_perm:'Notification', notify_on:'On', notify_off:'Off', notify_denied:'Denied', notify_unsupport:'Unsupported', periods:'Periods & Time', period_add:'+ Add period', period_name:'Period name', data:'Data', import:'Import', export:'Export', reset:'Reset all data', import_hint:'Supports JSON. Choose "Overwrite" or "Merge". You can also pick a local .json file.', merge:'Merge', overwrite:'Overwrite', choose_file:'Pick file', confirm_import:'Confirm', done:'Done', zoom_hint:'Pinch to zoom', zoom_reset:'Reset', toast_added:'Added', toast_updated:'Updated', toast_deleted:'Deleted', toast_exported:'Exported', toast_reset:'Reset done', toast_file_read:'File loaded, please confirm', toast_imported:'Imported', courses:'courses', toast_no_name:'Please enter course name', toast_no_period:'Please add a period first', toast_first_week:'First week', toast_last_week:'Last week', confirm_delete:'Delete this course?', confirm_delete_period:'Delete this period? Related courses move to period 1.', confirm_reset:'Reset all data to demo? Cannot be undone.', keep_one_period:'Keep at least 1 period', toast_remind_on:'Reminder on', toast_notify_denied:'Notification denied, allow in browser settings', toast_notify_unsupport:'Notifications unsupported', toast_notify_on:'Notification enabled', toast_notify_manual:'Notification denied, allow manually', toast_min_set:'Set to remind', toast_min_remind:'min ahead', upcoming:'starting soon', remain_min:'min to class', remind_on:'Reminder on', last_week:'last week' },
+    zh: { menu:'菜单', tab_week:'本周表格', tab_today:'今日列表', add:'添加', week:'周', week_of:'第', weeks_total:'周', year:'年', today:'今日', no_course:'今天没有课程', enjoy:'享受悠闲的一天吧', click_add:'点击右上角 + 添加课程', morning:'早上好', noon:'中午好', afternoon:'下午好', evening:'晚上好', night:'夜深了,注意休息', cheer:',今天也要加油哦', month:'月', day:'日', sun:'周日', mon:'周一', tue:'周二', wed:'周三', thu:'周四', fri:'周五', sat:'周六', period_short:'节', empty:'无课', add_course:'添加课程', edit_course:'编辑课程', course_name:'课程名称', weekday:'星期', period:'节次', location:'教室地点', teacher:'授课老师', color:'颜色标识', note:'备注', weeks:'上课周次', all_weeks:'全周上课', cancel:'取消', save:'保存', delete:'删除该课程', theme:'外观主题', light:'明色', dark:'暗色', language:'语言', reminder:'课程提醒', remind_enable:'开启上课提醒', remind_min:'提前提醒时间', minutes:'分钟', notify_perm:'通知权限', notify_on:'已开启', notify_off:'未开启', notify_denied:'已拒绝', notify_unsupport:'不支持', periods:'节次与时间', period_add:'+ 添加节次', period_name:'节次名称', data:'课程表数据', import:'导入课程表', export:'导出课程表', reset:'重置全部数据', import_hint:'支持 JSON 格式。可选择"覆盖"现有数据或"合并"添加。也可点击下方按钮选择本地 .json 文件导入。', merge:'合并添加', overwrite:'覆盖全部', choose_file:'选文件', confirm_import:'确认导入', done:'完成', zoom_hint:'双指缩放表格', zoom_reset:'重置', toast_added:'已添加', toast_updated:'已更新', toast_deleted:'已删除', toast_exported:'已导出', toast_reset:'已重置', toast_file_read:'文件已读取,请确认导入', toast_imported:'已导入', courses:'门课程', toast_no_name:'请输入课程名称', toast_no_period:'请先在设置中添加节次', toast_first_week:'已是第1周', toast_last_week:'已是最后一周', confirm_delete:'确定删除该课程?', confirm_delete_period:'删除该节次?关联的课程将转为第一节。', confirm_reset:'确定重置全部数据为示例数据?此操作不可恢复。', keep_one_period:'至少保留1个节次', toast_remind_on:'提醒已开启', toast_notify_denied:'未授权通知,请在浏览器设置中允许', toast_notify_unsupport:'当前浏览器不支持通知', toast_notify_on:'通知权限已开启', toast_notify_manual:'通知已被拒绝,请在浏览器设置中手动允许', toast_min_set:'已设为提前', toast_min_remind:'分钟提醒', upcoming:'即将开始', remain_min:'分钟上课', remind_on:'提醒已开启', last_week:'最后一周', confirm_title:'请确认', ok:'确定' },
+    en: { menu:'Menu', tab_week:'Week Table', tab_today:'Today List', add:'Add', week:'W', week_of:'Week', weeks_total:'weeks', year:'', today:'Today', no_course:'No classes today', enjoy:'Enjoy your free day', click_add:'Tap + at top right to add', morning:'Good morning', noon:'Good noon', afternoon:'Good afternoon', evening:'Good evening', night:'Late night, rest well', cheer:', keep it up!', month:'/', day:' ', sun:'Sun', mon:'Mon', tue:'Tue', wed:'Wed', thu:'Thu', fri:'Fri', sat:'Sat', period_short:'P', empty:'—', add_course:'Add Course', edit_course:'Edit Course', course_name:'Course Name', weekday:'Weekday', period:'Period', location:'Location', teacher:'Teacher', color:'Color', note:'Note', weeks:'Weeks', all_weeks:'All weeks', cancel:'Cancel', save:'Save', delete:'Delete Course', theme:'Theme', light:'Light', dark:'Dark', language:'Language', reminder:'Reminder', remind_enable:'Enable reminder', remind_min:'Remind ahead', minutes:'min', notify_perm:'Notification', notify_on:'On', notify_off:'Off', notify_denied:'Denied', notify_unsupport:'Unsupported', periods:'Periods & Time', period_add:'+ Add period', period_name:'Period name', data:'Data', import:'Import', export:'Export', reset:'Reset all data', import_hint:'Supports JSON. Choose "Overwrite" or "Merge". You can also pick a local .json file.', merge:'Merge', overwrite:'Overwrite', choose_file:'Pick file', confirm_import:'Confirm', done:'Done', zoom_hint:'Pinch to zoom', zoom_reset:'Reset', toast_added:'Added', toast_updated:'Updated', toast_deleted:'Deleted', toast_exported:'Exported', toast_reset:'Reset done', toast_file_read:'File loaded, please confirm', toast_imported:'Imported', courses:'courses', toast_no_name:'Please enter course name', toast_no_period:'Please add a period first', toast_first_week:'First week', toast_last_week:'Last week', confirm_delete:'Delete this course?', confirm_delete_period:'Delete this period? Related courses move to period 1.', confirm_reset:'Reset all data to demo? Cannot be undone.', keep_one_period:'Keep at least 1 period', toast_remind_on:'Reminder on', toast_notify_denied:'Notification denied, allow in browser settings', toast_notify_unsupport:'Notifications unsupported', toast_notify_on:'Notification enabled', toast_notify_manual:'Notification denied, allow manually', toast_min_set:'Set to remind', toast_min_remind:'min ahead', upcoming:'starting soon', remain_min:'min to class', remind_on:'Reminder on', last_week:'last week', confirm_title:'Confirm', ok:'OK' },
     es: { menu:'Menú', tab_week:'Semana', tab_today:'Hoy', add:'Añadir', week:'S', week_of:'Semana', weeks_total:'sem', year:'', today:'Hoy', no_course:'Sin clases hoy', enjoy:'Disfruta tu día', click_add:'Toca + para añadir', morning:'Buenos días', noon:'Buen mediodía', afternoon:'Buenas tardes', evening:'Buenas noches', night:'Es tarde, descansa', cheer:', ¡ánimo!', month:'/', day:' ', sun:'Dom', mon:'Lun', tue:'Mar', wed:'Mié', thu:'Jue', fri:'Vie', sat:'Sáb', period_short:'P', empty:'—', add_course:'Añadir curso', edit_course:'Editar curso', course_name:'Nombre', weekday:'Día', period:'Periodo', location:'Aula', teacher:'Profesor', color:'Color', note:'Nota', weeks:'Semanas', all_weeks:'Todas', cancel:'Cancelar', save:'Guardar', delete:'Eliminar', theme:'Tema', light:'Claro', dark:'Oscuro', language:'Idioma', reminder:'Recordatorio', remind_enable:'Activar', remind_min:'Anticipación', minutes:'min', notify_perm:'Notificación', notify_on:'On', notify_off:'Off', notify_denied:'Denegado', notify_unsupport:'No soportado', periods:'Periodos', period_add:'+ Añadir', period_name:'Nombre', data:'Datos', import:'Importar', export:'Exportar', reset:'Restablecer', import_hint:'JSON. Elige Sobrescribir o Combinar. También archivo .json.', merge:'Combinar', overwrite:'Sobrescribir', choose_file:'Archivo', confirm_import:'Confirmar', done:'Hecho', zoom_hint:'Pellizca para zoom', zoom_reset:'Reset', toast_added:'Añadido', toast_updated:'Actualizado', toast_deleted:'Eliminado', toast_exported:'Exportado', toast_reset:'Restablecido', toast_file_read:'Archivo cargado, confirma', toast_imported:'Importado', courses:'cursos', toast_no_name:'Ingresa nombre', toast_no_period:'Añade un periodo', toast_first_week:'Primera semana', toast_last_week:'Última semana', confirm_delete:'¿Eliminar curso?', confirm_delete_period:'¿Eliminar periodo?', confirm_reset:'¿Restablecer todo?', keep_one_period:'Mantén 1 periodo', toast_remind_on:'Recordatorio on', toast_notify_denied:'Notif. denegada', toast_notify_unsupport:'No soportado', toast_notify_on:'Notif. activada', toast_notify_manual:'Permite manualmente', toast_min_set:'Recordar', toast_min_remind:'min antes', upcoming:'empieza pronto', remain_min:'min', remind_on:'On', last_week:'última' },
     hi: { menu:'मेन्यू', tab_week:'सप्ताह', tab_today:'आज', add:'जोड़ें', week:'व', week_of:'सप्ताह', weeks_total:'सप्ताह', year:'', today:'आज', no_course:'आज कोई कक्षा नहीं', enjoy:'आज़ाद दिन का आनंद लें', click_add:'जोड़ने के लिए + दबाएँ', morning:'सुप्रभात', noon:'नमस्कार', afternoon:'शुभ अपराह्न', evening:'शुभ संध्या', night:'रात हो रही है, आराम करें', cheer:', आगे बढ़ते रहें!', month:'/', day:' ', sun:'रवि', mon:'सोम', tue:'मंगल', wed:'बुध', thu:'गुरु', fri:'शुक्र', sat:'शनि', period_short:'पी', empty:'—', add_course:'कक्षा जोड़ें', edit_course:'कक्षा संपादित करें', course_name:'कक्षा नाम', weekday:'दिन', period:'अवधि', location:'स्थान', teacher:'शिक्षक', color:'रंग', note:'टिप्पणी', weeks:'सप्ताह', all_weeks:'सभी', cancel:'रद्द', save:'सहेजें', delete:'हटाएँ', theme:'थीम', light:'हल्का', dark:'गहरा', language:'भाषा', reminder:'अनुस्मारक', remind_enable:'सक्षम करें', remind_min:'पूर्व अनुस्मारक', minutes:'मिनट', notify_perm:'सूचना', notify_on:'चालू', notify_off:'बंद', notify_denied:'अस्वीकृत', notify_unsupport:'असमर्थित', periods:'अवधि', period_add:'+ जोड़ें', period_name:'नाम', data:'डेटा', import:'आयात', export:'निर्यात', reset:'रीसेट', import_hint:'JSON. ओवरराइट या मर्ज करें। .json फ़ाइल भी।', merge:'मर्ज', overwrite:'ओवरराइट', choose_file:'फ़ाइल', confirm_import:'पुष्टि', done:'पूर्ण', zoom_hint:'ज़ूम के लिए पिंच', zoom_reset:'रीसेट', toast_added:'जोड़ा', toast_updated:'अपडेट', toast_deleted:'हटाया', toast_exported:'निर्यात', toast_reset:'रीसेट', toast_file_read:'फ़ाइल लोड, पुष्टि करें', toast_imported:'आयात', courses:'कक्षाएँ', toast_no_name:'नाम दर्ज करें', toast_no_period:'अवधि जोड़ें', toast_first_week:'पहला सप्ताह', toast_last_week:'अंतिम', confirm_delete:'हटाएँ?', confirm_delete_period:'अवधि हटाएँ?', confirm_reset:'रीसेट?', keep_one_period:'1 अवधि रखें', toast_remind_on:'अनुस्मारक चालू', toast_notify_denied:'अस्वीकृत', toast_notify_unsupport:'असमर्थित', toast_notify_on:'सूचना चालू', toast_notify_manual:'मैन्युअल अनुमति', toast_min_set:'अनुस्मारक', toast_min_remind:'मिनट पहले', upcoming:'जल्द शुरू', remain_min:'मिनट', remind_on:'चालू', last_week:'अंतिम' },
     ar: { menu:'القائمة', tab_week:'الأسبوع', tab_today:'اليوم', add:'إضافة', week:'أ', week_of:'أسبوع', weeks_total:'أسبوع', year:'', today:'اليوم', no_course:'لا حصص اليوم', enjoy:'استمتع بيومك', click_add:'اضغط + للإضافة', morning:'صباح الخير', noon:'مساء الخير', afternoon:'مساء الخير', evening:'مساء الخير', night:'وقت متأخر، استرح', cheer:'، واصل!', month:'/', day:' ', sun:'أحد', mon:'إثن', tue:'ثلا', wed:'أرب', thu:'خمي', fri:'جمع', sat:'سبت', period_short:'ح', empty:'—', add_course:'إضافة حصة', edit_course:'تعديل', course_name:'الاسم', weekday:'اليوم', period:'الحصة', location:'المكان', teacher:'المعلم', color:'اللون', note:'ملاحظة', weeks:'الأسابيع', all_weeks:'الكل', cancel:'إلغاء', save:'حفظ', delete:'حذف', theme:'السمة', light:'فاتح', dark:'داكن', language:'اللغة', reminder:'تذكير', remind_enable:'تفعيل', remind_min:'قبل', minutes:'د', notify_perm:'إشعار', notify_on:'مفعّل', notify_off:'متوقف', notify_denied:'مرفوض', notify_unsupport:'غير مدعوم', periods:'الحصص', period_add:'+ إضافة', period_name:'الاسم', data:'البيانات', import:'استيراد', export:'تصدير', reset:'إعادة تعيين', import_hint:'JSON. الكتابة فوق أو الدمج. ملف .json أيضاً.', merge:'دمج', overwrite:'كتابة فوق', choose_file:'ملف', confirm_import:'تأكيد', done:'تم', zoom_hint:'قرّب بإصبعين', zoom_reset:'إعادة', toast_added:'أُضيف', toast_updated:'حُدّث', toast_deleted:'حُذف', toast_exported:'صُدّر', toast_reset:'إعادة تعيين', toast_file_read:'الملف محمّل، أكد', toast_imported:'استيراد', courses:'حصص', toast_no_name:'أدخل الاسم', toast_no_period:'أضف حصة', toast_first_week:'الأول', toast_last_week:'الأخير', confirm_delete:'حذف؟', confirm_delete_period:'حذف الحصة؟', confirm_reset:'إعادة تعيين؟', keep_one_period:'احتفظ بواحدة', toast_remind_on:'مفعّل', toast_notify_denied:'مرفوض', toast_notify_unsupport:'غير مدعوم', toast_notify_on:'مفعّل', toast_notify_manual:'اسمح يدوياً', toast_min_set:'تذكير', toast_min_remind:'د قبل', upcoming:'قريباً', remain_min:'د', remind_on:'مفعّل', last_week:'الأخير' },
     pt: { menu:'Menu', tab_week:'Semana', tab_today:'Hoje', add:'Adicionar', week:'S', week_of:'Semana', weeks_total:'sem', year:'', today:'Hoje', no_course:'Sem aulas hoje', enjoy:'Aproveite o dia', click_add:'Toque + para adicionar', morning:'Bom dia', noon:'Boa tarde', afternoon:'Boa tarde', evening:'Boa noite', night:'Tarde, descanse', cheer:', continue!', month:'/', day:' ', sun:'Dom', mon:'Seg', tue:'Ter', wed:'Qua', thu:'Qui', fri:'Sex', sat:'Sáb', period_short:'P', empty:'—', add_course:'Adicionar', edit_course:'Editar', course_name:'Nome', weekday:'Dia', period:'Período', location:'Local', teacher:'Professor', color:'Cor', note:'Nota', weeks:'Semanas', all_weeks:'Todas', cancel:'Cancelar', save:'Salvar', delete:'Excluir', theme:'Tema', light:'Claro', dark:'Escuro', language:'Idioma', reminder:'Lembrete', remind_enable:'Ativar', remind_min:'Antecipar', minutes:'min', notify_perm:'Notificação', notify_on:'On', notify_off:'Off', notify_denied:'Negado', notify_unsupport:'Sem suporte', periods:'Períodos', period_add:'+ Adicionar', period_name:'Nome', data:'Dados', import:'Importar', export:'Exportar', reset:'Resetar', import_hint:'JSON. Sobrescrever ou combinar. Arquivo .json.', merge:'Combinar', overwrite:'Sobrescrever', choose_file:'Arquivo', confirm_import:'Confirmar', done:'Feito', zoom_hint:'Pinça para zoom', zoom_reset:'Reset', toast_added:'Adicionado', toast_updated:'Atualizado', toast_deleted:'Excluído', toast_exported:'Exportado', toast_reset:'Resetado', toast_file_read:'Arquivo carregado', toast_imported:'Importado', courses:'aulas', toast_no_name:'Insira nome', toast_no_period:'Adicione período', toast_first_week:'Primeira', toast_last_week:'Última', confirm_delete:'Excluir?', confirm_delete_period:'Excluir período?', confirm_reset:'Resetar?', keep_one_period:'Mantenha 1', toast_remind_on:'On', toast_notify_denied:'Negado', toast_notify_unsupport:'Sem suporte', toast_notify_on:'On', toast_notify_manual:'Permita manualmente', toast_min_set:'Lembrar', toast_min_remind:'min antes', upcoming:'em breve', remain_min:'min', remind_on:'On', last_week:'última' },
     ru: { menu:'Меню', tab_week:'Неделя', tab_today:'Сегодня', add:'Добавить', week:'Н', week_of:'Неделя', weeks_total:'нед', year:'', today:'Сегодня', no_course:'Сегодня занятий нет', enjoy:'Отдыхайте', click_add:'Нажмите + для добавления', morning:'Доброе утро', noon:'Добрый день', afternoon:'Добрый день', evening:'Добрый вечер', night:'Поздно, отдохните', cheer:', продолжайте!', month:'/', day:' ', sun:'Вс', mon:'Пн', tue:'Вт', wed:'Ср', thu:'Чт', fri:'Пт', sat:'Сб', period_short:'П', empty:'—', add_course:'Добавить', edit_course:'Изменить', course_name:'Название', weekday:'День', period:'Пара', location:'Аудитория', teacher:'Преподаватель', color:'Цвет', note:'Заметка', weeks:'Недели', all_weeks:'Все', cancel:'Отмена', save:'Сохранить', delete:'Удалить', theme:'Тема', light:'Светлая', dark:'Тёмная', language:'Язык', reminder:'Напоминание', remind_enable:'Включить', remind_min:'Заранее', minutes:'мин', notify_perm:'Уведомления', notify_on:'Вкл', notify_off:'Выкл', notify_denied:'Отклонено', notify_unsupport:'Нет поддержки', periods:'Пары', period_add:'+ Добавить', period_name:'Название', data:'Данные', import:'Импорт', export:'Экспорт', reset:'Сброс', import_hint:'JSON. Заменить или объединить. Файл .json.', merge:'Объединить', overwrite:'Заменить', choose_file:'Файл', confirm_import:'Подтвердить', done:'Готово', zoom_hint:'Щипок для зума', zoom_reset:'Сброс', toast_added:'Добавлено', toast_updated:'Обновлено', toast_deleted:'Удалено', toast_exported:'Экспортировано', toast_reset:'Сброс', toast_file_read:'Файл загружен', toast_imported:'Импортировано', courses:'занятий', toast_no_name:'Введите название', toast_no_period:'Добавьте пару', toast_first_week:'Первая', toast_last_week:'Последняя', confirm_delete:'Удалить?', confirm_delete_period:'Удалить пару?', confirm_reset:'Сбросить?', keep_one_period:'Оставьте 1', toast_remind_on:'Вкл', toast_notify_denied:'Отклонено', toast_notify_unsupport:'Нет поддержки', toast_notify_on:'Вкл', toast_notify_manual:'Разрешите вручную', toast_min_set:'Напоминать', toast_min_remind:'мин до', upcoming:'скоро', remain_min:'мин', remind_on:'Вкл', last_week:'последняя' },
     ja: { menu:'メニュー', tab_week:'週表', tab_today:'本日', add:'追加', week:'週', week_of:'第', weeks_total:'週', year:'年', today:'今日', no_course:'今日は授業なし', enjoy:'のんびりしよう', click_add:'右上の + で追加', morning:'おはよう', noon:'こんにちは', afternoon:'こんにちは', evening:'こんばんは', night:'夜更けです、お休みを', cheer:',頑張りましょう!', month:'月', day:'日', sun:'日', mon:'月', tue:'火', wed:'水', thu:'木', fri:'金', sat:'土', period_short:'限', empty:'—', add_course:'授業追加', edit_course:'編集', course_name:'授業名', weekday:'曜日', period:'時限', location:'教室', teacher:'先生', color:'色', note:'メモ', weeks:'週', all_weeks:'全週', cancel:'キャンセル', save:'保存', delete:'削除', theme:'テーマ', light:'ライト', dark:'ダーク', language:'言語', reminder:'リマインダー', remind_enable:'有効化', remind_min:'事前', minutes:'分', notify_perm:'通知', notify_on:'オン', notify_off:'オフ', notify_denied:'拒否', notify_unsupport:'非対応', periods:'時限', period_add:'+ 追加', period_name:'名前', data:'データ', import:'インポート', export:'エクスポート', reset:'リセット', import_hint:'JSON。上書き/統合。.json ファイル可。', merge:'統合', overwrite:'上書き', choose_file:'ファイル', confirm_import:'確認', done:'完了', zoom_hint:'ピンチで拡大', zoom_reset:'リセット', toast_added:'追加', toast_updated:'更新', toast_deleted:'削除', toast_exported:'出力', toast_reset:'リセット', toast_file_read:'読込完了、確認を', toast_imported:'取込', courses:'件', toast_no_name:'名前を入力', toast_no_period:'時限を追加', toast_first_week:'第1週', toast_last_week:'最終週', confirm_delete:'削除しますか?', confirm_delete_period:'時限を削除?', confirm_reset:'リセットしますか?', keep_one_period:'1時限は必須', toast_remind_on:'オン', toast_notify_denied:'拒否', toast_notify_unsupport:'非対応', toast_notify_on:'オン', toast_notify_manual:'手動で許可', toast_min_set:'通知', toast_min_remind:'分前', upcoming:'開始間近', remain_min:'分', remind_on:'オン', last_week:'最終' },
-    de: { menu:'Menü', tab_week:'Woche', tab_today:'Heute', add:'Hinzufügen', week:'W', week_of:'Woche', weeks_total:'Wochen', year:'', today:'Heute', no_course:'Heute keine Stunden', enjoy:'Genieße den Tag', click_add:'+ tippen zum Hinzufügen', morning:'Guten Morgen', noon:'Guten Tag', afternoon:'Guten Tag', evening:'Guten Abend', night:'Spät, ruh dich aus', cheer,', weiter so!', month:'/', day:' ', sun:'So', mon:'Mo', tue:'Di', wed:'Mi', thu:'Do', fri:'Fr', sat:'Sa', period_short:'S', empty:'—', add_course:'Hinzufügen', edit_course:'Bearbeiten', course_name:'Name', weekday:'Tag', period:'Stunde', location:'Raum', teacher:'Lehrer', color:'Farbe', note:'Notiz', weeks:'Wochen', all_weeks:'Alle', cancel:'Abbrechen', save:'Speichern', delete:'Löschen', theme:'Design', light:'Hell', dark:'Dunkel', language:'Sprache', reminder:'Erinnerung', remind_enable:'Aktivieren', remind_min:'Vorab', minutes:'Min', notify_perm:'Benachrichtigung', notify_on:'An', notify_off:'Aus', notify_denied:'Abgelehnt', notify_unsupport:'Nicht unterstützt', periods:'Stunden', period_add:'+ Hinzufügen', period_name:'Name', data:'Daten', import:'Import', export:'Export', reset:'Zurücksetzen', import_hint:'JSON. Überschreiben oder Zusammenführen. .json Datei.', merge:'Zusammenführen', overwrite:'Überschreiben', choose_file:'Datei', confirm_import:'Bestätigen', done:'Fertig', zoom_hint:'Pinch-Zoom', zoom_reset:'Reset', toast_added:'Hinzugefügt', toast_updated:'Aktualisiert', toast_deleted:'Gelöscht', toast_exported:'Exportiert', toast_reset:'Reset', toast_file_read:'Datei geladen', toast_imported:'Importiert', courses:'Stunden', toast_no_name:'Name eingeben', toast_no_period:'Stunde hinzufügen', toast_first_week:'Erste', toast_last_week:'Letzte', confirm_delete:'Löschen?', confirm_delete_period:'Stunde löschen?', confirm_reset:'Reset?', keep_one_period:'1 behalten', toast_remind_on:'An', toast_notify_denied:'Abgelehnt', toast_notify_unsupport:'Nicht unterstützt', toast_notify_on:'An', toast_notify_manual:'Manuell erlauben', toast_min_set:'Erinnern', toast_min_remind:'Min vor', upcoming:'beginnt bald', remain_min:'Min', remind_on:'An', last_week:'letzte' },
+    de: { menu:'Menü', tab_week:'Woche', tab_today:'Heute', add:'Hinzufügen', week:'W', week_of:'Woche', weeks_total:'Wochen', year:'', today:'Heute', no_course:'Heute keine Stunden', enjoy:'Genieße den Tag', click_add:'+ tippen zum Hinzufügen', morning:'Guten Morgen', noon:'Guten Tag', afternoon:'Guten Tag', evening:'Guten Abend', night:'Spät, ruh dich aus', cheer:', weiter so!', month:'/', day:' ', sun:'So', mon:'Mo', tue:'Di', wed:'Mi', thu:'Do', fri:'Fr', sat:'Sa', period_short:'S', empty:'—', add_course:'Hinzufügen', edit_course:'Bearbeiten', course_name:'Name', weekday:'Tag', period:'Stunde', location:'Raum', teacher:'Lehrer', color:'Farbe', note:'Notiz', weeks:'Wochen', all_weeks:'Alle', cancel:'Abbrechen', save:'Speichern', delete:'Löschen', theme:'Design', light:'Hell', dark:'Dunkel', language:'Sprache', reminder:'Erinnerung', remind_enable:'Aktivieren', remind_min:'Vorab', minutes:'Min', notify_perm:'Benachrichtigung', notify_on:'An', notify_off:'Aus', notify_denied:'Abgelehnt', notify_unsupport:'Nicht unterstützt', periods:'Stunden', period_add:'+ Hinzufügen', period_name:'Name', data:'Daten', import:'Import', export:'Export', reset:'Zurücksetzen', import_hint:'JSON. Überschreiben oder Zusammenführen. .json Datei.', merge:'Zusammenführen', overwrite:'Überschreiben', choose_file:'Datei', confirm_import:'Bestätigen', done:'Fertig', zoom_hint:'Pinch-Zoom', zoom_reset:'Reset', toast_added:'Hinzugefügt', toast_updated:'Aktualisiert', toast_deleted:'Gelöscht', toast_exported:'Exportiert', toast_reset:'Reset', toast_file_read:'Datei geladen', toast_imported:'Importiert', courses:'Stunden', toast_no_name:'Name eingeben', toast_no_period:'Stunde hinzufügen', toast_first_week:'Erste', toast_last_week:'Letzte', confirm_delete:'Löschen?', confirm_delete_period:'Stunde löschen?', confirm_reset:'Reset?', keep_one_period:'1 behalten', toast_remind_on:'An', toast_notify_denied:'Abgelehnt', toast_notify_unsupport:'Nicht unterstützt', toast_notify_on:'An', toast_notify_manual:'Manuell erlauben', toast_min_set:'Erinnern', toast_min_remind:'Min vor', upcoming:'beginnt bald', remain_min:'Min', remind_on:'An', last_week:'letzte' },
     fr: { menu:'Menu', tab_week:'Semaine', tab_today:'Aujourd', add:'Ajouter', week:'S', week_of:'Semaine', weeks_total:'sem', year:'', today:"Aujourd'hui", no_course:'Pas de cours', enjoy:'Profite du jour', click_add:'Touche + pour ajouter', morning:'Bonjour', noon:'Bonjour', afternoon:'Bon après-midi', evening:'Bonsoir', night:'Tard, repose-toi', cheer:', continue !', month:'/', day:' ', sun:'Dim', mon:'Lun', tue:'Mar', wed:'Mer', thu:'Jeu', fri:'Ven', sat:'Sam', period_short:'C', empty:'—', add_course:'Ajouter', edit_course:'Modifier', course_name:'Nom', weekday:'Jour', period:'Créneau', location:'Salle', teacher:'Prof', color:'Couleur', note:'Note', weeks:'Semaines', all_weeks:'Toutes', cancel:'Annuler', save:'Enregistrer', delete:'Supprimer', theme:'Thème', light:'Clair', dark:'Sombre', language:'Langue', reminder:'Rappel', remind_enable:'Activer', remind_min:'Avance', minutes:'min', notify_perm:'Notification', notify_on:'On', notify_off:'Off', notify_denied:'Refusé', notify_unsupport:'Non supporté', periods:'Créneaux', period_add:'+ Ajouter', period_name:'Nom', data:'Données', import:'Importer', export:'Exporter', reset:'Réinitialiser', import_hint:'JSON. Écraser ou fusionner. Fichier .json.', merge:'Fusionner', overwrite:'Écraser', choose_file:'Fichier', confirm_import:'Confirmer', done:'Fait', zoom_hint:'Pincer pour zoom', zoom_reset:'Reset', toast_added:'Ajouté', toast_updated:'Mis à jour', toast_deleted:'Supprimé', toast_exported:'Exporté', toast_reset:'Réinitialisé', toast_file_read:'Fichier chargé', toast_imported:'Importé', courses:'cours', toast_no_name:'Entrez le nom', toast_no_period:'Ajoutez un créneau', toast_first_week:'Première', toast_last_week:'Dernière', confirm_delete:'Supprimer ?', confirm_delete_period:'Supprimer créneau ?', confirm_reset:'Réinitialiser ?', keep_one_period:'Gardez 1', toast_remind_on:'On', toast_notify_denied:'Refusé', toast_notify_unsupport:'Non supporté', toast_notify_on:'On', toast_notify_manual:'Autoriser manuellement', toast_min_set:'Rappel', toast_min_remind:'min avant', upcoming:'bientôt', remain_min:'min', remind_on:'On', last_week:'dernière' }
   };
 
@@ -957,17 +1070,18 @@
         return (pa ? pa.start : '99:99').localeCompare(pb ? pb.start : '99:99');
       });
     if (courses.length === 0) {
-      list.innerHTML = `<div class="empty"><span class="emoji">🎉</span><p>${t('no_course')}<br>${t('enjoy')}</p><div class="hint">${t('click_add')}</div></div>`;
+      list.innerHTML = `<div class="empty"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span><p>${t('no_course')}<br>${t('enjoy')}</p><div class="hint">${t('click_add')}</div></div>`;
       return;
     }
     list.innerHTML = courses.map(c => {
       const p = getPeriod(c.periodId);
       const time = p ? `${p.start} - ${p.end}` : '';
       const periodName = p ? `<span class="c-period">${escapeHTML(p.name)}</span>` : '';
-      const note = c.note ? `<div class="c-note">${escapeHTML(c.note)}</div>` : '';
+      const noteSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+      const note = c.note ? `<div class="c-note">${noteSvg}<span>${escapeHTML(c.note)}</span></div>` : '';
       const meta = [];
-      if (c.location) meta.push(`<span>📍 ${escapeHTML(c.location)}</span>`);
-      if (c.teacher) meta.push(`<span>👤 ${escapeHTML(c.teacher)}</span>`);
+      if (c.location) meta.push(`<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${escapeHTML(c.location)}</span>`);
+      if (c.teacher) meta.push(`<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${escapeHTML(c.teacher)}</span>`);
       return `<div class="course-card" data-id="${c.id}" style="--c-color:${c.color}">
         <div class="c-top"><div class="c-name">${escapeHTML(c.name)}</div><div class="c-time">${time}${periodName}</div></div>
         <div class="c-meta">${meta.join('')}</div>${note}</div>`;
@@ -1158,8 +1272,18 @@
     document.getElementById('deleteWrap').style.display = 'flex';
     showModal('courseModalMask');
   }
-  function showModal(id) { document.getElementById(id).classList.add('show'); }
-  function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+  function showModal(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('hide');
+    el.classList.add('show');
+  }
+  function hideModal(id) {
+    const el = document.getElementById(id);
+    if (!el.classList.contains('show')) return;
+    el.classList.add('hide');
+    el.classList.remove('show');
+    setTimeout(() => { el.classList.remove('hide'); el.style.display = ''; }, 240);
+  }
 
   function saveCourse() {
     const name = document.getElementById('f-name').value.trim();
@@ -1187,9 +1311,10 @@
     }
     saveState(); render(); hideModal('courseModalMask');
   }
-  function deleteCourse() {
+  async function deleteCourse() {
     if (!state.editingId) return;
-    if (!confirm(t('confirm_delete'))) return;
+    const ok = await showConfirm({ msg: t('confirm_delete'), type: 'danger', okText: t('delete') });
+    if (!ok) return;
     state.courses = state.courses.filter(c => c.id !== state.editingId);
     saveState(); render(); hideModal('courseModalMask');
     toast(t('toast_deleted'));
@@ -1216,11 +1341,12 @@
   }
 
   function renderLangList() {
+    const checkSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>`;
     const list = document.getElementById('langList');
     list.innerHTML = LANGS.map(l => `
       <div class="lang-item" data-lang="${l.code}">
         <span><span class="li-name">${l.name}</span><span class="li-native">${l.native}</span></span>
-        <span class="li-check">${state.lang === l.code ? '✓' : ''}</span>
+        <span class="li-check">${state.lang === l.code ? checkSvg : ''}</span>
       </div>`).join('');
     list.querySelectorAll('.lang-item').forEach(item => {
       item.addEventListener('click', () => {
@@ -1250,16 +1376,17 @@
         <input type="text" class="p-name" value="${escapeHTML(p.name)}" maxlength="8">
         <input type="time" class="p-start" value="${p.start}">
         <input type="time" class="p-end" value="${p.end}">
-        <button class="p-del" aria-label="del">×</button>
+        <button class="p-del" aria-label="del"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
       </div>`).join('');
     list.querySelectorAll('.period-item').forEach(item => {
       const id = item.dataset.id;
       item.querySelector('.p-name').addEventListener('change', e => { const p = getPeriod(id); if (p) { p.name = e.target.value || p.name; saveState(); } });
       item.querySelector('.p-start').addEventListener('change', e => { const p = getPeriod(id); if (p) { p.start = e.target.value; saveState(); } });
       item.querySelector('.p-end').addEventListener('change', e => { const p = getPeriod(id); if (p) { p.end = e.target.value; saveState(); } });
-      item.querySelector('.p-del').addEventListener('click', () => {
+      item.querySelector('.p-del').addEventListener('click', async () => {
         if (state.periods.length <= 1) { toast(t('keep_one_period')); return; }
-        if (!confirm(t('confirm_delete_period'))) return;
+        const ok = await showConfirm({ msg: t('confirm_delete_period'), type: 'danger', okText: t('delete') });
+        if (!ok) return;
         state.periods = state.periods.filter(x => x.id !== id);
         const fallback = state.periods[0].id;
         state.courses.forEach(c => { if (c.periodId === id) c.periodId = fallback; });
@@ -1301,10 +1428,10 @@
             body: `${p.name} ${p.start}-${p.end} ${loc}${teacher}${note}\n${Math.ceil(diffMin)} ${t('remain_min')}`,
             tag: c.id
           });
-        } catch(e) { toast(`📢 ${c.name} · ${Math.ceil(diffMin)}${t('remain_min')}`); }
+        } catch(e) { toast(`${c.name} · ${Math.ceil(diffMin)}${t('remain_min')}`); }
         state.remindedToday.ids.push(c.id);
         saveState();
-        toast(`📢 ${c.name} ${Math.ceil(diffMin)}${t('remain_min')}`);
+        toast(`${c.name} ${Math.ceil(diffMin)}${t('remain_min')}`);
       }
     }
   }
@@ -1328,7 +1455,7 @@
   function doImport(text, mode) {
     try {
       const data = JSON.parse(text);
-      if (!data || (!data.courses && !data.periods)) { toast('JSON ✗'); return false; }
+      if (!data || (!data.courses && !data.periods)) { toast('JSON'); return false; }
       let newPeriods = data.periods || state.periods;
       let newCourses = data.courses || [];
       newCourses = newCourses.map(c => {
@@ -1365,7 +1492,7 @@
       saveState(); render(); renderDrawer();
       toast(`${t('toast_imported')} ${newCourses.length} ${t('courses')}`);
       return true;
-    } catch(e) { toast('JSON ✗ ' + e.message); return false; }
+    } catch(e) { toast('JSON ' + e.message); return false; }
   }
 
   // ===== Toast =====
@@ -1378,12 +1505,50 @@
     toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
   }
 
+  // ===== 自定义确认弹窗 =====
+  let confirmResolver = null;
+  function showConfirm(opts) {
+    const o = typeof opts === 'string' ? { msg: opts } : opts;
+    const mask = document.getElementById('confirmMask');
+    const card = document.getElementById('confirmCard');
+    const icon = document.getElementById('cfIcon');
+    card.classList.toggle('cf-info', o.type === 'info');
+    if (o.type === 'info') {
+      icon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+    } else {
+      icon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+    }
+    document.getElementById('cfTitle').textContent = o.title || t('confirm_title');
+    document.getElementById('cfMsg').textContent = o.msg || '';
+    document.getElementById('cfCancel').textContent = o.cancelText || t('cancel');
+    document.getElementById('cfOk').textContent = o.okText || t('ok');
+    const okBtn = document.getElementById('cfOk');
+    okBtn.classList.toggle('btn-primary', o.type !== 'danger');
+    okBtn.classList.toggle('btn-danger', o.type === 'danger');
+    okBtn.style.flex = o.type === 'danger' ? '0 0 45%' : '';
+    mask.classList.remove('hide');
+    mask.classList.add('show');
+    return new Promise(resolve => { confirmResolver = resolve; });
+  }
+  function closeConfirm(val) {
+    const mask = document.getElementById('confirmMask');
+    if (!mask.classList.contains('show')) return;
+    mask.classList.add('hide');
+    mask.classList.remove('show');
+    setTimeout(() => { mask.classList.remove('hide'); }, 220);
+    if (confirmResolver) { const r = confirmResolver; confirmResolver = null; r(val); }
+  }
+
   // ===== 事件 =====
   document.getElementById('menuBtn').addEventListener('click', openDrawer);
   document.getElementById('drawerClose').addEventListener('click', closeDrawer);
   document.getElementById('drawerMask').addEventListener('click', closeDrawer);
   document.getElementById('addBtn').addEventListener('click', openAdd);
   document.getElementById('addBtn2').addEventListener('click', openAdd);
+
+  document.getElementById('cfOk').addEventListener('click', () => closeConfirm(true));
+  document.getElementById('cfCancel').addEventListener('click', () => closeConfirm(false));
+  document.getElementById('confirmMask').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirm(false); });
 
   document.getElementById('saveCourseBtn').addEventListener('click', saveCourse);
   document.getElementById('cancelCourseBtn').addEventListener('click', () => hideModal('courseModalMask'));
@@ -1423,11 +1588,12 @@
 
   document.getElementById('remindMinRow').addEventListener('click', () => { renderMinOptions(); showModal('minModalMask'); });
   function renderMinOptions() {
+    const checkSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>`;
     const wrap = document.getElementById('minOptions');
     wrap.innerHTML = REMIND_OPTIONS.map(m => `
       <div class="settings-row" data-min="${m}">
         <span class="s-label">${m} ${t('minutes')}</span>
-        <span class="s-value">${state.remindMinutes === m ? '✓' : ''}</span>
+        <span class="s-value">${state.remindMinutes === m ? checkSvg : ''}</span>
       </div>`).join('');
     wrap.querySelectorAll('.settings-row').forEach(row => {
       row.addEventListener('click', () => {
@@ -1473,8 +1639,9 @@
   });
 
   document.getElementById('exportRow').addEventListener('click', exportData);
-  document.getElementById('resetDataRow').addEventListener('click', () => {
-    if (confirm(t('confirm_reset'))) {
+  document.getElementById('resetDataRow').addEventListener('click', async () => {
+    const ok = await showConfirm({ msg: t('confirm_reset'), type: 'danger', okText: t('reset') });
+    if (ok) {
       state.courses = []; state.periods = []; state.currentWeek = 1;
       state.periods = defaultPeriods();
       seedDemo();
