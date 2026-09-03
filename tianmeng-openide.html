@@ -1588,8 +1588,13 @@ function renderMessage(msg) {
       </div>`;
     }
   } else {
-    // 用户消息：直接展示（简单转义）
-    contentHTML = `<div class="msg-content">${escapeHTML(msg.content||'').replace(/\n/g,'<br>')}</div>`;
+    // 用户消息：含代码块时用Markdown渲染，否则纯文本转义
+    if (/```/.test(msg.content || '')) {
+      const rendered = renderMarkdownToRich(msg.content || '');
+      contentHTML = `<div class="msg-content">${rendered.html}</div>`;
+    } else {
+      contentHTML = `<div class="msg-content">${escapeHTML(msg.content||'').replace(/\n/g,'<br>')}</div>`;
+    }
   }
 
   // 附件
@@ -1604,12 +1609,7 @@ function renderMessage(msg) {
   wrap.appendChild(bubble);
   wrap.appendChild(meta);
 
-  row.appendChild(avatar);
-  if (msg.role === 'user') row.appendChild(wrap);
-  else { row.insertBefore(wrap, avatar); row.appendChild(avatar); }
-  // 修正: 保持 user 在右侧(avatar 在后)、ai 在左侧(avatar 在前)
-  // 上面写法有误，改为统一结构:
-  row.innerHTML = '';
+  // 布局：AI → avatar在左；user → avatar在右
   if (msg.role === 'ai') {
     row.appendChild(avatar);
     row.appendChild(wrap);
@@ -1628,17 +1628,16 @@ function renderMessage(msg) {
   return row;
 }
 
+// 空状态HTML模板（缓存避免被innerHTML清除后丢失）
+let _emptyHTML = '';
 function renderAllMessages() {
   const area = $('#chatArea');
-  // 保留空状态DOM
-  const empty = $('#msgEmpty');
   area.innerHTML = '';
   if (!messages.length) {
-    area.appendChild(empty);
-    empty.style.display = 'flex';
+    // 重建空状态
+    area.innerHTML = _emptyHTML || (_emptyHTML = createEmptyHTML());
     return;
   }
-  empty.style.display = 'none';
   for (const m of messages) {
     area.appendChild(renderMessage(m));
   }
@@ -1647,6 +1646,39 @@ function renderAllMessages() {
   $$('#chatArea pre code').forEach(block => {
     try { hljs.highlightElement(block); } catch(e){}
   });
+}
+// 生成空状态欢迎页HTML
+function createEmptyHTML() {
+  const aiName = (typeof config !== 'undefined' && config.aiName) || '天梦OpenIDE';
+  return `<div class="msg-empty" id="msgEmpty">
+      <div class="msg-empty-icon">
+        <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+      </div>
+      <div class="msg-empty-title">你好，我是 <span id="greetName">${escapeHTML(aiName)}</span></div>
+      <div class="msg-empty-desc">已接入先进大模型，助你问答、写代码、创作文档、查询天气……开始你的对话吧！</div>
+      <div class="quick-skills">
+        <div class="skill-card" data-preset="帮我写一篇关于人工智能的短文，500字左右。">
+          <div class="skill-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div>
+          <div class="skill-title">撰写文章</div>
+          <div class="skill-desc">作文、论文、文案</div>
+        </div>
+        <div class="skill-card" data-preset="用 Python 写一个快速排序算法，并简要解释思路。">
+          <div class="skill-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></div>
+          <div class="skill-title">代码编写</div>
+          <div class="skill-desc">多语言编程支持</div>
+        </div>
+        <div class="skill-card" data-preset="现在的准确时间和日期是？顺便告诉我今天适合做什么。">
+          <div class="skill-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+          <div class="skill-title">时间与规划</div>
+          <div class="skill-desc">日程与方案建议</div>
+        </div>
+        <div class="skill-card" data-preset="查询一下北京今天的天气，如果出行请给出建议。">
+          <div class="skill-icon"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg></div>
+          <div class="skill-title">天气查询</div>
+          <div class="skill-desc">实时天气与建议</div>
+        </div>
+      </div>
+    </div>`;
 }
 
 /* ---------- 7. 文档导出 ---------- */
@@ -2119,13 +2151,13 @@ function bindInput() {
     };
   });
 
-  // 快捷卡
-  $$('.skill-card').forEach(c => {
-    c.onclick = () => {
-      $('#inputText').value = c.dataset.preset;
-      $('#inputText').dispatchEvent(new Event('input'));
-      $('#inputText').focus();
-    };
+  // 快捷卡：用事件委托（因空状态通过innerHTML重建，直接绑定会丢失）
+  $('#chatArea').addEventListener('click', (e) => {
+    const card = e.target.closest('.skill-card');
+    if (!card) return;
+    $('#inputText').value = card.dataset.preset;
+    $('#inputText').dispatchEvent(new Event('input'));
+    $('#inputText').focus();
   });
 }
 function updateSendBtn() {
@@ -2251,13 +2283,13 @@ async function trySend() {
   // System Prompt
   payloadMsgs.push({
     role: 'system',
-    content: `你是"${config.aiName||'天梦OpenIDE'}"，由白天鹅工作室打造的智能助手。
-请严格遵循以下输出格式规则：
-1. 简短对话、表格、要点说明等 → 使用 Markdown 输出。
-2. 长文章、论文、作文、方案、报告等（>400字）→ 使用 Markdown 输出，并且内容以 # 标题 开头。
-3. 输出代码时，使用 ```语言名 ... ``` 代码块标记，确保代码块完整。
-4. 当用户要求写 HTML 页面时，使用 ```html 代码块输出完整 HTML。
-5. 回答要简洁、专业、友善；中文回答优先。`
+    content: '你是"' + (config.aiName||'天梦OpenIDE') + '"，由白天鹅工作室打造的智能助手。\n' +
+'请严格遵循以下输出格式规则：\n' +
+'1. 简短对话、表格、要点说明等 → 使用 Markdown 输出。\n' +
+'2. 长文章、论文、作文、方案、报告等（>400字）→ 使用 Markdown 输出，并且内容以 # 标题 开头。\n' +
+'3. 输出代码时，使用三个反引号+语言名 作为代码块标记，确保代码块完整。\n' +
+'4. 当用户要求写 HTML 页面时，使用 html 代码块输出完整 HTML。\n' +
+'5. 回答要简洁、专业、友善；中文回答优先。'
   });
   const recent = messages.filter(m => m.role !== 'system').slice(-20);
   for (const m of recent) {
