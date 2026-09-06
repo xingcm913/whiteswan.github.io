@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Swan Browser — 自建浏览器</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #dee1e6; color: #202124; overflow: hidden; }
+  #app { display: flex; flex-direction: column; height: 100vh; }
+
+  /* ===== 标签栏 ===== */
+  #tab-bar {
+    display: flex; align-items: flex-end; background: #dee1e6;
+    padding: 8px 8px 0 8px; height: 42px; flex-shrink: 0; gap: 2px;
+    border-bottom: 1px solid #c0c4cc;
+  }
+  .tab {
+    display: flex; align-items: center; gap: 8px;
+    min-width: 160px; max-width: 240px; height: 34px;
+    padding: 0 10px; border-radius: 8px 8px 0 0;
+    background: #c8ccd1; color: #444; font-size: 13px;
+    cursor: pointer; user-select: none; position: relative;
+    border: 1px solid transparent;
+  }
+  .tab.active { background: #fff; color: #202124; border-color: #c0c4cc; border-bottom-color: #fff; z-index: 2; }
+  .tab .tab-fav { width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg, #4a90d9, #357abd); flex-shrink: 0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:10px; font-weight:bold; }
+  .tab .tab-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tab .tab-close { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #666; flex-shrink: 0; }
+  .tab .tab-close:hover { background: rgba(0,0,0,0.12); }
+  .tab-new {
+    width: 32px; height: 32px; border-radius: 8px; display: flex;
+    align-items: center; justify-content: center; cursor: pointer;
+    font-size: 20px; color: #5f6368; flex-shrink: 0;
+  }
+  .tab-new:hover { background: rgba(0,0,0,0.1); }
+
+  /* ===== 工具栏 ===== */
+  #toolbar {
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+    background: #fff; height: 52px; flex-shrink: 0;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .nav-btn {
+    width: 34px; height: 34px; border-radius: 50%; border: none;
+    background: transparent; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; color: #5f6368;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .nav-btn:hover { background: #f1f3f4; }
+  .nav-btn:disabled { opacity: 0.35; cursor: default; }
+  .nav-btn:disabled:hover { background: transparent; }
+  #address-bar {
+    flex: 1; height: 36px; border-radius: 18px; border: 1px solid #dfe1e5;
+    background: #f1f3f4; padding: 0 16px; font-size: 14px; outline: none;
+    transition: all 0.15s;
+  }
+  #address-bar:focus { background: #fff; border-color: #4a90d9; box-shadow: 0 0 0 2px rgba(74,144,217,0.2); }
+  #copy-btn {
+    height: 34px; padding: 0 14px; border-radius: 17px; border: 1px solid #dfe1e5;
+    background: #f1f3f4; cursor: pointer; font-size: 13px; color: #5f6368;
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  }
+  #copy-btn:hover { background: #e8eaed; }
+  #copy-btn.copied { background: #e6f4ea; color: #137333; border-color: #a8dab5; }
+
+  /* ===== 内容区 ===== */
+  #viewport { flex: 1; overflow: auto; background: #fff; position: relative; }
+  .page { padding: 40px; max-width: 900px; margin: 0 auto; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ===== 首页 ===== */
+  .home { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%; padding-top: 80px; }
+  .logo { font-size: 64px; font-weight: 700; margin-bottom: 8px; background: linear-gradient(135deg, #4a90d9, #357abd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; }
+  .logo-sub { color: #5f6368; font-size: 14px; margin-bottom: 36px; }
+  .search-box { width: 100%; max-width: 560px; position: relative; }
+  .search-input {
+    width: 100%; height: 46px; border-radius: 23px; border: 1px solid #dfe1e5;
+    padding: 0 50px 0 20px; font-size: 16px; outline: none;
+    box-shadow: 0 1px 6px rgba(32,33,36,0.08);
+  }
+  .search-input:focus { box-shadow: 0 1px 12px rgba(32,33,36,0.16); border-color: transparent; }
+  .search-btn {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    width: 36px; height: 36px; border-radius: 50%; border: none;
+    background: #4a90d9; color: #fff; cursor: pointer; font-size: 16px;
+  }
+  .search-btns { margin-top: 24px; display: flex; gap: 12px; }
+  .home-btn {
+    padding: 10px 22px; border-radius: 6px; border: 1px solid #f8f9fa;
+    background: #f8f9fa; color: #3c4043; cursor: pointer; font-size: 14px;
+  }
+  .home-btn:hover { border-color: #dadce0; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+  .quick-links { margin-top: 48px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .quick-card {
+    width: 90px; text-align: center; cursor: pointer; padding: 12px;
+    border-radius: 10px; transition: background 0.15s;
+  }
+  .quick-card:hover { background: #f1f3f4; }
+  .quick-icon { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #4a90d9, #357abd); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 8px; }
+  .quick-label { font-size: 12px; color: #3c4043; }
+
+  /* ===== 搜索结果页 ===== */
+  .results-header { padding: 16px 0; border-bottom: 1px solid #ebebeb; margin-bottom: 20px; }
+  .results-count { font-size: 13px; color: #70757a; }
+  .result-item { padding: 16px 0; border-bottom: 1px solid #f1f3f4; }
+  .result-url { font-size: 12px; color: #202124; display: flex; align-items: center; gap: 6px; }
+  .result-url .dot { width: 8px; height: 8px; border-radius: 50%; background: #4a90d9; }
+  .result-title { font-size: 18px; color: #1a0dab; margin: 4px 0; cursor: pointer; text-decoration: none; }
+  .result-title:hover { text-decoration: underline; }
+  .result-snippet { font-size: 14px; color: #4d5156; line-height: 1.5; }
+  .result-tags { margin-top: 6px; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #e8f0fe; color: #1967d2; margin-right: 4px; }
+
+  .related-section { margin-top: 28px; }
+  .related-title { font-size: 16px; font-weight: 600; color: #202124; margin-bottom: 12px; }
+  .related-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .related-item {
+    padding: 12px 16px; background: #f8f9fa; border-radius: 8px;
+    cursor: pointer; font-size: 14px; color: #202124; display: flex;
+    align-items: center; gap: 10px; transition: background 0.15s;
+  }
+  .related-item:hover { background: #e8eaed; }
+  .related-item .icon { color: #4a90d9; font-size: 16px; }
+
+  .no-results { text-align: center; padding: 60px 20px; color: #5f6368; }
+  .no-results .big { font-size: 48px; margin-bottom: 16px; }
+
+  /* ===== 上传页面 ===== */
+  .upload-page { max-width: 720px; margin: 0 auto; }
+  .upload-page h2 { font-size: 24px; margin-bottom: 8px; }
+  .upload-page .desc { color: #5f6368; margin-bottom: 24px; font-size: 14px; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #3c4043; }
+  .form-group label .req { color: #d93025; }
+  .form-input {
+    width: 100%; padding: 10px 14px; border: 1px solid #dadce0; border-radius: 8px;
+    font-size: 14px; outline: none; font-family: inherit;
+  }
+  .form-input:focus { border-color: #4a90d9; box-shadow: 0 0 0 2px rgba(74,144,217,0.2); }
+  textarea.form-input { resize: vertical; min-height: 160px; line-height: 1.6; }
+  .file-drop {
+    border: 2px dashed #dadce0; border-radius: 10px; padding: 28px;
+    text-align: center; cursor: pointer; transition: all 0.15s; color: #5f6368;
+  }
+  .file-drop:hover, .file-drop.drag { border-color: #4a90d9; background: #f0f6ff; }
+  .file-drop .icon { font-size: 32px; margin-bottom: 8px; }
+  .btn-primary {
+    padding: 10px 28px; border-radius: 8px; border: none; background: #4a90d9;
+    color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .btn-primary:hover { background: #357abd; }
+  .btn-primary:disabled { background: #a8c7e8; cursor: default; }
+  .btn-secondary {
+    padding: 10px 20px; border-radius: 8px; border: 1px solid #dadce0;
+    background: #fff; color: #3c4043; font-size: 14px; cursor: pointer;
+  }
+  .btn-secondary:hover { background: #f8f9fa; }
+  .form-actions { display: flex; gap: 10px; align-items: center; }
+  .upload-list { margin-top: 32px; }
+  .upload-list h3 { font-size: 18px; margin-bottom: 12px; }
+  .upload-row {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+    border: 1px solid #ebebeb; border-radius: 8px; margin-bottom: 8px;
+  }
+  .upload-row .info { flex: 1; min-width: 0; }
+  .upload-row .title { font-weight: 600; font-size: 14px; }
+  .upload-row .url { font-size: 12px; color: #4a90d9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .upload-row .actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .mini-btn { padding: 5px 10px; border-radius: 6px; border: 1px solid #dadce0; background: #fff; cursor: pointer; font-size: 12px; }
+  .mini-btn:hover { background: #f8f9fa; }
+  .mini-btn.danger:hover { background: #fce8e6; border-color: #f5c2bf; color: #d93025; }
+
+  /* ===== 页面内容 ===== */
+  .content-page h1 { font-size: 28px; margin-bottom: 8px; }
+  .content-meta { font-size: 12px; color: #70757a; margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .content-body { font-size: 15px; line-height: 1.75; color: #202124; }
+  .content-body h2, .content-body h3 { margin: 20px 0 10px; }
+  .content-body p { margin: 10px 0; }
+  .content-body ul, .content-body ol { margin: 10px 0 10px 24px; }
+  .content-body code { background: #f1f3f4; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  .content-body pre { background: #f1f3f4; padding: 12px; border-radius: 8px; overflow-x: auto; margin: 12px 0; }
+  .content-body blockquote { border-left: 3px solid #4a90d9; padding-left: 12px; color: #5f6368; margin: 12px 0; }
+  .content-body a { color: #1a0dab; }
+  .content-body img { max-width: 100%; border-radius: 8px; }
+  .link-bar {
+    display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+    background: #f8f9fa; border-radius: 10px; margin-bottom: 24px;
+    border: 1px solid #ebebeb;
+  }
+  .link-bar .lbl { font-size: 12px; color: #5f6368; flex-shrink: 0; }
+  .link-bar .url { flex: 1; font-family: monospace; font-size: 13px; color: #4a90d9; background: #fff; padding: 6px 10px; border-radius: 6px; border: 1px solid #ebebeb; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: #202124; color: #fff; padding: 12px 24px; border-radius: 8px;
+    font-size: 14px; z-index: 9999; opacity: 0; transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ===== 空状态 / 加载 ===== */
+  .empty { text-align: center; padding: 80px 20px; color: #70757a; }
+  .empty .big { font-size: 56px; margin-bottom: 16px; }
+  .loading { text-align: center; padding: 60px; color: #5f6368; }
+  .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e8eaed; border-top-color: #4a90d9; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== 数据库状态栏 ===== */
+  #db-status {
+    position: fixed; bottom: 10px; right: 14px; font-size: 11px;
+    color: #9aa0a6; background: rgba(255,255,255,0.9); padding: 3px 8px;
+    border-radius: 4px; z-index: 100; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="tab-bar"></div>
+  <div id="toolbar">
+    <button class="nav-btn" id="back-btn" title="后退">‹</button>
+    <button class="nav-btn" id="forward-btn" title="前进">›</button>
+    <button class="nav-btn" id="reload-btn" title="刷新">⟳</button>
+    <button class="nav-btn" id="home-btn" title="主页">⌂</button>
+    <input type="text" id="address-bar" placeholder="输入 swan:// 链接或搜索关键词" />
+    <button id="copy-btn" title="复制当前页面链接">📋 复制链接</button>
+  </div>
+  <div id="viewport"></div>
+</div>
+<div id="db-status">数据库：未连接</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   Swan Browser — 自建浏览器（单文件版）
+   数据库：IndexedDB（本地持久化，充当后端数据库）
+   协议：swan:// （仅本软件内部可解析）
+   ========================================================= */
+
+/* ---------- 1. IndexedDB 数据库封装 ---------- */
+const DB_NAME = 'SwanBrowserDB';
+const DB_VERSION = 1;
+const STORE = 'pages';
+
+const DB = {
+  db: null,
+  ready: false,
+
+  init() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE)) {
+          const store = db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+          store.createIndex('title', 'title', { unique: false });
+          store.createIndex('tags', 'tags', { unique: false, multiEntry: true });
+          store.createIndex('createdAt', 'createdAt', { unique: false });
+        }
+      };
+      req.onsuccess = (e) => {
+        this.db = e.target.result;
+        this.ready = true;
+        document.getElementById('db-status').textContent = '数据库：已连接 (IndexedDB)';
+        resolve();
+      };
+      req.onerror = (e) => reject(e.target.error);
+    });
+  },
+
+  tx(mode) { return this.db.transaction(STORE, mode).objectStore(STORE); },
+
+  add(page) {
+    return new Promise((resolve, reject) => {
+      const req = this.tx('readwrite').add(page);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  put(page) {
+    return new Promise((resolve, reject) => {
+      const req = this.tx('readwrite').put(page);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  get(id) {
+    return new Promise((resolve, reject) => {
+      const req = this.tx('readonly').get(id);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  getAll() {
+    return new Promise((resolve, reject) => {
+      const req = this.tx('readonly').getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  delete(id) {
+    return new Promise((resolve, reject) => {
+      const req = this.tx('readwrite').delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  async count() {
+    const all = await this.getAll();
+    return all.length;
+  }
+};
+
+/* ---------- 2. swan:// 链接生成器 ---------- */
+function makeSwanUrl(id) {
+  return `swan://page/${id}`;
+}
+
+/* 生成短随机ID作为页面标识（同时作为数据库主键的可读部分） */
+function genShortId() {
+  return Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+}
+
+/* ---------- 3. 标签页管理 ---------- */
+const TabManager = {
+  tabs: [],
+  activeId: null,
+  counter: 0,
+
+  create(url = 'swan://home', title = '新标签页') {
+    const id = ++this.counter;
+    const tab = {
+      id,
+      url,
+      title,
+      history: [url],
+      histIndex: 0,
+      content: null
+    };
+    this.tabs.push(tab);
+    this.activeId = id;
+    this.render();
+    this.navigate(url, false);
+    return tab;
+  },
+
+  close(id) {
+    const idx = this.tabs.findIndex(t => t.id === id);
+    if (idx === -1) return;
+    this.tabs.splice(idx, 1);
+    if (this.tabs.length === 0) {
+      this.create();
+    } else {
+      if (this.activeId === id) {
+        this.activeId = this.tabs[Math.min(idx, this.tabs.length - 1)].id;
+      }
+      this.render();
+      this.refreshViewport();
+    }
+  },
+
+  activate(id) {
+    this.activeId = id;
+    this.render();
+    this.refreshViewport();
+  },
+
+  get active() {
+    return this.tabs.find(t => t.id === this.activeId);
+  },
+
+  navigate(url, pushHistory = true) {
+    const tab = this.active;
+    if (!tab) return;
+    tab.url = url;
+    if (pushHistory) {
+      tab.history = tab.history.slice(0, tab.histIndex + 1);
+      tab.history.push(url);
+      tab.histIndex = tab.history.length - 1;
+    }
+    this.render();
+    Router.handle(url);
+  },
+
+  back() {
+    const tab = this.active;
+    if (tab && tab.histIndex > 0) {
+      tab.histIndex--;
+      tab.url = tab.history[tab.histIndex];
+      this.render();
+      Router.handle(tab.url);
+    }
+  },
+
+  forward() {
+    const tab = this.active;
+    if (tab && tab.histIndex < tab.history.length - 1) {
+      tab.histIndex++;
+      tab.url = tab.history[tab.histIndex];
+      this.render();
+      Router.handle(tab.url);
+    }
+  },
+
+  reload() {
+    const tab = this.active;
+    if (tab) Router.handle(tab.url);
+  },
+
+  render() {
+    const bar = document.getElementById('tab-bar');
+    bar.innerHTML = '';
+    this.tabs.forEach(tab => {
+      const el = document.createElement('div');
+      el.className = 'tab' + (tab.id === this.activeId ? ' active' : '');
+      el.innerHTML = `
+        <div class="tab-fav">S</div>
+        <div class="tab-title">${escapeHtml(tab.title)}</div>
+        <div class="tab-close">×</div>
+      `;
+      el.querySelector('.tab-title').onclick = () => this.activate(tab.id);
+      el.querySelector('.tab-fav').onclick = () => this.activate(tab.id);
+      el.querySelector('.tab-close').onclick = (e) => { e.stopPropagation(); this.close(tab.id); };
+      bar.appendChild(el);
+    });
+    const newBtn = document.createElement('div');
+    newBtn.className = 'tab-new';
+    newBtn.textContent = '+';
+    newBtn.onclick = () => this.create();
+    bar.appendChild(newBtn);
+
+    /* 更新地址栏 & 导航按钮状态 */
+    const tab = this.active;
+    if (tab) {
+      document.getElementById('address-bar').value = tab.url;
+      document.getElementById('back-btn').disabled = tab.histIndex <= 0;
+      document.getElementById('forward-btn').disabled = tab.histIndex >= tab.history.length - 1;
+    }
+  },
+
+  refreshViewport() {
+    const tab = this.active;
+    if (tab) {
+      document.getElementById('address-bar').value = tab.url;
+      Router.handle(tab.url);
+    }
+  }
+};
+
+/* ---------- 4. 路由（swan:// 协议解析） ---------- */
+const Router = {
+  handle(url) {
+    const tab = TabManager.active;
+    if (!tab) return;
+
+    /* 如果不是 swan:// 开头，当作搜索关键词 */
+    if (!url.startsWith('swan://')) {
+      if (url.trim() === '') {
+        this.renderHome();
+        return;
+      }
+      /* 可能是粘贴的 swan 链接缺失协议，或纯搜索词 */
+      this.renderSearch(url);
+      return;
+    }
+
+    const path = url.slice('swan://'.length);
+    const [route, ...rest] = path.split('/');
+
+    if (route === 'home' || route === '') {
+      this.renderHome();
+    } else if (route === 'search') {
+      const qs = rest.join('/');
+      const params = new URLSearchParams(qs.startsWith('?') ? qs.slice(1) : qs);
+      this.renderSearch(params.get('q') || '');
+    } else if (route === 'upload') {
+      this.renderUpload();
+    } else if (route === 'page') {
+      const id = parseInt(rest[0], 10);
+      this.renderPage(id);
+    } else if (route === 'edit') {
+      const id = parseInt(rest[0], 10);
+      this.renderUpload(id);
+    } else if (route === 'library') {
+      this.renderLibrary();
+    } else {
+      this.renderHome();
+    }
+  },
+
+  renderHome() {
+    const tab = TabManager.active;
+    if (tab) tab.title = 'Swan 搜索';
+    TabManager.render();
+
+    const vp = document.getElementById('viewport');
+    vp.innerHTML = `
+      <div class="page home">
+        <div class="logo">Swan</div>
+        <div class="logo-sub">自建浏览器 · 内容由用户上传 · 私有搜索引擎</div>
+        <div class="search-box">
+          <input type="text" class="search-input" id="home-search" placeholder="搜索已上传的内容，或输入 swan:// 链接" autofocus />
+          <button class="search-btn" id="home-search-btn">🔍</button>
+        </div>
+        <div class="search-btns">
+          <button class="home-btn" onclick="Router.handle('swan://search?q='+encodeURIComponent(document.getElementById('home-search').value))">Swan 搜索</button>
+          <button class="home-btn" onclick="Router.handle('swan://upload')">上传内容</button>
+          <button class="home-btn" onclick="Router.handle('swan://library')">内容库</button>
+        </div>
+        <div class="quick-links" id="quick-links"></div>
+      </div>
+    `;
+    const doSearch = () => {
+      const q = document.getElementById('home-search').value.trim();
+      if (q) Router.handle('swan://search?q=' + encodeURIComponent(q));
+    };
+    document.getElementById('home-search').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSearch();
+    });
+    document.getElementById('home-search-btn').onclick = doSearch;
+
+    /* 加载最近内容作为快捷入口 */
+    DB.getAll().then(all => {
+      const quick = document.getElementById('quick-links');
+      const recent = all.sort((a,b) => b.createdAt - a.createdAt).slice(0, 6);
+      if (recent.length === 0) {
+        quick.innerHTML = '<div style="color:#9aa0a6;font-size:13px;">还没有上传任何内容，点击「上传内容」开始吧</div>';
+      } else {
+        quick.innerHTML = recent.map(p => `
+          <div class="quick-card" onclick="Router.handle('swan://page/${p.id}')">
+            <div class="quick-icon">${(p.title || '?').charAt(0).toUpperCase()}</div>
+            <div class="quick-label">${escapeHtml(p.title.slice(0, 8))}</div>
+          </div>
+        `).join('');
+      }
+    });
+  },
+
+  async renderSearch(query) {
+    const tab = TabManager.active;
+    if (tab) tab.title = `${query} - Swan 搜索`;
+    TabManager.render();
+
+    const vp = document.getElementById('viewport');
+    vp.innerHTML = `
+      <div class="page">
+        <div class="search-box" style="max-width:100%;margin-bottom:24px;">
+          <input type="text" class="search-input" id="result-search" value="${escapeHtml(query)}" />
+          <button class="search-btn" id="result-search-btn">🔍</button>
+        </div>
+        <div class="loading"><div class="spinner"></div><div style="margin-top:12px;">正在搜索数据库…</div></div>
+      </div>
+    `;
+    const doSearch = () => {
+      const q = document.getElementById('result-search').value.trim();
+      if (q) Router.handle('swan://search?q=' + encodeURIComponent(q));
+    };
+    document.getElementById('result-search').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+    document.getElementById('result-search-btn').onclick = doSearch;
+
+    const all = await DB.getAll();
+    const results = searchEngine(all, query);
+
+    if (results.length === 0) {
+      vp.innerHTML = `
+        <div class="page">
+          <div class="search-box" style="max-width:100%;margin-bottom:24px;">
+            <input type="text" class="search-input" id="result-search" value="${escapeHtml(query)}" />
+            <button class="search-btn" id="result-search-btn">🔍</button>
+          </div>
+          <div class="no-results">
+            <div class="big">🔍</div>
+            <h3>未找到与「${escapeHtml(query)}」相关的内容</h3>
+            <p style="margin-top:10px;">数据库中暂无匹配结果。你可以上传相关内容后再搜索。</p>
+            <button class="btn-primary" style="margin-top:20px;" onclick="Router.handle('swan://upload')">上传内容</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('result-search').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+      document.getElementById('result-search-btn').onclick = doSearch;
+      return;
+    }
+
+    /* 相关问题：从结果中提取标题中含问号或短标题 */
+    const relatedQuestions = results
+      .filter(r => r.page.title.includes('?') || r.page.title.includes('？') || r.page.title.length < 20)
+      .slice(0, 6)
+      .map(r => r.page.title);
+
+    /* 相关网页：基于标签相似度 */
+    const tagSet = new Set();
+    results.forEach(r => (r.page.tags || []).forEach(t => tagSet.add(t)));
+    const relatedPages = all
+      .filter(p => !results.find(r => r.page.id === p.id))
+      .map(p => ({ page: p, score: (p.tags || []).filter(t => tagSet.has(t)).length }))
+      .filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6)
+      .map(x => x.page);
+
+    vp.innerHTML = `
+      <div class="page">
+        <div class="search-box" style="max-width:100%;margin-bottom:16px;">
+          <input type="text" class="search-input" id="result-search" value="${escapeHtml(query)}" />
+          <button class="search-btn" id="result-search-btn">🔍</button>
+        </div>
+        <div class="results-header">
+          <div class="results-count">找到约 ${results.length} 条结果（用时 ${(Math.random()*0.3+0.1).toFixed(2)} 秒）</div>
+        </div>
+        <div id="results-list">
+          ${results.map(r => `
+            <div class="result-item">
+              <div class="result-url"><span class="dot"></span>swan://page/${r.page.id}</div>
+              <div class="result-title" onclick="Router.handle('swan://page/${r.page.id}')">${escapeHtml(r.page.title)}</div>
+              <div class="result-snippet">${escapeHtml(r.snippet)}</div>
+              ${(r.page.tags && r.page.tags.length) ? `<div class="result-tags">${r.page.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+        ${relatedQuestions.length > 0 ? `
+          <div class="related-section">
+            <div class="related-title">💡 相关问题</div>
+            <div class="related-grid">
+              ${relatedQuestions.map(q => `
+                <div class="related-item" onclick="Router.handle('swan://search?q='+encodeURIComponent('${q.replace(/'/g,"\\'")}'))">
+                  <span class="icon">?</span><span>${escapeHtml(q)}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+        ${relatedPages.length > 0 ? `
+          <div class="related-section">
+            <div class="related-title">🔗 相关网页</div>
+            <div class="related-grid">
+              ${relatedPages.map(p => `
+                <div class="related-item" onclick="Router.handle('swan://page/${p.id}')">
+                  <span class="icon">→</span><span>${escapeHtml(p.title)}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+    document.getElementById('result-search').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+    document.getElementById('result-search-btn').onclick = doSearch;
+  },
+
+  renderUpload(editId = null) {
+    const tab = TabManager.active;
+    if (tab) tab.title = editId ? '编辑内容' : '上传内容';
+    TabManager.render();
+
+    const vp = document.getElementById('viewport');
+    vp.innerHTML = `
+      <div class="page upload-page">
+        <h2>${editId ? '✏️ 编辑内容' : '📤 上传新内容'}</h2>
+        <p class="desc">上传的内容将保存到本地数据库，系统会自动分配一个以 <code>swan://</code> 开头的专属链接，该链接仅在本浏览器中可访问。</p>
+        <form id="upload-form">
+          <div class="form-group">
+            <label>标题 <span class="req">*</span></label>
+            <input type="text" class="form-input" id="f-title" required placeholder="给内容起个标题" />
+          </div>
+          <div class="form-group">
+            <label>标签（用逗号分隔）</label>
+            <input type="text" class="form-input" id="f-tags" placeholder="例如：教程, HTML, 前端" />
+          </div>
+          <div class="form-group">
+            <label>内容 <span class="req">*</span></label>
+            <textarea class="form-input" id="f-content" required placeholder="支持纯文本或 HTML 内容…"></textarea>
+          </div>
+          <div class="form-group">
+            <label>或从文件导入（.txt / .md / .html）</label>
+            <div class="file-drop" id="file-drop">
+              <div class="icon">📁</div>
+              <div>点击选择文件，或将文件拖拽到此处</div>
+              <input type="file" id="file-input" accept=".txt,.md,.html,.htm" style="display:none" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" id="submit-btn">${editId ? '保存修改' : '上传并生成链接'}</button>
+            <button type="button" class="btn-secondary" onclick="Router.handle('swan://library')">取消</button>
+          </div>
+        </form>
+
+        <div class="upload-list" id="upload-list"></div>
+      </div>
+    `;
+
+    const titleInput = document.getElementById('f-title');
+    const tagsInput = document.getElementById('f-tags');
+    const contentInput = document.getElementById('f-content');
+
+    /* 编辑模式：加载数据 */
+    if (editId) {
+      DB.get(editId).then(p => {
+        if (p) {
+          titleInput.value = p.title;
+          tagsInput.value = (p.tags || []).join(', ');
+          contentInput.value = p.content;
+        }
+      });
+    }
+
+    /* 文件导入 */
+    const fileDrop = document.getElementById('file-drop');
+    const fileInput = document.getElementById('file-input');
+    fileDrop.onclick = () => fileInput.click();
+    fileInput.onchange = (e) => { if (e.target.files[0]) readFile(e.target.files[0]); };
+    fileDrop.ondragover = (e) => { e.preventDefault(); fileDrop.classList.add('drag'); };
+    fileDrop.ondragleave = () => fileDrop.classList.remove('drag');
+    fileDrop.ondrop = (e) => {
+      e.preventDefault();
+      fileDrop.classList.remove('drag');
+      if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]);
+    };
+    function readFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        contentInput.value = e.target.result;
+        if (!titleInput.value) titleInput.value = file.name.replace(/\.[^.]+$/, '');
+        toast('文件已导入：' + file.name);
+      };
+      reader.readAsText(file);
+    }
+
+    /* 提交 */
+    document.getElementById('upload-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const title = titleInput.value.trim();
+      const tags = tagsInput.value.split(/[,，]/).map(t => t.trim()).filter(Boolean);
+      const content = contentInput.value.trim();
+      if (!title || !content) { toast('请填写标题和内容'); return; }
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = '保存中…';
+
+      if (editId) {
+        const existing = await DB.get(editId);
+        await DB.put({ ...existing, title, tags, content, updatedAt: Date.now() });
+        toast('内容已更新');
+        Router.handle('swan://page/' + editId);
+      } else {
+        const page = {
+          title, tags, content,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          views: 0
+        };
+        const id = await DB.add(page);
+        toast('✅ 上传成功！链接：swan://page/' + id);
+        Router.handle('swan://page/' + id);
+      }
+    };
+
+    /* 内容库列表 */
+    loadLibraryList();
+  },
+
+  async renderPage(id) {
+    const vp = document.getElementById('viewport');
+    vp.innerHTML = '<div class="page"><div class="loading"><div class="spinner"></div></div></div>';
+
+    const page = await DB.get(id);
+    const tab = TabManager.active;
+
+    if (!page) {
+      if (tab) tab.title = '页面不存在';
+      TabManager.render();
+      vp.innerHTML = `
+        <div class="page">
+          <div class="empty">
+            <div class="big">🚫</div>
+            <h3>页面 swan://page/${id} 不存在</h3>
+            <p style="margin-top:10px;">该链接可能已被删除，或仅在本浏览器中有效。</p>
+            <button class="btn-primary" style="margin-top:20px;" onclick="Router.handle('swan://home')">返回主页</button>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    /* 更新浏览量 */
+    page.views = (page.views || 0) + 1;
+    await DB.put(page);
+
+    if (tab) tab.title = page.title;
+    TabManager.render();
+
+    const url = makeSwanUrl(page.id);
+    const date = new Date(page.createdAt).toLocaleString('zh-CN');
+
+    vp.innerHTML = `
+      <div class="page content-page">
+        <div class="link-bar">
+          <span class="lbl">🔗 专属链接：</span>
+          <span class="url" id="page-url">${url}</span>
+          <button class="btn-secondary" onclick="copyLink('${url}')">复制</button>
+        </div>
+        <h1>${escapeHtml(page.title)}</h1>
+        <div class="content-meta">
+          <span>📅 ${date}</span>
+          <span>👁 ${page.views} 次浏览</span>
+          ${(page.tags && page.tags.length) ? page.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('') : ''}
+          <span style="margin-left:auto;">
+            <button class="mini-btn" onclick="Router.handle('swan://edit/${page.id}')">✏️ 编辑</button>
+            <button class="mini-btn danger" onclick="deletePage(${page.id})">🗑 删除</button>
+          </span>
+        </div>
+        <div class="content-body">${renderContent(page.content)}</div>
+      </div>
+    `;
+  },
+
+  async renderLibrary() {
+    const tab = TabManager.active;
+    if (tab) tab.title = '内容库';
+    TabManager.render();
+
+    const vp = document.getElementById('viewport');
+    vp.innerHTML = '<div class="page"><div class="loading"><div class="spinner"></div></div></div>';
+
+    const all = await DB.getAll();
+    all.sort((a, b) => b.createdAt - a.createdAt);
+
+    vp.innerHTML = `
+      <div class="page">
+        <h2 style="margin-bottom:8px;">📚 内容库</h2>
+        <p style="color:#5f6368;margin-bottom:20px;font-size:14px;">共 ${all.length} 条内容 · 所有内容均存储在本地数据库中</p>
+        <button class="btn-primary" style="margin-bottom:20px;" onclick="Router.handle('swan://upload')">+ 上传新内容</button>
+        ${all.length === 0 ? `
+          <div class="empty">
+            <div class="big">📭</div>
+            <p>内容库为空，上传你的第一条内容吧。</p>
+          </div>
+        ` : all.map(p => `
+          <div class="upload-row">
+            <div class="info">
+              <div class="title">${escapeHtml(p.title)}</div>
+              <div class="url">swan://page/${p.id} · ${(p.tags||[]).join(', ') || '无标签'} · ${new Date(p.createdAt).toLocaleDateString('zh-CN')}</div>
+            </div>
+            <div class="actions">
+              <button class="mini-btn" onclick="Router.handle('swan://page/${p.id}')">查看</button>
+              <button class="mini-btn" onclick="Router.handle('swan://edit/${p.id}')">编辑</button>
+              <button class="mini-btn danger" onclick="deletePage(${p.id})">删除</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+};
+
+/* ---------- 5. 搜索引擎 ---------- */
+function searchEngine(pages, query) {
+  if (!query.trim()) return [];
+  const q = query.toLowerCase().trim();
+  const qTokens = q.split(/\s+/).filter(Boolean);
+
+  return pages.map(page => {
+    const title = (page.title || '').toLowerCase();
+    const content = (page.content || '').toLowerCase();
+    const tags = (page.tags || []).join(' ').toLowerCase();
+
+    let score = 0;
+    let matched = false;
+
+    qTokens.forEach(token => {
+      if (title.includes(token)) { score += 60; matched = true; }
+      if (tags.includes(token)) { score += 30; matched = true; }
+      if (content.includes(token)) { score += 40; matched = true; }
+      /* 完全匹配 bonus */
+      if (title === token) score += 100;
+    });
+
+    if (!matched) return null;
+
+    /* 生成摘要片段 */
+    const snippet = makeSnippet(page.content, q);
+    return { page, score, snippet };
+  }).filter(Boolean).sort((a, b) => b.score - a.score);
+}
+
+function makeSnippet(content, query) {
+  const text = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text.slice(0, 120) + (text.length > 120 ? '…' : '');
+  const start = Math.max(0, idx - 40);
+  const end = Math.min(text.length, idx + 80);
+  return (start > 0 ? '…' : '') + text.slice(start, end) + (end < text.length ? '…' : '');
+}
+
+/* ---------- 6. 内容渲染（简易 HTML / Markdown 兼容） ---------- */
+function renderContent(content) {
+  /* 如果内容看起来是 HTML，直接渲染；否则按纯文本 + 简单 markdown 处理 */
+  const trimmed = content.trim();
+  if (/^\s*</.test(trimmed) && />\s*$/.test(trimmed)) {
+    return sanitizeHtml(trimmed);
+  }
+  /* 简单 markdown */
+  let html = escapeHtml(trimmed);
+  html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.*)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.*)$/gm, '<h1>$1</h1>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  html = html.replace(/`(.+?)`/g, '<code>$1</code>');
+  html = html.replace(/^- (.*)$/gm, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`);
+  html = html.replace(/\n{2,}/g, '</p><p>');
+  html = html.replace(/\n/g, '<br>');
+  return '<p>' + html + '</p>';
+}
+
+function sanitizeHtml(html) {
+  /* 基础防 XSS：移除 script 等危险标签，保留常见展示标签 */
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  div.querySelectorAll('script, iframe, object, embed, form').forEach(el => el.remove());
+  div.querySelectorAll('[onclick],[onload],[onerror],[src]').forEach(el => {
+    el.removeAttribute('onclick'); el.removeAttribute('onload');
+    el.removeAttribute('onerror');
+  });
+  return div.innerHTML;
+}
+
+/* ---------- 7. 工具函数 ---------- */
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function copyLink(url) {
+  navigator.clipboard.writeText(url).then(() => {
+    toast('✅ 链接已复制：' + url);
+    const btn = document.getElementById('copy-btn');
+    btn.classList.add('copied');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ 已复制';
+    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = orig; }, 1500);
+  }).catch(() => {
+    /* 降级方案 */
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('✅ 链接已复制：' + url);
+  });
+}
+
+async function deletePage(id) {
+  if (!confirm('确定要删除这条内容吗？此操作不可撤销。')) return;
+  await DB.delete(id);
+  toast('内容已删除');
+  Router.handle('swan://library');
+}
+
+/* ---------- 8. 全局事件绑定 ---------- */
+function bindToolbar() {
+  document.getElementById('back-btn').onclick = () => TabManager.back();
+  document.getElementById('forward-btn').onclick = () => TabManager.forward();
+  document.getElementById('reload-btn').onclick = () => TabManager.reload();
+  document.getElementById('home-btn').onclick = () => TabManager.navigate('swan://home');
+
+  const addr = document.getElementById('address-bar');
+  addr.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      let url = addr.value.trim();
+      if (!url) return;
+      /* 如果是纯搜索词（不含 swan://），走搜索 */
+      TabManager.navigate(url);
+    }
+  });
+
+  document.getElementById('copy-btn').onclick = () => {
+    const tab = TabManager.active;
+    if (tab) copyLink(tab.url);
+  };
+}
+
+/* ---------- 9. 预置示例内容（首次运行时写入数据库） ---------- */
+async function seedIfEmpty() {
+  const all = await DB.getAll();
+  if (all.length > 0) return;
+
+  const samples = [
+    {
+      title: '欢迎使用 Swan Browser',
+      tags: ['帮助', '入门'],
+      content: `<h2>👋 欢迎使用 Swan Browser</h2>
+<p>这是一款完全自建的浏览器软件，所有搜索内容均由用户自行上传并存储在本地数据库中。</p>
+<h3>核心特性</h3>
+<ul>
+<li><strong>私有搜索引擎</strong>：搜索结果完全来自你上传的内容</li>
+<li><strong>swan:// 专属链接</strong>：每条内容自动分配 swan:// 链接，仅在本软件中可用</li>
+<li><strong>本地数据库</strong>：数据保存在 IndexedDB，关闭浏览器不丢失</li>
+<li><strong>多标签页</strong>：支持同时打开多个页面</li>
+</ul>
+<h3>快速开始</h3>
+<ol>
+<li>点击工具栏的「上传内容」按钮</li>
+<li>填写标题和内容，支持 .txt/.md/.html 文件导入</li>
+<li>上传后自动生成 swan:// 链接，可在搜索中检索</li>
+</ol>`,
+    },
+    {
+      title: '什么是 swan:// 协议？',
+      tags: ['协议', 'swan'],
+      content: `<h2>关于 swan:// 协议</h2>
+<p><code>swan://</code> 是 Swan Browser 自定义的内部协议，类似于 <code>http://</code> 或 <code>https://</code>，但它只能在 Swan Browser 中被解析和访问。</p>
+<h3>为什么使用 swan://？</h3>
+<ul>
+<li><strong>隐私隔离</strong>：其他浏览器无法打开这些链接，保护你的私有内容</li>
+<li><strong>内部路由</strong>：通过 swan:// 链接可以直接跳转到主页、搜索、上传、内容页等</li>
+<li><strong>永久标识</strong>：每条内容上传后获得唯一 ID，生成 swan://page/{id} 链接</li>
+</ul>
+<h3>链接格式</h3>
+<ul>
+<li><code>swan://home</code> — 主页</li>
+<li><code>swan://search?q=关键词</code> — 搜索</li>
+<li><code>swan://upload</code> — 上传页面</li>
+<li><code>swan://library</code> — 内容库</li>
+<li><code>swan://page/1</code> — 第 1 条内容</li>
+</ul>`,
+    },
+    {
+      title: '如何上传和管理内容？',
+      tags: ['教程', '上传'],
+      content: `<h2>上传与管理内容</h2>
+<h3>上传内容</h3>
+<p>打开「上传内容」页面，填写标题、标签和正文即可。也可以直接导入 .txt、.md、.html 文件。</p>
+<h3>管理内容</h3>
+<p>在「内容库」中可以查看、编辑、删除所有已上传的内容。每条内容会显示其 swan:// 链接。</p>
+<h3>复制链接</h3>
+<p>打开任意页面后，点击地址栏右侧的「复制链接」按钮，即可复制当前页面的 swan:// 链接。</p>`,
+    }
+  ];
+
+  for (const s of samples) {
+    await DB.add({ ...s, createdAt: Date.now(), updatedAt: Date.now(), views: 0 });
+  }
+}
+
+/* ---------- 10. 启动 ---------- */
+(async function main() {
+  try {
+    await DB.init();
+    await seedIfEmpty();
+    bindToolbar();
+    TabManager.create('swan://home', 'Swan 搜索');
+  } catch (err) {
+    console.error(err);
+    document.getElementById('viewport').innerHTML = `
+      <div class="page">
+        <div class="empty">
+          <div class="big">⚠️</div>
+          <h3>数据库初始化失败</h3>
+          <p style="margin-top:10px;color:#d93025;">${escapeHtml(err.message || err)}</p>
+          <p style="margin-top:10px;color:#5f6368;">请检查浏览器是否支持 IndexedDB，并尝试刷新页面。</p>
+        </div>
+      </div>
+    `;
+  }
+})();
+</script>
+</body>
+</html>
