@@ -1,0 +1,68 @@
+import type { Achievement } from '../types'
+
+export const ACHIEVEMENTS: Achievement[] = [
+  {
+    id: 'first-lesson',
+    name: '初心者',
+    description: '完成第一节课',
+    icon: '🎯',
+    xp: 50,
+    condition: (s) => s.completedLessons >= 1,
+  },
+  {
+    id: 'ten-lessons',
+    name: '勤学不辍',
+    description: '完成 10 节课',
+    icon: '📚',
+    xp: 200,
+    condition: (s) => s.completedLessons >= 10,
+  },
+  {
+    id: 'streak-3',
+    name: '三日连胜',
+    description: '连续学习 3 天',
+    icon: '🔥',
+    xp: 100,
+    condition: (s) => s.streak >= 3,
+  },
+  {
+    id: 'streak-7',
+    name: '一周达人',
+    description: '连续学习 7 天',
+    icon: '⚡',
+    xp: 300,
+    condition: (s) => s.streak >= 7,
+  },
+  {
+    id: 'vocab-50',
+    name: '词汇达人',
+    description: '掌握 50 个单词',
+    icon: '🧠',
+    xp: 250,
+    condition: (s) => s.vocabMastered >= 50,
+  },
+  {
+    id: 'xp-500',
+    name: '经验猎手',
+    description: '累计获得 500 XP',
+    icon: '⭐',
+    xp: 150,
+    condition: (s) => s.xp >= 500,
+  },
+  {
+    id: 'xp-2000',
+    name: '经验大师',
+    description: '累计获得 2000 XP',
+    icon: '🏆',
+    xp: 500,
+    condition: (s) => s.xp >= 2000,
+  },
+  {
+    id: 'polyglot',
+    name: '多语通',
+    description: '学习 3 种语言',
+    icon: '🌍',
+    xp: 400,
+    condition: (s) => s.daysActive >= 5,
+  },
+]
