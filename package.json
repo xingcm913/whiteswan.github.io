@@ -1,0 +1,21 @@
+{
+  "name": "swan-search-engine",
+  "version": "1.0.0",
+  "description": "SWAN 私有搜索引擎 - 自主可控、用户自建、私有协议、封闭生态搜索引擎",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["search-engine", "private", "swan", "cloud"],
+  "author": "SWAN",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "better-sqlite3": "^11.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "sanitize-html": "^2.13.0",
+    "cors": "^2.8.5"
+  }
+}

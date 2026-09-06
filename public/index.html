@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦢 SWAN 私有搜索引擎</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="app">
+  <!-- 顶部导航 -->
+  <nav id="navbar" class="navbar glass">
+    <div class="nav-left">
+      <div class="logo" onclick="go('home')">🦢 <span>SWAN</span></div>
+    </div>
+    <div class="nav-center" id="navSearchBox">
+      <div class="search-box nav-search">
+        <input id="topSearchInput" type="text" placeholder="搜索 SWAN 私有网页..." oninput="onSearchInput(this.value)" onkeydown="if(event.key==='Enter')doSearch()">
+        <button onclick="doSearch()">🔍</button>
+      </div>
+      <div id="suggestBox" class="suggest-box"></div>
+    </div>
+    <div class="nav-right">
+      <button class="nav-btn" onclick="go('home')">首页</button>
+      <button class="nav-btn" onclick="go('upload')">上传</button>
+      <button class="nav-btn" onclick="go('user')">我的</button>
+      <button id="adminBtn" class="nav-btn" style="display:none" onclick="go('admin')">后台</button>
+      <button id="loginBtn" class="nav-btn primary" onclick="showAuth('login')">登录</button>
+      <button id="logoutBtn" class="nav-btn" style="display:none" onclick="logout()">退出</button>
+    </div>
+  </nav>
+
+  <!-- 主内容区 -->
+  <main id="main"></main>
+</div>
+
+<!-- 认证弹窗 -->
+<div id="authModal" class="modal" style="display:none">
+  <div class="modal-content glass">
+    <button class="modal-close" onclick="closeAuth()">×</button>
+    <h2 id="authTitle">登录 SWAN</h2>
+    <div class="auth-tabs">
+      <button id="tabLogin" class="auth-tab active" onclick="switchAuthTab('login')">登录</button>
+      <button id="tabRegister" class="auth-tab" onclick="switchAuthTab('register')">注册</button>
+    </div>
+    <div class="form-group">
+      <label>手机号 / 邮箱</label>
+      <input id="authAccount" type="text" placeholder="11位手机号或邮箱">
+    </div>
+    <div class="form-group">
+      <label>密码</label>
+      <input id="authPassword" type="password" placeholder="至少6位">
+    </div>
+    <div id="nicknameGroup" class="form-group" style="display:none">
+      <label>昵称（选填）</label>
+      <input id="authNickname" type="text" placeholder="给自己起个名字">
+    </div>
+    <button id="authSubmit" class="btn primary full" onclick="submitAuth()">登录</button>
+    <p class="auth-tip">无需验证码 · 无需实名 · 云端同步</p>
+  </div>
+</div>
+
+<!-- 免责声明弹窗 -->
+<div id="disclaimerModal" class="modal" style="display:none">
+  <div class="modal-content glass">
+    <h2>📜 上传须知 & 责任声明</h2>
+    <div class="disclaimer-text">
+      <p>用户上传内容全部由上传者本人承担全部法律责任。</p>
+      <p>SWAN 平台实行<b>先发布、AI初审、人工终审</b>机制。</p>
+      <p>在管理员未人工审核完成前出现的违规内容，一切责任归属上传者本人，与平台无关。</p>
+      <p>禁止上传：违法违规、色情低俗、暴力恐怖、侵权盗版、诈骗赌博等内容。</p>
+    </div>
+    <label class="checkbox-line">
+      <input type="checkbox" id="agreeDisclaimer">
+      <span>我已阅读并同意以上声明，自愿承担全部法律责任</span>
+    </label>
+    <button class="btn primary full" onclick="confirmDisclaimer()">确认并继续上传</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
