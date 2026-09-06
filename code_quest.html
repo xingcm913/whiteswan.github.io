@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>代码大陆 - 边玩边学 HTML/CSS/JS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#0f0c29;--bg2:#302b63;--bg3:#24243e;
+  --primary:#6c5ce7;--primary2:#a29bfe;
+  --accent:#00cec9;--accent2:#81ecec;
+  --gold:#fdcb6e;--danger:#ff7675;--success:#55efc4;
+  --text:#dfe6e9;--text2:#b2bec3;--dark:#2d3436;
+  --card:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.12);
+}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);background:var(--bg);}
+body{
+  background:linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%);
+  display:flex;flex-direction:column;
+}
+/* 滚动条 */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:var(--primary);border-radius:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ===== 开始界面 ===== */
+#start-screen{
+  position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:24px;
+  background:radial-gradient(circle at 50% 30%,rgba(108,92,231,0.3),transparent 70%),
+             linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+}
+#start-screen h1{font-size:clamp(32px,8vw,64px);background:linear-gradient(90deg,var(--accent),var(--primary2),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:12px;letter-spacing:2px;}
+#start-screen .sub{color:var(--text2);font-size:clamp(13px,3.5vw,17px);margin-bottom:32px;max-width:560px;line-height:1.7;}
+#start-screen .logo-wrap{margin-bottom:24px;}
+#start-screen .logo{font-size:clamp(60px,18vw,120px);filter:drop-shadow(0 0 30px rgba(0,206,201,0.5));animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px 32px;border:none;border-radius:14px;font-size:16px;font-weight:700;
+  cursor:pointer;transition:all .2s;color:#fff;font-family:inherit;
+}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));box-shadow:0 6px 20px rgba(108,92,231,0.4);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(108,92,231,0.6);}
+.btn-primary:active{transform:translateY(0);}
+.btn-ghost{background:var(--card);border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{background:rgba(255,255,255,0.1);}
+.start-btns{display:flex;flex-direction:column;gap:14px;width:100%;max-width:300px;}
+.credits{position:absolute;bottom:16px;font-size:12px;color:var(--text2);opacity:.7;}
+
+/* ===== 游戏主界面 ===== */
+#game{display:none;flex:1;flex-direction:column;min-height:0;}
+.topbar{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:rgba(0,0,0,0.3);border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.topbar .level-chip{
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;
+}
+.topbar .title{font-size:14px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.topbar .coins{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--gold);font-weight:700;}
+.topbar button{background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-size:12px;cursor:pointer;}
+
+/* NPC 对话区 */
+.npc-dialog{
+  display:flex;gap:10px;padding:12px 14px;background:rgba(0,0,0,0.25);
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.npc-avatar{
+  width:48px;height:48px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:26px;background:linear-gradient(135deg,var(--primary),var(--accent));
+  box-shadow:0 4px 12px rgba(0,0,0,0.4);
+}
+.npc-text{flex:1;min-width:0;}
+.npc-name{font-size:12px;color:var(--accent2);font-weight:700;margin-bottom:3px;}
+.npc-msg{font-size:13px;line-height:1.6;color:var(--text);}
+.npc-msg b{color:var(--gold);}
+
+/* 主工作区 */
+.workspace{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+.tabs{display:flex;background:rgba(0,0,0,0.2);border-bottom:1px solid var(--border);flex-shrink:0;}
+.tab{flex:1;padding:9px;font-size:12px;text-align:center;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;font-weight:600;transition:all .15s;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(0,206,201,0.08);}
+.code-area{flex:1;display:flex;flex-direction:column;min-height:0;}
+.editor-wrap{flex:1;position:relative;min-height:120px;}
+#code-editor{
+  width:100%;height:100%;resize:none;border:none;outline:none;background:#1e1e2e;
+  color:#dfe6e9;font-family:"Courier New",Consolas,monospace;font-size:14px;line-height:1.6;
+  padding:12px 14px;tab-size:2;
+}
+.editor-hint{position:absolute;bottom:8px;right:12px;font-size:11px;color:var(--text2);opacity:.6;pointer-events:none;}
+
+.preview-area{flex:1;display:flex;flex-direction:column;min-height:120px;background:#fff;border-top:2px solid var(--border);}
+.preview-head{background:#f1f2f6;padding:6px 12px;font-size:11px;color:#636e72;font-weight:700;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.preview-dot{width:8px;height:8px;border-radius:50%;background:#ff7675;}
+.preview-dot:nth-child(2){background:#fdcb6e;}
+.preview-dot:nth-child(3){background:#55efc4;}
+#preview-frame{flex:1;width:100%;border:none;background:#fff;}
+
+/* 底部操作栏 */
+.action-bar{
+  display:flex;gap:10px;padding:10px 14px;background:rgba(0,0,0,0.35);
+  border-top:1px solid var(--border);flex-shrink:0;
+}
+.action-bar .btn{flex:1;padding:12px;font-size:14px;}
+.btn-run{background:linear-gradient(135deg,#00b894,#00cec9);box-shadow:0 4px 14px rgba(0,206,201,0.35);}
+.btn-hint{background:linear-gradient(135deg,#e17055,#fdcb6e);box-shadow:0 4px 14px rgba(253,203,110,0.35);}
+.btn-reset{background:var(--card);border:1px solid var(--border);color:var(--text);}
+
+/* 任务面板 (NPC讲解) */
+.task-panel{
+  position:fixed;inset:0;z-index:80;background:rgba(0,0,0,0.75);
+  display:none;align-items:flex-end;justify-content:center;
+}
+.task-panel.show{display:flex;}
+.task-card{
+  background:linear-gradient(160deg,#2d3436,#1e1e2e);
+  width:100%;max-width:560px;max-height:82vh;border-radius:18px 18px 0 0;
+  padding:20px;overflow-y:auto;border-top:3px solid var(--accent);
+  animation:slideUp .3s ease;
+}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.task-card h3{color:var(--accent2);font-size:17px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.task-card .req{background:rgba(255,255,255,0.06);border-left:3px solid var(--gold);padding:10px 12px;border-radius:8px;margin:10px 0;font-size:13px;line-height:1.7;}
+.task-card .req b{color:var(--gold);}
+.task-card .tip{color:var(--success);font-size:13px;margin-top:8px;}
+.task-card .close{
+  width:100%;margin-top:14px;padding:12px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-weight:700;cursor:pointer;font-size:14px;
+}
+
+/* 提示弹窗 */
+.hint-panel{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.9);
+  z-index:90;background:linear-gradient(160deg,#2d3436,#1e1e2e);
+  border:2px solid var(--gold);border-radius:16px;padding:20px;max-width:90%;width:420px;
+  display:none;box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+.hint-panel.show{display:block;animation:pop .25s ease;}
+@keyframes pop{from{transform:translate(-50%,-50%) scale(0.8);opacity:0;}to{transform:translate(-50%,-50%) scale(1);opacity:1;}}
+.hint-panel h4{color:var(--gold);font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.hint-panel p{font-size:13px;line-height:1.7;}
+.hint-panel pre{background:#0d0d1a;padding:10px;border-radius:8px;overflow-x:auto;font-size:12px;color:var(--accent2);margin-top:8px;}
+.hint-panel .ok{width:100%;margin-top:14px;padding:10px;border:none;border-radius:8px;background:var(--gold);color:var(--dark);font-weight:700;cursor:pointer;}
+
+/* 成功 / 失败提示 */
+.toast{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:200;
+  padding:12px 24px;border-radius:12px;font-weight:700;font-size:14px;
+  display:none;box-shadow:0 10px 30px rgba(0,0,0,0.5);max-width:90%;text-align:center;
+}
+.toast.show{display:block;animation:toastIn .3s ease;}
+@keyframes toastIn{from{transform:translate(-50%,-30px);opacity:0;}to{transform:translate(-50%,0);opacity:1;}}
+.toast.success{background:linear-gradient(135deg,#00b894,#55efc4);color:#0a3d2e;}
+.toast.error{background:linear-gradient(135deg,#d63031,#ff7675);color:#fff;}
+
+/* 关卡选择界面 */
+#map-screen{position:fixed;inset:0;z-index:95;display:none;flex-direction:column;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);overflow-y:auto;}
+#map-screen.show{display:flex;}
+.map-header{padding:20px;text-align:center;border-bottom:1px solid var(--border);}
+.map-header h2{color:var(--accent2);font-size:22px;margin-bottom:4px;}
+.map-header p{color:var(--text2);font-size:13px;}
+.map-grid{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+.level-node{
+  background:var(--card);border:2px solid var(--border);border-radius:14px;padding:14px;
+  cursor:pointer;transition:all .2s;text-align:center;position:relative;
+}
+.level-node:hover{transform:translateY(-3px);border-color:var(--primary2);}
+.level-node.locked{opacity:.4;cursor:not-allowed;}
+.level-node.done{border-color:var(--success);background:rgba(85,239,196,0.1);}
+.level-node.current{border-color:var(--gold);box-shadow:0 0 20px rgba(253,203,110,0.4);}
+.level-node .num{font-size:24px;font-weight:800;color:var(--accent2);}
+.level-node.done .num{color:var(--success);}
+.level-node.locked .num{color:var(--text2);}
+.level-node .nm{font-size:12px;margin-top:4px;color:var(--text);font-weight:600;}
+.level-node .cat{font-size:10px;color:var(--text2);margin-top:2px;}
+.level-node .badge{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--gold);color:var(--dark);font-size:12px;font-weight:800;display:none;align-items:center;justify-content:center;}
+.level-node.done .badge{display:flex;}
+.map-back{padding:14px 20px;text-align:center;}
+.map-back button{padding:10px 24px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-weight:600;}
+
+/* 结局界面 */
+#end-screen{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:radial-gradient(circle at 50% 40%,rgba(253,203,110,0.2),transparent 60%),linear-gradient(135deg,#0f0c29,#302b63,#24243e);}
+#end-screen.show{display:flex;}
+#end-screen h1{font-size:clamp(28px,7vw,48px);color:var(--gold);margin-bottom:12px;}
+#end-screen p{color:var(--text);font-size:15px;max-width:520px;line-height:1.8;margin-bottom:24px;}
+#end-screen .trophy{font-size:80px;margin-bottom:16px;animation:float 3s ease-in-out infinite;}
+
+/* 响应式 */
+@media(min-width:768px){
+  .workspace{flex-direction:row;}
+  .code-area{flex:1;border-right:2px solid var(--border);}
+  .preview-area{flex:1;border-top:none;}
+  .tabs{display:none;}
+  #code-editor{font-size:15px;}
+}
+@media(max-width:767px){
+  .workspace.show-preview .code-area{display:none;}
+  .workspace.show-code .preview-area{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- 开始界面 -->
+<div id="start-screen">
+  <div class="logo-wrap"><div class="logo">⚔️</div></div>
+  <h1>代码大陆</h1>
+  <p class="sub">在这片被遗忘的数字大陆上，古老的代码之力正在消散。<br>作为被召唤的代码勇者，你将跟随导师们学习 <b style="color:#00cec9">HTML</b>、<b style="color:#a29bfe">CSS</b> 与 <b style="color:#fdcb6e">JavaScript</b>，用真实的代码战斗，拯救代码大陆！</p>
+  <div class="start-btns">
+    <button class="btn btn-primary" onclick="startGame()">▶ 开始冒险</button>
+    <button class="btn btn-ghost" onclick="showMap()">🗺️ 关卡选择</button>
+  </div>
+  <div class="credits">边玩边学 · 实战代码 · 手机适配</div>
+</div>
+
+<!-- 游戏界面 -->
+<div id="game">
+  <div class="topbar">
+    <span class="level-chip" id="level-chip">第 1 关</span>
+    <span class="title" id="level-title">初入大陆</span>
+    <span class="coins">🪙 <span id="coin-count">0</span></span>
+    <button onclick="showMap()">🗺️</button>
+  </div>
+
+  <div class="npc-dialog" onclick="openTask()">
+    <div class="npc-avatar" id="npc-avatar">🧙</div>
+    <div class="npc-text">
+      <div class="npc-name" id="npc-name">贤者·艾伦</div>
+      <div class="npc-msg" id="npc-msg">点击这里查看任务详情...</div>
+    </div>
+  </div>
+
+  <div class="workspace show-code" id="workspace">
+    <div class="tabs">
+      <div class="tab active" id="tab-code" onclick="switchTab('code')">⌨️ 代码</div>
+      <div class="tab" id="tab-preview" onclick="switchTab('preview')">👁️ 预览</div>
+    </div>
+    <div class="code-area">
+      <div class="editor-wrap">
+        <textarea id="code-editor" spellcheck="false" placeholder="在这里编写你的代码..."></textarea>
+        <div class="editor-hint">按「运行」查看效果</div>
+      </div>
+    </div>
+    <div class="preview-area">
+      <div class="preview-head">
+        <span class="preview-dot"></span><span class="preview-dot"></span><span class="preview-dot"></span>
+        <span style="margin-left:8px;">实时预览</span>
+      </div>
+      <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-reset" onclick="resetCode()">↺ 重置</button>
+    <button class="btn btn-hint" onclick="showHint()">💡 提示</button>
+    <button class="btn btn-run" onclick="runCode(true)">▶ 运行验证</button>
+  </div>
+</div>
+
+<!-- 任务面板 -->
+<div class="task-panel" id="task-panel" onclick="if(event.target===this)closeTask()">
+  <div class="task-card">
+    <h3 id="task-title">📜 任务</h3>
+    <div id="task-body"></div>
+    <button class="close" onclick="closeTask()">我明白了，去写代码</button>
+  </div>
+</div>
+
+<!-- 提示弹窗 -->
+<div class="hint-panel" id="hint-panel">
+  <h4>💡 导师提示</h4>
+  <p id="hint-text"></p>
+  <button class="ok" onclick="closeHint()">知道了</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- 关卡地图 -->
+<div id="map-screen">
+  <div class="map-header">
+    <h2>🗺️ 代码大陆地图</h2>
+    <p>已通关 <span id="map-progress">0</span> / <span id="map-total">0</span> 关</p>
+  </div>
+  <div class="map-grid" id="map-grid"></div>
+  <div class="map-back"><button onclick="closeMap()">← 返回</button></div>
+</div>
+
+<!-- 结局 -->
+<div id="end-screen">
+  <div class="trophy">🏆</div>
+  <h1>大陆重生！</h1>
+  <p>恭喜你，代码勇者！你已经掌握了 HTML、CSS 与 JavaScript 的全部基础力量，代码大陆的光芒重新闪耀。<br><br>你编写的每一行代码，都是这片大陆永恒的守护者。继续前行，去创造属于你的数字世界吧！</p>
+  <div class="start-btns">
+    <button class="btn btn-primary" onclick="restartGame()">🔄 再玩一次</button>
+    <button class="btn btn-ghost" onclick="showMap()">🗺️ 复习关卡</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   游戏数据：关卡定义
+   ============================================================ */
+const LEVELS = [
+  /* ========== HTML 篇 ========== */
+  {
+    id:1, cat:'HTML', title:'初入大陆', npc:'🧙', npcName:'贤者·艾伦',
+    intro:'勇者，欢迎来到代码大陆！我是贤者艾伦。这片大陆由 <b>HTML 标签</b>构成万物。先从最基础的文档结构开始吧。',
+    req:'请编写一个完整的 HTML 文档结构：包含 <b>&lt;!DOCTYPE html&gt;</b>、<b>&lt;html&gt;</b>、<b>&lt;head&gt;</b>（含 title）和 <b>&lt;body&gt;</b>。',
+    init:'<!DOCTYPE html>\n<html>\n<head>\n  <title>我的第一个页面</title>\n</head>\n<body>\n  \n</body>\n</html>',
+    hint:'文档结构是固定的：DOCTYPE 声明 → html 根标签 → head（放元信息）→ body（放可见内容）。title 写在 head 里。',
+    validate:(doc,code)=>{
+      return {ok:/<!doctype\s+html>/i.test(code) && /<html[\s>]/i.test(code) && /<head[\s>]/i.test(code) && /<body[\s>]/i.test(code) && /<title>[\s\S]*<\/title>/i.test(code),
+        msg:'文档结构正确！你已掌握 HTML 的骨架。'};
+    }
+  },
+  {
+    id:2, cat:'HTML', title:'标题之力', npc:'🧙', npcName:'贤者·艾伦',
+    intro:'很好！现在我们学习<b>标题标签</b>。标题是大陆的路标，从 h1 到 h6 字号递减。',
+    req:'在 body 中添加一个 <b>&lt;h1&gt;</b> 主标题，内容为「代码大陆」，再添加一个 <b>&lt;h2&gt;</b> 副标题「勇者的旅程」。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>标题</title></head>\n<body>\n  \n</body>\n</html>',
+    hint:'h1 最大最重要，一个页面通常一个 h1。h2 次之。写法：<h1>文字</h1>',
+    validate:(doc)=>{
+      const h1=doc.querySelector('h1'), h2=doc.querySelector('h2');
+      return {ok:h1 && h1.textContent.trim().includes('代码大陆') && h2 && h2.textContent.trim().includes('勇者的旅程'),
+        msg:'标题结构清晰！h1 与 h2 各司其职。'};
+    }
+  },
+  {
+    id:3, cat:'HTML', title:'段落与文字', npc:'📜', npcName:'书记官·莉娜',
+    intro:'我是书记官莉娜。段落 <b>&lt;p&gt;</b> 承载文字，<b>&lt;strong&gt;</b> 加粗表强调，<b>&lt;em&gt;</b> 斜体表强调，<b>&lt;br&gt;</b> 换行。',
+    req:'创建一个段落 p，内容包含「欢迎」，并用 <b>strong</b> 加粗「代码大陆」，用 <b>em</b> 斜体「勇者」。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>段落</title></head>\n<body>\n  \n</body>\n</html>',
+    hint:'<p>欢迎来到<strong>代码大陆</strong>，勇敢的<em>勇者</em>！</p>',
+    validate:(doc)=>{
+      const p=doc.querySelector('p');
+      return {ok:p && p.textContent.includes('欢迎') && p.querySelector('strong') && p.querySelector('em'),
+        msg:'段落与文字格式化运用自如！'};
+    }
+  },
+  {
+    id:4, cat:'HTML', title:'链接之门', npc:'🚪', npcName:'传送师·凯尔',
+    intro:'链接 <b>&lt;a&gt;</b> 是连接各地的传送门。<b>href</b> 属性指定目的地，<b>target="_blank"</b> 可在新标签打开。',
+    req:'创建一个链接 a，href 为 <b>https://www.example.com</b>，文字为「前往探索」，并设置 <b>target="_blank"</b>。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>链接</title></head>\n<body>\n  \n</body>\n</html>',
+    hint:'<a href="https://www.example.com" target="_blank">前往探索</a>',
+    validate:(doc)=>{
+      const a=doc.querySelector('a');
+      return {ok:a && a.getAttribute('href')==='https://www.example.com' && a.getAttribute('target')==='_blank' && a.textContent.trim()==='前往探索',
+        msg:'传送门已开启！链接属性掌握了。'};
+    }
+  },
+  {
+    id:5, cat:'HTML', title:'图像之灵', npc:'🎨', npcName:'画师·米娅',
+    intro:'图像 <b>&lt;img&gt;</b> 让大陆栩栩如生。<b>src</b> 指定图片地址，<b>alt</b> 是替代文字（重要！）。img 是自闭合标签。',
+    req:'添加一张图片，src 为 <b>https://picsum.photos/200</b>，alt 为 <b>风景图</b>。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>图片</title></head>\n<body>\n  \n</body>\n</html>',
+    hint:'<img src="https://picsum.photos/200" alt="风景图"> （img 不需要闭合标签）',
+    validate:(doc)=>{
+      const img=doc.querySelector('img');
+      return {ok:img && img.getAttribute('src')==='https://picsum.photos/200' && img.getAttribute('alt')==='风景图',
+        msg:'图像之灵已降临！别忘了 alt 属性对无障碍很重要。'};
+    }
+  },
+  {
+    id:6, cat:'HTML', title:'列表密文', npc:'📋', npcName:'书记官·莉娜',
+    intro:'列表分为<b>无序列表 ul</b>（圆点）和<b>有序列表 ol</b>（数字），每项用 <b>&lt;li&gt;</b>。',
+    req:'创建一个无序列表 ul，包含 3 个 li，内容分别是「HTML」「CSS」「JavaScript」。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>列表</title></head>\n<body>\n  \n</body>\n</html>',
+    hint:'<ul>\n  <li>HTML</li>\n  <li>CSS</li>\n  <li>JavaScript</li>\n</ul>',
+    validate:(doc)=>{
+      const ul=doc.querySelector('ul'); const lis=ul?ul.querySelectorAll(':scope > li'):[];
+      return {ok:lis.length===3 && ['HTML','CSS','JavaScript'].every(t=>[...lis].some(li=>li.textContent.trim()===t)),
+        msg:'列表密文已破解！ul 与 li 配合完美。'};
+    }
+  },
+  {
+    id:7, cat:'HTML', title:'表格之阵', npc:'⚔️', npcName:'将军·罗兰',
+    intro:'表格 <b>table</b> 是排兵布阵的利器。<b>tr</b> 是行，<b>th</b> 是表头，<b>td</b> 是单元格。',
+    req:'创建一个表格，第一行为表头 th：「姓名」「等级」；第二行 td：「艾伦」「99」。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>表格</title></head>\n<body>\n  \n</body>\n</html>',
+    hint:'<table>\n  <tr><th>姓名</th><th>等级</th></tr>\n  <tr><td>艾伦</td><td>99</td></tr>\n</table>',
+    validate:(doc)=>{
+      const ths=doc.querySelectorAll('th'), tds=doc.querySelectorAll('td');
+      const thTexts=[...ths].map(t=>t.textContent.trim());
+      const tdTexts=[...tds].map(t=>t.textContent.trim());
+      return {ok:ths.length>=2 && thTexts.includes('姓名')&&thTexts.includes('等级') && tdTexts.includes('艾伦')&&tdTexts.includes('99'),
+        msg:'军阵整齐！表格结构掌握了。'};
+    }
+  },
+  {
+    id:8, cat:'HTML', title:'表单之心', npc:'📝', npcName:'商人·奥托',
+    intro:'表单 <b>form</b> 收集勇者信息。<b>input</b> 输入框，<b>button</b> 按钮，<b>label</b> 关联标签。',
+    req:'创建一个表单，包含一个文本输入框（placeholder 为「请输入名字」）和一个按钮（文字「提交」）。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>表单</title></head>\n<body>\n  \n</body>\n</html>',
+    hint:'<form>\n  <input type="text" placeholder="请输入名字">\n  <button>提交</button>\n</form>',
+    validate:(doc)=>{
+      const form=doc.querySelector('form');
+      const input=form?form.querySelector('input'):doc.querySelector('input');
+      const btn=form?form.querySelector('button'):doc.querySelector('button');
+      return {ok:input && input.getAttribute('placeholder')==='请输入名字' && btn && btn.textContent.trim()==='提交',
+        msg:'表单已就绪！input 和 button 是交互的基础。'};
+    }
+  },
+  {
+    id:9, cat:'HTML', title:'语义之魂', npc:'🏛️', npcName:'贤者·艾伦',
+    intro:'语义标签让结构更清晰：<b>header</b> 页头、<b>nav</b> 导航、<b>main</b> 主内容、<b>footer</b> 页脚。',
+    req:'创建 header、nav、main、footer 四个语义标签，每个里面放一个 p 说明其作用（如 header 里写「页头」）。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>语义</title></head>\n<body>\n  \n</body>\n</html>',
+    hint:'<header><p>页头</p></header>\n<nav><p>导航</p></nav>\n<main><p>主内容</p></main>\n<footer><p>页脚</p></footer>',
+    validate:(doc)=>{
+      return {ok:doc.querySelector('header')&&doc.querySelector('nav')&&doc.querySelector('main')&&doc.querySelector('footer'),
+        msg:'语义之魂觉醒！页面结构对搜索引擎和读屏器更友好。'};
+    }
+  },
+  {
+    id:10, cat:'HTML', title:'容器与分组', npc:'📦', npcName:'工匠·本',
+    intro:'<b>div</b> 是块级容器，<b>span</b> 是行内容器。用 <b>class</b> 和 <b>id</b> 给它们命名分类。',
+    req:'创建一个 div，class 为 <b>card</b>，里面包含一个 span，id 为 <b>name</b>，文字为「勇者」。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>容器</title></head>\n<body>\n  \n</body>\n</html>',
+    hint:'<div class="card">\n  <span id="name">勇者</span>\n</div>',
+    validate:(doc)=>{
+      const div=doc.querySelector('div.card');
+      const span=div?div.querySelector('span#name'):null;
+      return {ok:div && span && span.textContent.trim()==='勇者',
+        msg:'容器分组完成！div/span + class/id 是布局基石。'};
+    }
+  },
+  /* ========== CSS 篇 ========== */
+  {
+    id:11, cat:'CSS', title:'色彩魔法', npc:'🎨', npcName:'画师·米娅',
+    intro:'CSS 让大陆焕发色彩！在 <b>&lt;style&gt;</b> 标签中写样式。用标签选择器设置颜色和字号。',
+    req:'在 head 中添加 style 标签，让所有 <b>h1</b> 颜色为 <b>红色(red)</b>，让所有 <b>p</b> 字号为 <b>20px</b>。body 中有 h1 和 p。',
+    init:'<!DOCTYPE html>\n<html>\n<head>\n  <title>CSS色彩</title>\n  \n</head>\n<body>\n  <h1>标题</h1>\n  <p>段落文字</p>\n</body>\n</html>',
+    hint:'<style>\n  h1 { color: red; }\n  p { font-size: 20px; }\n</style>',
+    validate:(doc,code)=>{
+      const h1=doc.querySelector('h1'), p=doc.querySelector('p');
+      if(!h1||!p) return {ok:false,msg:'请在 body 中保留 h1 和 p'};
+      const cs1=getComputedStyle(h1), cs2=getComputedStyle(p);
+      const redOk = /red|#f00|#ff0000|rgb\(255,\s*0,\s*0\)/i.test(code) && (cs1.color==='rgb(255, 0, 0)'||cs1.color==='red');
+      return {ok:redOk && cs2.fontSize==='20px', msg:'色彩魔法生效！选择器 + 属性 + 值就是 CSS 三件套。'};
+    }
+  },
+  {
+    id:12, cat:'CSS', title:'选择器奥义', npc:'🔮', npcName:'贤者·艾伦',
+    intro:'选择器精准定位元素：<b>.class</b> 类选择器、<b>#id</b> id 选择器、<b>标签</b> 元素选择器。',
+    req:'创建一个 class 为 <b>box</b> 的 div，用 CSS 让它背景色为 <b>blue</b>，宽高各 <b>100px</b>。再创建 id 为 <b>special</b> 的 p，颜色为 <b>green</b>。',
+    init:'<!DOCTYPE html>\n<html>\n<head>\n  <title>选择器</title>\n  <style>\n    \n  </style>\n</head>\n<body>\n  \n</body>\n</html>',
+    hint:'.box { background: blue; width: 100px; height: 100px; }\n#special { color: green; }',
+    validate:(doc)=>{
+      const box=doc.querySelector('.box');
+      const sp=doc.querySelector('#special');
+      if(!box||!sp) return {ok:false,msg:'需要 .box 的 div 和 #special 的 p'};
+      const cs1=getComputedStyle(box), cs2=getComputedStyle(sp);
+      const bgOk = /blue|#00f|#0000ff|rgb\(0,\s*0,\s*255\)/i.test(cs1.backgroundColor);
+      const greenOk = /green|#0f0|#008000|rgb\(0,\s*128,\s*0\)/i.test(cs2.color);
+      return {ok:bgOk && greenOk && cs1.width==='100px' && cs1.height==='100px',
+        msg:'选择器奥义大成！类选择器用 . ，id 选择器用 # 。'};
+    }
+  },
+  {
+    id:13, cat:'CSS', title:'盒模型', npc:'📦', npcName:'工匠·本',
+    intro:'每个元素都是一个盒子：<b>content</b> 内容、<b>padding</b> 内边距、<b>border</b> 边框、<b>margin</b> 外边距。',
+    req:'创建一个 div，设置 width:200px，padding:20px，border:5px solid black，margin:30px，背景色 yellow。',
+    init:'<!DOCTYPE html>\n<html>\n<head>\n  <title>盒模型</title>\n  <style>\n    \n  </style>\n</head>\n<body>\n  <div>盒子</div>\n</body>\n</html>',
+    hint:'div {\n  width: 200px;\n  padding: 20px;\n  border: 5px solid black;\n  margin: 30px;\n  background: yellow;\n}',
+    validate:(doc)=>{
+      const d=doc.querySelector('div');
+      if(!d) return {ok:false,msg:'需要一个 div'};
+      const cs=getComputedStyle(d);
+      return {ok:cs.width==='200px'&&cs.padding==='20px'&&cs.borderWidth==='5px'&&cs.margin==='30px',
+        msg:'盒模型已掌握！padding 内、border 边、margin 外。'};
+    }
+  },
+  {
+    id:14, cat:'CSS', title:'弹性布局 Flex', npc:'🧩', npcName:'贤者·艾伦',
+    intro:'<b>Flexbox</b> 是现代布局的神器。父元素设 <b>display:flex</b>，子元素自动排列。<b>justify-content</b> 主轴对齐。',
+    req:'创建一个父 div（class 为 <b>container</b>），内含 3 个子 div。用 flex 让它们水平排列并<b>居中对齐</b>（justify-content:center）。',
+    init:'<!DOCTYPE html>\n<html>\n<head>\n  <title>Flex</title>\n  <style>\n    \n  </style>\n</head>\n<body>\n  <div class="container">\n    <div>1</div><div>2</div><div>3</div>\n  </div>\n</body>\n</html>',
+    hint:'.container {\n  display: flex;\n  justify-content: center;\n  gap: 10px;\n}',
+    validate:(doc)=>{
+      const c=doc.querySelector('.container');
+      if(!c) return {ok:false,msg:'需要 .container'};
+      const cs=getComputedStyle(c);
+      return {ok:cs.display==='flex'&&cs.justifyContent==='center',
+        msg:'弹性布局成功！flex 是布局的瑞士军刀。'};
+    }
+  },
+  {
+    id:15, cat:'CSS', title:'悬停与过渡', npc:'✨', npcName:'画师·米娅',
+    intro:'<b>:hover</b> 伪类让元素在鼠标悬停时变化，<b>transition</b> 让变化更平滑。',
+    req:'创建一个按钮 button，默认背景 red，<b>hover 时</b>背景变 blue，并添加 <b>transition:0.3s</b> 过渡效果。',
+    init:'<!DOCTYPE html>\n<html>\n<head>\n  <title>悬停</title>\n  <style>\n    \n  </style>\n</head>\n<body>\n  <button>按钮</button>\n</body>\n</html>',
+    hint:'button {\n  background: red;\n  transition: 0.3s;\n  padding: 10px 20px;\n}\nbutton:hover { background: blue; }',
+    validate:(doc,code)=>{
+      const btn=doc.querySelector('button');
+      if(!btn) return {ok:false,msg:'需要 button'};
+      const cs=getComputedStyle(btn);
+      const hasHover=/button\s*:\s*hover\s*\{[^}]*background\s*:\s*blue/i.test(code)||/button\s*:\s*hover[\s\S]*?blue/i.test(code);
+      const hasTransition=/transition/i.test(code);
+      return {ok:/red|#f00|#ff0000/i.test(cs.backgroundColor) && hasHover && hasTransition,
+        msg:'交互魔法完成！hover + transition 让界面活起来。'};
+    }
+  },
+  /* ========== JavaScript 篇 ========== */
+  {
+    id:16, cat:'JS', title:'变量与输出', npc:'⚡', npcName:'法师·泽诺',
+    intro:'我是法师泽诺，掌管 JavaScript！用 <b>var/let/const</b> 声明变量，<b>document.write()</b> 输出到页面，<b>console.log()</b> 输出到控制台。',
+    req:'在 script 中：声明变量 name 赋值「勇者」，变量 level 赋值 1，然后用 <b>document.write</b> 输出：「我是勇者，等级 1」。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>JS变量</title></head>\n<body>\n  <script>\n    \n  <\/script>\n</body>\n</html>',
+    hint:'let name = "勇者";\nlet level = 1;\ndocument.write("我是" + name + "，等级 " + level);',
+    validate:(doc,code,win)=>{
+      const txt=doc.body.textContent;
+      const ok=/勇者/.test(txt)&&/1/.test(txt)&&/document\.write/.test(code)&&/(let|var|const)\s+\w+/.test(code);
+      return {ok,msg:'变量之力觉醒！let 声明变量，+ 拼接字符串。'};
+    }
+  },
+  {
+    id:17, cat:'JS', title:'函数术式', npc:'⚡', npcName:'法师·泽诺',
+    intro:'<b>函数 function</b> 是可复用的术式。定义后可反复调用。',
+    req:'定义函数 <b>greet(name)</b>，返回「你好，」+name。调用 greet(「艾伦」) 并用 document.write 输出结果。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>函数</title></head>\n<body>\n  <script>\n    \n  <\/script>\n</body>\n</html>',
+    hint:'function greet(name) {\n  return "你好，" + name;\n}\ndocument.write(greet("艾伦"));',
+    validate:(doc)=>{
+      return {ok:doc.body.textContent.includes('你好，艾伦'), msg:'函数术式成功！封装复用，代码更优雅。'};
+    }
+  },
+  {
+    id:18, cat:'JS', title:'DOM 操控', npc:'🎭', npcName:'法师·泽诺',
+    intro:'DOM 是页面的对象树。<b>document.getElementById()</b> 获取元素，<b>.textContent</b> 或 <b>.innerHTML</b> 修改内容。',
+    req:'HTML 中有一个 id 为 <b>msg</b> 的 div。用 JS 获取它，把它的内容改为 <b>「DOM 已被操控！」</b>。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>DOM</title></head>\n<body>\n  <div id="msg">原始内容</div>\n  <script>\n    \n  <\/script>\n</body>\n</html>',
+    hint:'let el = document.getElementById("msg");\nel.textContent = "DOM 已被操控！";',
+    validate:(doc)=>{
+      const el=doc.getElementById('msg');
+      return {ok:el && el.textContent.trim()==='DOM 已被操控！', msg:'DOM 操控成功！这是 JS 与页面交互的核心。'};
+    }
+  },
+  {
+    id:19, cat:'JS', title:'事件响应', npc:'🎯', npcName:'法师·泽诺',
+    intro:'事件让页面响应交互。<b>onclick</b> 或 <b>addEventListener</b> 监听点击。',
+    req:'创建一个按钮，点击时弹出 alert 显示 <b>「点击成功！」</b>。（可用 onclick 属性或 addEventListener）',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>事件</title></head>\n<body>\n  \n</body>\n</html>',
+    hint:'方式一：<button onclick="alert(\'点击成功！\')">点我</button>\n方式二：<button id="b">点我</button>\n<script>document.getElementById("b").onclick=()=>alert("点击成功！")<\/script>',
+    validate:(doc,code)=>{
+      const btn=doc.querySelector('button');
+      if(!btn) return {ok:false,msg:'需要一个按钮'};
+      const hasAlert=/alert\(\s*['"`]点击成功/.test(code);
+      return {ok:hasAlert, msg:'事件响应完成！点击即触发魔法。'};
+    }
+  },
+  {
+    id:20, cat:'JS', title:'条件判断', npc:'⚖️', npcName:'法师·泽诺',
+    intro:'<b>if/else</b> 让程序做决定。根据条件走不同分支。',
+    req:'声明变量 score = 85。如果 score >= 60 输出「及格」，否则输出「不及格」。用 document.write 输出结果。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>条件</title></head>\n<body>\n  <script>\n    \n  <\/script>\n</body>\n</html>',
+    hint:'let score = 85;\nif (score >= 60) {\n  document.write("及格");\n} else {\n  document.write("不及格");\n}',
+    validate:(doc,code)=>{
+      const ok=/及格/.test(doc.body.textContent)&&/if\s*\(/.test(code);
+      return {ok, msg:'条件判断生效！if/else 是逻辑分支的基石。'};
+    }
+  },
+  {
+    id:21, cat:'JS', title:'循环之力', npc:'🔁', npcName:'法师·泽诺',
+    intro:'<b>for 循环</b> 重复执行代码。用循环输出 1 到 5 的数字。',
+    req:'用 for 循环输出 1 到 5，每个数字后加一个空格，用 document.write 输出。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>循环</title></head>\n<body>\n  <script>\n    \n  <\/script>\n</body>\n</html>',
+    hint:'for (let i = 1; i <= 5; i++) {\n  document.write(i + " ");\n}',
+    validate:(doc,code)=>{
+      const txt=doc.body.textContent.replace(/\s/g,'');
+      const ok=/for\s*\(/.test(code) && txt==='12345';
+      return {ok, msg:'循环之力涌动！for 循环让重复劳动自动化。'};
+    }
+  },
+  {
+    id:22, cat:'JS', title:'数组魔法', npc:'📚', npcName:'法师·泽诺',
+    intro:'<b>数组 Array</b> 存储一组数据。<b>push</b> 添加，<b>length</b> 长度，遍历输出。',
+    req:'创建数组 skills = [「HTML」,「CSS」,「JS」]，用 for 循环遍历并 document.write 输出每个元素（用空格分隔）。',
+    init:'<!DOCTYPE html>\n<html>\n<head><title>数组</title></head>\n<body>\n  <script>\n    \n  <\/script>\n</body>\n</html>',
+    hint:'let skills = ["HTML","CSS","JS"];\nfor (let i = 0; i < skills.length; i++) {\n  document.write(skills[i] + " ");\n}',
+    validate:(doc,code)=>{
+      const txt=doc.body.textContent.replace(/\s+/g,' ').trim();
+      const ok=/\[/.test(code)&&/length/.test(code)&&txt==='HTML CSS JS';
+      return {ok, msg:'数组魔法成功！数组是数据集合的基础容器。'};
+    }
+  },
+  {
+    id:23, cat:'综合', title:'最终之战：勇者名片', npc:'👑', npcName:'众贤者',
+    intro:'勇者，你已学完 HTML/CSS/JS 全部基础！最终之战：用你所学，制作一张「勇者名片」。',
+    req:'制作一张名片：1) 一个 div（class=card）作为卡片容器；2) 里面有 h2 显示「勇者」；3) 有一个 p（id=level）显示等级；4) 用 CSS 给 card 加 padding、圆角 border-radius:15px、背景色、box-shadow；5) 用 JS 把 #level 的内容改为「Lv.99」。',
+    init:'<!DOCTYPE html>\n<html>\n<head>\n  <title>勇者名片</title>\n  <style>\n    \n  </style>\n</head>\n<body>\n  <div class="card">\n    <h2>勇者</h2>\n    <p id="level">Lv.1</p>\n  </div>\n  <script>\n    \n  <\/script>\n</body>\n</html>',
+    hint:'CSS: .card { padding: 20px; border-radius: 15px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }\nJS: document.getElementById("level").textContent = "Lv.99";',
+    validate:(doc,code)=>{
+      const card=doc.querySelector('.card');
+      if(!card) return {ok:false,msg:'需要 .card 容器'};
+      const h2=card.querySelector('h2');
+      const lv=doc.getElementById('level');
+      if(!h2||!lv) return {ok:false,msg:'需要 h2「勇者」和 #level'};
+      const cs=getComputedStyle(card);
+      const styleOk=parseInt(cs.padding)>0&&parseInt(cs.borderRadius)>=15&&cs.boxShadow!=='none';
+      return {ok:h2.textContent.includes('勇者')&&lv.textContent.trim()==='Lv.99'&&styleOk,
+        msg:'🏆 最终之战胜利！你已融会贯通 HTML + CSS + JS！'};
+    }
+  }
+];
+
+/* ============================================================
+   游戏状态与逻辑
+   ============================================================ */
+let state = {
+  currentLevel: 0,
+  coins: 0,
+  completed: JSON.parse(localStorage.getItem('cc_completed')||'[]'),
+  maxUnlocked: parseInt(localStorage.getItem('cc_max')||'0')
+};
+
+const $ = id => document.getElementById(id);
+const editor = $('code-editor');
+const preview = $('preview-frame');
+
+function startGame(){
+  $('start-screen').style.display='none';
+  $('game').style.display='flex';
+  loadLevel(state.maxUnlocked);
+}
+
+function loadLevel(idx){
+  if(idx>=LEVELS.length){ showEnd(); return; }
+  state.currentLevel = idx;
+  const lv = LEVELS[idx];
+  $('level-chip').textContent = `第 ${lv.id} 关 · ${lv.cat}`;
+  $('level-title').textContent = lv.title;
+  $('npc-avatar').textContent = lv.npc;
+  $('npc-name').textContent = lv.npcName;
+  $('npc-msg').innerHTML = lv.intro + ' <span style="color:var(--gold);font-size:11px;">(点击查看详情)</span>';
+  $('coin-count').textContent = state.coins;
+  editor.value = lv.init;
+  $('task-title').innerHTML = `📜 第${lv.id}关 · ${lv.title}`;
+  $('task-body').innerHTML = `<div style="font-size:13px;line-height:1.7;color:var(--text2);margin-bottom:6px;">${lv.intro}</div><div class="req">${lv.req}</div><div class="tip">💡 写完后点击「运行验证」，系统会自动检查你的代码！</div>`;
+  runCode(false);
+  // 自动打开任务面板引导
+  setTimeout(()=>openTask(),300);
+}
+
+function openTask(){ $('task-panel').classList.add('show'); }
+function closeTask(){ $('task-panel').classList.remove('show'); }
+
+function showHint(){
+  const lv = LEVELS[state.currentLevel];
+  $('hint-text').innerHTML = lv.hint.replace(/\n/g,'<br>').replace(/ /g,'&nbsp;');
+  $('hint-panel').classList.add('show');
+}
+function closeHint(){ $('hint-panel').classList.remove('show'); }
+
+function resetCode(){
+  editor.value = LEVELS[state.currentLevel].init;
+  runCode(false);
+  toast('已重置为初始代码','success');
+}
+
+function switchTab(t){
+  const ws=$('workspace');
+  if(t==='code'){ ws.classList.add('show-code'); ws.classList.remove('show-preview'); $('tab-code').classList.add('active'); $('tab-preview').classList.remove('active'); }
+  else{ ws.classList.add('show-preview'); ws.classList.remove('show-code'); $('tab-preview').classList.add('active'); $('tab-code').classList.remove('active'); }
+}
+
+function runCode(check){
+  const code = editor.value;
+  const doc = preview.contentDocument;
+  doc.open();
+  try{
+    doc.write(code);
+    doc.close();
+  }catch(e){
+    if(check){ toast('代码有语法错误，请检查','error'); return; }
+  }
+  // 等 iframe 渲染
+  setTimeout(()=>{
+    if(check){
+      try{
+        const lv = LEVELS[state.currentLevel];
+        const result = lv.validate(doc, code, preview.contentWindow);
+        if(result.ok){
+          state.coins += 10;
+          if(!state.completed.includes(lv.id)){
+            state.completed.push(lv.id);
+            localStorage.setItem('cc_completed', JSON.stringify(state.completed));
+          }
+          if(state.currentLevel >= state.maxUnlocked){
+            state.maxUnlocked = state.currentLevel + 1;
+            localStorage.setItem('cc_max', state.maxUnlocked);
+          }
+          $('coin-count').textContent = state.coins;
+          toast(result.msg || '✓ 验证通过！','success');
+          setTimeout(()=>{
+            if(state.currentLevel+1 >= LEVELS.length){ showEnd(); }
+            else nextLevel();
+          }, 1600);
+        } else {
+          toast(result.msg || '✗ 还不对哦，再试试','error');
+        }
+      }catch(e){
+        toast('校验出错：'+e.message,'error');
+      }
+    }
+  }, 200);
+}
+
+function nextLevel(){
+  if(state.currentLevel+1 < LEVELS.length){
+    loadLevel(state.currentLevel+1);
+  } else {
+    showEnd();
+  }
+}
+
+function toast(msg,type){
+  const t=$('toast');
+  t.textContent=msg;
+  t.className='toast show '+(type||'success');
+  clearTimeout(window._tt);
+  window._tt=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function showEnd(){
+  $('game').style.display='none';
+  $('end-screen').classList.add('show');
+}
+
+function restartGame(){
+  state.currentLevel=0; state.coins=0;
+  $('end-screen').classList.remove('show');
+  startGame();
+}
+
+/* ===== 关卡地图 ===== */
+function showMap(){
+  $('start-screen').style.display='none';
+  $('map-screen').classList.add('show');
+  renderMap();
+}
+function closeMap(){
+  $('map-screen').classList.remove('show');
+  if($('game').style.display==='flex'){
+    // 回到游戏
+  } else {
+    $('start-screen').style.display='flex';
+  }
+}
+function renderMap(){
+  const grid=$('map-grid');
+  $('map-total').textContent=LEVELS.length;
+  $('map-progress').textContent=state.completed.length;
+  grid.innerHTML='';
+  LEVELS.forEach((lv,i)=>{
+    const node=document.createElement('div');
+    let cls='level-node';
+    if(state.completed.includes(lv.id)) cls+=' done';
+    else if(i>state.maxUnlocked) cls+=' locked';
+    if(i===state.maxUnlocked) cls+=' current';
+    node.className=cls;
+    node.innerHTML=`<div class="num">${lv.id}</div><div class="nm">${lv.title}</div><div class="cat">${lv.cat}</div><div class="badge">✓</div>`;
+    if(!node.classList.contains('locked')){
+      node.onclick=()=>{ closeMap(); $('game').style.display='flex'; loadLevel(i); };
+    }
+    grid.appendChild(node);
+  });
+}
+
+/* 编辑器 Tab 支持 */
+editor.addEventListener('keydown', e=>{
+  if(e.key==='Tab'){
+    e.preventDefault();
+    const s=editor.selectionStart, end=editor.selectionEnd;
+    editor.value=editor.value.substring(0,s)+'  '+editor.value.substring(end);
+    editor.selectionStart=editor.selectionEnd=s+2;
+  }
+});
+
+/* 初始化 */
+$('map-total').textContent=LEVELS.length;
+</script>
+</body>
+</html>
