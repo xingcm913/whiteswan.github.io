@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 实验室 · 字符级 RNN</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c2230;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --accent-2: #3fb950;
+    --warn: #f0883e;
+    --danger: #f85149;
+    --user: #1f6feb;
+    --bot: #238636;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+                 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    padding: 14px 24px;
+    background: linear-gradient(90deg, #161b22, #0d1117);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  header h1 {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  header .badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+  }
+  header .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--muted);
+    display: inline-block;
+  }
+  header .status-dot.training { background: var(--accent-2); animation: pulse 1.5s infinite; }
+  header .status-dot.done { background: var(--accent); }
+  header .status-dot.stopped { background: var(--warn); }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  nav {
+    display: flex;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+  nav button {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    padding: 12px 22px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all .15s;
+  }
+  nav button:hover { color: var(--text); background: var(--panel-2); }
+  nav button.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  main {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+  .tab {
+    display: none;
+    height: 100%;
+    overflow: auto;
+    padding: 24px;
+  }
+  .tab.active { display: block; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-size: 15px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h2 .num {
+    width: 22px; height: 22px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    font-size: 12px;
+  }
+  .card p.desc {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 14px;
+    line-height: 1.6;
+  }
+
+  /* ----- 对话页 ----- */
+  #chat-window {
+    height: calc(100vh - 220px);
+    overflow-y: auto;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .msg {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .msg.user { align-self: flex-end; background: var(--user); color: #fff; border-bottom-right-radius: 2px; }
+  .msg.bot  { align-self: flex-start; background: var(--panel-2); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
+  .msg.bot .typing { color: var(--muted); font-style: italic; }
+  .chat-input {
+    display: flex;
+    gap: 10px;
+  }
+  .chat-input textarea {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+    height: 44px;
+    line-height: 24px;
+  }
+  .chat-input textarea:focus { outline: none; border-color: var(--accent); }
+
+  /* ----- 通用 ----- */
+  button.btn, .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity .15s;
+    font-family: inherit;
+  }
+  .btn:hover { opacity: .9; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn.green { background: var(--accent-2); }
+  .btn.red { background: var(--danger); }
+  .btn.ghost { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
+  .btn.small { padding: 6px 12px; font-size: 12px; }
+
+  label.field {
+    display: block;
+    margin-bottom: 12px;
+  }
+  label.field > span {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  input[type=number], input[type=text], select, textarea {
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  input[type=range] { width: 100%; }
+
+  .row { display: flex; gap: 10px; align-items: center; }
+  .row > * { flex: 1; }
+  .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ----- 训练页 ----- */
+  .train-bar {
+    display: flex; gap: 12px; align-items: center;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .progress {
+    flex: 1; height: 8px; min-width: 200px;
+    background: var(--panel-2); border-radius: 4px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress > div {
+    height: 100%; background: var(--accent-2);
+    transition: width .3s;
+  }
+  .stats-line { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  canvas { display: block; width: 100%; background: var(--panel-2); border-radius: 6px; border: 1px solid var(--border); }
+
+  /* ----- 调试页 ----- */
+  .kv { display: grid; grid-template-columns: 160px 1fr; gap: 6px 14px; font-size: 13px; }
+  .kv .k { color: var(--muted); }
+  .kv .v { color: var(--text); word-break: break-all; }
+  .prob-bar { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-size: 13px; }
+  .prob-bar .ch {
+    width: 24px; text-align: center;
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 2px 0; font-family: monospace;
+  }
+  .prob-bar .bar {
+    flex: 1; height: 16px; background: var(--panel-2); border-radius: 3px; overflow: hidden;
+  }
+  .prob-bar .bar > div { height: 100%; background: var(--accent); }
+  .prob-bar .pct { width: 60px; text-align: right; color: var(--muted); font-family: monospace; }
+
+  .toolbar { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+
+  .small-box {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 6px 10px; font-family: monospace; font-size: 12px;
+  }
+  .log {
+    background: #000; color: #c9d1d9; padding: 12px; border-radius: 6px;
+    font-family: 'SF Mono', Consolas, monospace; font-size: 12px;
+    max-height: 180px; overflow-y: auto; line-height: 1.6;
+    border: 1px solid var(--border);
+  }
+  .log .err { color: var(--danger); }
+  .log .ok { color: var(--accent-2); }
+  .log .info { color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>AI 实验室 · Char-RNN</h1>
+  <span class="badge">纯 numpy 手写</span>
+  <span class="badge">完全免费</span>
+  <span class="badge">可训练 · 可对话 · 可调试</span>
+  <div style="margin-left:auto; display:flex; align-items:center; gap:6px;">
+    <span class="status-dot" id="status-dot"></span>
+    <span style="font-size:12px; color:var(--muted)" id="status-text">未初始化</span>
+  </div>
+</header>
+
+<nav>
+  <button class="active" data-tab="chat">对话</button>
+  <button data-tab="train">训练</button>
+  <button data-tab="debug">调试</button>
+  <button data-tab="corpus">语料</button>
+</nav>
+
+<main>
+  <!-- ========== 对话 ========== -->
+  <section class="tab active" id="tab-chat">
+    <div class="card">
+      <h2><span class="num">1</span>与 AI 模型对话</h2>
+      <p class="desc">这是一个用 numpy 从零手写的字符级 RNN 神经网络。你的输入会被包成「问:...<br>答:」的形式,作为种子喂给模型,模型逐字符采样续写出回答。如果它答非所问,请先到「训练」页让它学一会儿。</p>
+      <div id="chat-window"></div>
+      <div class="chat-input">
+        <textarea id="chat-input" placeholder="问:你好" rows="1"></textarea>
+        <button class="btn green" id="btn-send">发送</button>
+      </div>
+      <div style="margin-top:10px; display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+        <label style="font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px;">
+          温度
+          <input type="range" id="chat-temp" min="0.1" max="1.5" step="0.05" value="0.7" style="width:120px;">
+          <span id="chat-temp-val" class="small-box">0.70</span>
+        </label>
+        <label style="font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px;">
+          Top-K
+          <input type="number" id="chat-topk" value="5" min="0" max="50" style="width:60px;">
+        </label>
+        <label style="font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" id="chat-raw"> 续写模式(不包问/答,直接续写)
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 训练 ========== -->
+  <section class="tab" id="tab-train">
+    <div class="card">
+      <h2><span class="num">2</span>训练 AI 模型</h2>
+      <p class="desc">这就是 AI 模型真实的训练方式:每次取一段文本 → 前向传播算预测 → 用交叉熵算损失 → BPTT 反向传播算梯度 → Adam 优化器更新权重。整个过程在 CPU 上跑,后台线程进行,可随时停止,权重自动保存。</p>
+
+      <div class="grid">
+        <div>
+          <label class="field"><span>训练迭代次数 n_iter</span>
+            <input type="number" id="train-iter" value="500" min="10" max="200000" step="10">
+          </label>
+          <label class="field"><span>隐藏层大小 hidden_size</span>
+            <input type="number" id="train-hidden" value="128" min="16" max="512" step="16">
+            <div class="hint">改这个值会重置权重(从头训练)。越大越聪明但越慢。</div>
+          </label>
+          <label class="field"><span>学习率 learning_rate</span>
+            <input type="number" id="train-lr" value="0.005" min="0.0001" max="0.5" step="0.0005">
+          </label>
+          <label class="field"><span>BPTT 序列长度 seq_len</span>
+            <input type="number" id="train-seqlen" value="50" min="10" max="500" step="5">
+          </label>
+          <div class="toolbar">
+            <button class="btn green" id="btn-train-start">开始训练</button>
+            <button class="btn red" id="btn-train-stop" disabled>停止</button>
+            <button class="btn ghost" id="btn-train-reset">重置权重</button>
+          </div>
+        </div>
+        <div>
+          <div class="train-bar">
+            <div class="progress"><div id="train-progress" style="width:0%"></div></div>
+            <span class="small-box" id="train-counter">0 / 0</span>
+          </div>
+          <div class="stats-line" id="train-stats">尚未开始训练</div>
+          <canvas id="loss-canvas" height="220"></canvas>
+          <div class="hint" style="margin-top:6px;">绿线:平滑损失(越低越好);灰线:每次迭代原始损失。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 调试 ========== -->
+  <section class="tab" id="tab-debug">
+    <div class="grid">
+      <div class="card">
+        <h2><span class="num">3</span>模型结构</h2>
+        <div class="kv" id="model-info"><div class="k">加载中...</div></div>
+        <div style="margin-top:14px;">
+          <button class="btn ghost small" id="btn-refresh-model">刷新</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">4</span>单步前向传播</h2>
+        <p class="desc">输入一个字符,看模型预测下一个字符的概率分布,以及隐藏状态变化。</p>
+        <div class="row" style="margin-bottom:10px;">
+          <input type="text" id="debug-char" maxlength="1" value="问" style="width:80px;">
+          <button class="btn small" id="btn-debug-forward">前向一步</button>
+          <button class="btn ghost small" id="btn-debug-reset-h">重置记忆</button>
+        </div>
+        <div id="debug-probs"></div>
+        <div class="hint">隐藏状态保存在内存中,连续输入多个字符可观察记忆的累积。</div>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">5</span>权重矩阵热力图(W_hh 前 16×16)</h2>
+        <canvas id="weight-canvas" height="280"></canvas>
+        <div style="margin-top:6px;">
+          <button class="btn ghost small" id="btn-refresh-weights">刷新权重</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">6</span>权重统计</h2>
+        <div class="kv" id="weight-stats"><div class="k">加载中...</div></div>
+        <div class="hint">训练后权重标准差通常会减小,均值可能略偏。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 语料 ========== -->
+  <section class="tab" id="tab-corpus">
+    <div class="card">
+      <h2><span class="num">7</span>训练语料</h2>
+      <p class="desc">模型学什么,完全取决于你喂什么文本。默认语料是一段中文对话。你可以粘贴自己的文本(建议包含「问:... 答:...」格式以便对话),保存后到训练页重新训练即可。</p>
+      <textarea id="corpus-area" rows="14" style="font-family: 'SF Mono', Consolas, monospace; font-size:12px;"></textarea>
+      <div class="toolbar" style="margin-top:10px;">
+        <button class="btn green" id="btn-save-corpus">保存并重建词汇表</button>
+        <button class="btn ghost" id="btn-load-corpus">重新加载</button>
+        <span class="small-box" id="corpus-stats">-</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+// ============ 全局 ============
+const API = (path, opts={}) => fetch(path, {headers:{'Content-Type':'application/json'}, ...opts}).then(r=>r.json());
+const $ = s => document.querySelector(s);
+let pollTimer = null;
+let debugH = null;  // 调试页隐藏状态
+
+// ============ Tab 切换 ============
+document.querySelectorAll('nav button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('nav button').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    $('#tab-'+b.dataset.tab).classList.add('active');
+    if (b.dataset.tab === 'debug') refreshDebug();
+    if (b.dataset.tab === 'corpus') loadCorpus();
+    if (b.dataset.tab === 'train') drawLoss();
+  };
+});
+
+// ============ 状态轮询 ============
+async function pollStatus() {
+  try {
+    const s = await API('/api/status');
+    const dot = $('#status-dot');
+    dot.className = 'status-dot ' + (s.status || '');
+    $('#status-text').textContent =
+      s.status === 'training' ? `训练中 ${s.current_iter}/${s.total_iter}` :
+      s.status === 'done' ? `训练完成 ${s.current_iter} 次` :
+      s.status === 'stopped' ? '已停止' :
+      s.model_info.status === 'initialized' ? '模型已就绪' : '未初始化';
+
+    // 训练页更新
+    if (s.status === 'training') {
+      const pct = s.total_iter ? (s.current_iter / s.total_iter * 100) : 0;
+      $('#train-progress').style.width = pct + '%';
+      $('#train-counter').textContent = `${s.current_iter} / ${s.total_iter}`;
+      const last = s.loss_history[s.loss_history.length-1];
+      $('#train-stats').textContent = last
+        ? `平滑损失: ${last.smooth_loss.toFixed(3)} | 当前批次损失: ${last.loss.toFixed(3)} | 词汇表: ${s.config.vocab_size} | 隐藏层: ${s.config.hidden_size}`
+        : '准备中...';
+      drawLoss(s.loss_history);
+    } else if (s.status === 'done' || s.status === 'stopped') {
+      $('#btn-train-start').disabled = false;
+      $('#btn-train-stop').disabled = true;
+      $('#train-counter').textContent = `${s.current_iter} / ${s.total_iter}`;
+      drawLoss(s.loss_history);
+    }
+  } catch(e) { /* ignore */ }
+}
+pollTimer = setInterval(pollStatus, 1000);
+pollStatus();
+
+// ============ 对话 ============
+const chatWindow = $('#chat-window');
+function addMsg(text, who) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + who;
+  d.textContent = text;
+  chatWindow.appendChild(d);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+  return d;
+}
+addMsg('你好!我是用 numpy 从零手写的字符级 RNN。我可以和你聊天,你也可以到「训练」页重新训练我,让我学你的风格。', 'bot');
+
+$('#chat-temp').oninput = e => $('#chat-temp-val').textContent = (+e.target.value).toFixed(2);
+
+async function sendChat() {
+  const text = $('#chat-input').value.trim();
+  if (!text) return;
+  addMsg(text, 'user');
+  $('#chat-input').value = '';
+  const typing = addMsg('正在思考...', 'bot');
+  typing.classList.add('typing');
+  try {
+    const r = await API('/api/chat', {method:'POST', body: JSON.stringify({
+      text,
+      length: 150,
+      temperature: +$('#chat-temp').value,
+      top_k: +$('#chat-topk').value,
+      raw_mode: $('#chat-raw').checked,
+    })});
+    typing.classList.remove('typing');
+    typing.textContent = r.ok ? r.reply : ('错误: ' + r.msg);
+  } catch(e) {
+    typing.textContent = '请求失败: ' + e.message;
+  }
+}
+$('#btn-send').onclick = sendChat;
+$('#chat-input').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } };
+
+// ============ 训练 ============
+$('#btn-train-start').onclick = async () => {
+  const body = {
+    n_iter: +$('#train-iter').value,
+    hidden_size: +$('#train-hidden').value,
+    lr: +$('#train-lr').value,
+    seq_len: +$('#train-seqlen').value,
+    log_every: 20,
+  };
+  $('#btn-train-start').disabled = true;
+  const r = await API('/api/train', {method:'POST', body: JSON.stringify(body)});
+  if (!r.ok) {
+    alert(r.msg);
+    $('#btn-train-start').disabled = false;
+    return;
+  }
+  $('#btn-train-stop').disabled = false;
+};
+$('#btn-train-stop').onclick = async () => {
+  await API('/api/stop', {method:'POST'});
+};
+$('#btn-train-reset').onclick = async () => {
+  if (!confirm('确定要重置权重吗?当前学到的会丢失。')) return;
+  await API('/api/reset', {method:'POST'});
+  alert('已重置');
+  pollStatus();
+};
+
+// 损失曲线
+function drawLoss(history) {
+  const cv = $('#loss-canvas');
+  const ctx = cv.getContext('2d');
+  const w = cv.width = cv.clientWidth;
+  const h = cv.height = 220;
+  ctx.clearRect(0,0,w,h);
+  // 背景
+  ctx.fillStyle = '#1c2230';
+  ctx.fillRect(0,0,w,h);
+  if (!history || !history.length) {
+    ctx.fillStyle = '#8b949e';
+    ctx.font = '13px sans-serif';
+    ctx.fillText('暂无训练数据,点击「开始训练」', 20, h/2);
+    return;
+  }
+  const iters = history.map(x => x.iter);
+  const maxIter = Math.max(...iters);
+  const losses = history.map(x => x.loss);
+  const sm = history.map(x => x.smooth_loss);
+  const maxL = Math.max(...losses, ...sm, 1) * 1.1;
+  const padL = 40, padB = 24, padT = 10, padR = 10;
+  const W = w - padL - padR, H = h - padB - padT;
+  // 坐标轴
+  ctx.strokeStyle = '#30363d';
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, padT+H); ctx.lineTo(padL+W, padT+H);
+  ctx.stroke();
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '10px sans-serif';
+  for (let i=0;i<=4;i++) {
+    const y = padT + H * i / 4;
+    ctx.fillText((maxL*(1-i/4)).toFixed(1), 4, y+3);
+    ctx.strokeStyle = '#21262d';
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL+W, y); ctx.stroke();
+  }
+  ctx.fillText('0', padL-4, padT+H+12);
+  ctx.fillText(maxIter, padL+W-20, padT+H+12);
+  ctx.fillText('loss', padL+W-30, padT+10);
+  // 原始损失(灰)
+  ctx.strokeStyle = '#484f58';
+  ctx.beginPath();
+  history.forEach((p,i) => {
+    const x = padL + (p.iter/maxIter)*W;
+    const y = padT + H*(1 - p.loss/maxL);
+    i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+  });
+  ctx.stroke();
+  // 平滑损失(绿)
+  ctx.strokeStyle = '#3fb950';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  history.forEach((p,i) => {
+    const x = padL + (p.iter/maxIter)*W;
+    const y = padT + H*(1 - p.smooth_loss/maxL);
+    i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+  });
+  ctx.stroke();
+  ctx.lineWidth = 1;
+}
+
+// ============ 调试 ============
+async function refreshDebug() {
+  // 模型信息
+  const m = await API('/api/model');
+  const info = m.model;
+  const kv = $('#model-info');
+  kv.innerHTML = '';
+  const rows = [
+    ['状态', info.status],
+    ['隐藏层大小', info.hidden_size],
+    ['词汇表大小', info.vocab_size],
+    ['学习率', info.learning_rate],
+    ['BPTT 长度', info.seq_len],
+    ['已训练迭代', info.iteration],
+    ['平滑损失', info.smooth_loss ? info.smooth_loss.toFixed(3) : '-'],
+    ['总参数量', info.total_params ? info.total_params.toLocaleString() : '-'],
+    ['参数形状', info.param_shapes ? JSON.stringify(info.param_shapes) : '-'],
+  ];
+  rows.forEach(([k,v]) => {
+    const dk = document.createElement('div'); dk.className='k'; dk.textContent=k;
+    const dv = document.createElement('div'); dv.className='v'; dv.textContent=v;
+    kv.appendChild(dk); kv.appendChild(dv);
+  });
+
+  // 权重
+  const w = await API('/api/debug/weights');
+  if (w.ok) {
+    drawWeights(w.W_hh_preview);
+    const ws = $('#weight-stats');
+    ws.innerHTML = '';
+    Object.entries(w.param_stats).forEach(([k,v]) => {
+      const dk = document.createElement('div'); dk.className='k'; dk.textContent=k;
+      const dv = document.createElement('div'); dv.className='v';
+      dv.textContent = `mean=${v.mean.toFixed(4)} std=${v.std.toFixed(4)} min=${v.min.toFixed(3)} max=${v.max.toFixed(3)}`;
+      ws.appendChild(dk); ws.appendChild(dv);
+    });
+  }
+}
+function drawWeights(mat) {
+  const cv = $('#weight-canvas');
+  const ctx = cv.getContext('2d');
+  const n = mat.length;
+  const w = cv.width = cv.clientWidth;
+  const h = cv.height = 280;
+  ctx.fillStyle='#1c2230'; ctx.fillRect(0,0,w,h);
+  if (!n) return;
+  const sz = Math.floor(Math.min((w-20)/n, (h-20)/n));
+  const offX = (w - sz*n)/2, offY = (h - sz*n)/2;
+  let maxAbs = 0;
+  mat.forEach(r => r.forEach(v => maxAbs = Math.max(maxAbs, Math.abs(v))));
+  for (let i=0;i<n;i++) for (let j=0;j<n;j++) {
+    const v = mat[i][j]/(maxAbs||1);
+    // 负=红,正=绿
+    const r = v<0 ? -v*255 : 0;
+    const g = v>0 ? v*255 : 0;
+    ctx.fillStyle = `rgba(${r|0},${g|0},0,${Math.abs(v)*0.9+0.1})`;
+    ctx.fillRect(offX+j*sz, offY+i*sz, sz-1, sz-1);
+  }
+  ctx.fillStyle='#8b949e'; ctx.font='10px sans-serif';
+  ctx.fillText('红=负 绿=正', 8, 14);
+}
+$('#btn-refresh-model').onclick = refreshDebug;
+$('#btn-refresh-weights').onclick = refreshDebug;
+$('#btn-debug-reset-h').onclick = () => { debugH = null; $('#debug-probs').innerHTML = '<div class="hint">记忆已重置</div>'; };
+$('#btn-debug-forward').onclick = async () => {
+  const ch = $('#debug-char').value;
+  const body = { char: ch };
+  if (debugH) body.h_prev = debugH;
+  const r = await API('/api/debug/forward', {method:'POST', body: JSON.stringify(body)});
+  const box = $('#debug-probs');
+  if (!r.ok) { box.innerHTML = `<div class="hint" style="color:var(--danger)">${r.msg}</div>`; return; }
+  debugH = r.h_new;
+  box.innerHTML = `<div class="hint">输入 "${r.input_char}" 后,模型预测下一个字符的 Top-10 概率:</div>`;
+  r.top.forEach(t => {
+    const row = document.createElement('div'); row.className='prob-bar';
+    row.innerHTML = `
+      <span class="ch">${t.char === '\n' ? '↵' : t.char === ' ' ? '␣' : t.char}</span>
+      <span class="bar"><div style="width:${t.prob*100}%"></div></span>
+      <span class="pct">${(t.prob*100).toFixed(2)}%</span>`;
+    box.appendChild(row);
+  });
+};
+
+// ============ 语料 ============
+async function loadCorpus() {
+  const r = await API('/api/corpus');
+  if (!r.ok) return;
+  $('#corpus-area').value = r.corpus;
+  $('#corpus-stats').textContent = `${r.corpus.length} 字符 / 词汇表 ${r.vocab_size}`;
+}
+$('#btn-load-corpus').onclick = loadCorpus;
+$('#btn-save-corpus').onclick = async () => {
+  const text = $('#corpus-area').value;
+  const r = await API('/api/corpus', {method:'POST', body: JSON.stringify({text})});
+  alert(r.msg || '已保存');
+  if (r.ok) $('#corpus-stats').textContent = `${r.corpus_len} 字符 / 词汇表 ${r.vocab_size}`;
+};
+</script>
+</body>
+</html>
