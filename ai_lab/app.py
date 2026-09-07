@@ -94,18 +94,25 @@ def api_chat():
                                    temperature=temperature, top_k=top_k)
         return jsonify({'ok': True, 'reply': out, 'raw': True})
 
-    # 对话模式:让模型续写 "答:"
-    seed = f'问:{user_input}\n答:'
+    # 对话模式:把最近几轮对话拼进种子,带上下文续写 "答:"
+    seed = trainer.build_seed(user_input)
     out = trainer.model.sample(seed_text=seed, length=length,
                                temperature=temperature, top_k=top_k)
-    # 截到下一个 "问:" 之前
+    # 聪明的停止:遇到下一个"问:"或两个连续换行就截断
     cut = out.find('问:')
     if cut != -1:
         out = out[:cut]
+    # 双换行也截断(语料里问答间通常有换行)
+    for sep in ['\n\n', '\r\n\r\n']:
+        idx = out.find(sep)
+        if idx != -1 and idx < len(out):
+            out = out[:idx]
     out = out.rstrip('\n').strip()
     if not out:
         out = '(模型还没学会回答,请先到「训练」页面训练它。)'
-    return jsonify({'ok': True, 'reply': out, 'raw': False})
+    # 记录这轮对话(供下一轮上下文)
+    trainer.add_dialog(user_input, out)
+    return jsonify({'ok': True, 'reply': out, 'raw': False, 'context_used': len(trainer.dialog_history) - 1})
 
 
 @app.route('/api/sample', methods=['POST'])
@@ -119,6 +126,13 @@ def api_sample():
     out = trainer.model.sample(seed_text=seed, length=length,
                                temperature=temperature, top_k=top_k)
     return jsonify({'ok': True, 'text': out})
+
+
+@app.route('/api/chat/clear', methods=['POST'])
+def api_chat_clear():
+    """清空后端对话上下文(下一轮对话变成冷启动)"""
+    trainer.clear_dialog()
+    return jsonify({'ok': True, 'msg': '对话上下文已清空'})
 
 
 @app.route('/api/corpus', methods=['GET', 'POST'])

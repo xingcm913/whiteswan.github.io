@@ -29,6 +29,10 @@ class Trainer:
         self.model_path = '/workspace/ai_lab/model.pkl'
         self.corpus_path = '/workspace/ai_lab/corpus.txt'
 
+        # 对话上下文(保留最近几轮,拼入种子,让回答更连贯)
+        self.dialog_history = []   # [{q, a}, ...]
+        self.max_history_rounds = 3
+
     # ---------------- 语料 ----------------
     def load_corpus(self, text=None):
         if text is None:
@@ -48,6 +52,8 @@ class Trainer:
         seq_len = self.model.seq_len
         pos = 0
         h_prev = np.zeros((self.model.hidden_size, 1))
+        last_save_iter = 0
+        SAVE_EVERY = max(log_every * 5, 200)  # 中途降频保存,避免 IO 拖慢训练
 
         while not self._stop_flag.is_set() and self.current_iter < n_iter:
             # 到达结尾,回到开头并重置记忆(常规做法)
@@ -59,7 +65,15 @@ class Trainer:
             y_idx = self.data[pos + 1:pos + 1 + seq_len]
 
             loss, grads, h_prev = self.model.loss_and_grads(x_idx, y_idx, h_prev)
-            # 脱离计算图(阻断梯度链)
+
+            # NaN / Inf 保护:学习率过大或梯度爆炸时自动停
+            if not np.isfinite(loss):
+                self.status = 'stopped'
+                self.last_message = (f'训练在 iter={self.current_iter} 检测到 NaN/Inf 损失,'
+                                     f'已自动停止。请把学习率调小(当前 lr={self.model.lr})后重置权重重训。')
+                self.model.save(self.model_path)
+                return
+
             h_prev = h_prev.copy()
             self.model.step(grads)
 
@@ -78,8 +92,10 @@ class Trainer:
                 # 只保留最近 500 条
                 if len(self.loss_history) > 500:
                     self.loss_history = self.loss_history[-500:]
-                # 周期保存
-                self.model.save(self.model_path)
+                # 中途降频保存(只在每 SAVE_EVERY 步或最后一步)
+                if self.current_iter - last_save_iter >= SAVE_EVERY or self.current_iter == n_iter:
+                    self.model.save(self.model_path)
+                    last_save_iter = self.current_iter
 
         if self._stop_flag.is_set():
             self.status = 'stopped'
@@ -88,6 +104,23 @@ class Trainer:
             self.status = 'done'
             self.last_message = f'训练完成,共 {self.current_iter} 次迭代'
         self.model.save(self.model_path)
+
+    # ---------------- 对话上下文 ----------------
+    def add_dialog(self, q, a):
+        self.dialog_history.append({'q': q, 'a': a})
+        if len(self.dialog_history) > self.max_history_rounds:
+            self.dialog_history = self.dialog_history[-self.max_history_rounds:]
+
+    def clear_dialog(self):
+        self.dialog_history = []
+
+    def build_seed(self, user_input):
+        """把最近几轮对话 + 当前问题拼成种子,带上下文续写"""
+        parts = []
+        for h in self.dialog_history:
+            parts.append(f"问:{h['q']}\n答:{h['a']}")
+        parts.append(f"问:{user_input}\n答:")
+        return '\n'.join(parts)
 
     def start(self, n_iter=1000, hidden_size=None, lr=None, seq_len=None,
               log_every=20, corpus_text=None):

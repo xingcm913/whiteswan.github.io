@@ -342,9 +342,13 @@
     <div class="card">
       <h2><span class="num">1</span>与 AI 模型对话</h2>
       <p class="desc">这是一个用 numpy 从零手写的字符级 RNN 神经网络。你的输入会被包成「问:...<br>答:」的形式,作为种子喂给模型,模型逐字符采样续写出回答。如果它答非所问,请先到「训练」页让它学一会儿。</p>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-size:11px; color:var(--muted);" id="chat-meta">最近 3 轮对话作为上下文</span>
+        <button class="btn ghost small" id="btn-chat-clear">清空对话</button>
+      </div>
       <div id="chat-window"></div>
       <div class="chat-input">
-        <textarea id="chat-input" placeholder="问:你好" rows="1"></textarea>
+        <textarea id="chat-input" placeholder="问:你好 (Enter 发送, Shift+Enter 换行)" rows="1"></textarea>
         <button class="btn green" id="btn-send">发送</button>
       </div>
       <div style="margin-top:10px; display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
@@ -649,6 +653,7 @@ document.querySelectorAll('nav button').forEach(b => {
 });
 
 // ============ 状态轮询 ============
+let lastTrainStatus = null;
 async function pollStatus() {
   try {
     const s = await API('/api/status');
@@ -659,6 +664,16 @@ async function pollStatus() {
       s.status === 'done' ? `训练完成 ${s.current_iter} 次` :
       s.status === 'stopped' ? '已停止' :
       s.model_info.status === 'initialized' ? '模型已就绪' : '未初始化';
+
+    // 训练完成 / 停止的 toast 提醒(只在从 training 变成 done/stopped 时弹)
+    if (lastTrainStatus === 'training' && (s.status === 'done' || s.status === 'stopped')) {
+      const last = s.loss_history[s.loss_history.length-1];
+      const lossStr = last ? ` 损失 ${last.smooth_loss.toFixed(1)}` : '';
+      toast(s.last_message + lossStr, s.status === 'done' ? 'ok' : 'err');
+      // 训练完自动重置对话上下文(因为模型权重变了,旧上下文不一定还有效)
+      try { await API('/api/chat/clear', {method:'POST'}); } catch(e) {}
+    }
+    lastTrainStatus = s.status;
 
     // 训练页更新
     if (s.status === 'training') {
@@ -681,17 +696,56 @@ async function pollStatus() {
 pollTimer = setInterval(pollStatus, 1000);
 pollStatus();
 
+// ============ Toast 通知 ============
+function toast(msg, type='info') {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed; right:20px; top:20px; z-index:9999;
+    background:${type==='ok'?'#1f3d2a':type==='err'?'#3d1f1f':'#1f2a3d'};
+    color:${type==='ok'?'#3fb950':type==='err'?'#f85149':'#58a6ff'};
+    border:1px solid var(--border); border-left:3px solid currentColor;
+    padding:12px 18px; border-radius:6px; font-size:13px; max-width:380px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.4); transition:opacity .3s;`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(()=>t.remove(), 300); }, 3500);
+}
+
 // ============ 对话 ============
 const chatWindow = $('#chat-window');
-function addMsg(text, who) {
+const STORAGE_KEY = 'ai_lab_chat_history';
+
+function loadChatHistory() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    if (Array.isArray(arr) && arr.length) {
+      arr.forEach(m => addMsg(m.text, m.who, false));
+      return;
+    }
+  } catch(e) {}
+  addMsg('你好!我是用 numpy 从零手写的字符级 RNN。我可以和你聊天,你也可以到「训练」页重新训练我,让我学你的风格。', 'bot', false);
+}
+
+function saveMsg(text, who) {
+  try {
+    const arr = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    arr.push({text, who});
+    // 只保留最近 50 条
+    while (arr.length > 50) arr.shift();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  } catch(e) {}
+}
+
+function addMsg(text, who, persist=true) {
   const d = document.createElement('div');
   d.className = 'msg ' + who;
   d.textContent = text;
   chatWindow.appendChild(d);
   chatWindow.scrollTop = chatWindow.scrollHeight;
+  if (persist) saveMsg(text, who);
   return d;
 }
-addMsg('你好!我是用 numpy 从零手写的字符级 RNN。我可以和你聊天,你也可以到「训练」页重新训练我,让我学你的风格。', 'bot');
+
+loadChatHistory();
 
 $('#chat-temp').oninput = e => $('#chat-temp-val').textContent = (+e.target.value).toFixed(2);
 
@@ -700,7 +754,7 @@ async function sendChat() {
   if (!text) return;
   addMsg(text, 'user');
   $('#chat-input').value = '';
-  const typing = addMsg('正在思考...', 'bot');
+  const typing = addMsg('正在思考...', 'bot', false);
   typing.classList.add('typing');
   try {
     const r = await API('/api/chat', {method:'POST', body: JSON.stringify({
@@ -711,13 +765,33 @@ async function sendChat() {
       raw_mode: $('#chat-raw').checked,
     })});
     typing.classList.remove('typing');
-    typing.textContent = r.ok ? r.reply : ('错误: ' + r.msg);
+    if (r.ok) {
+      typing.textContent = r.reply;
+      saveMsg(r.reply, 'bot');
+      // 显示上下文标记
+      if (r.context_used > 0 && !$('#chat-raw').checked) {
+        $('#chat-meta').textContent = `已用最近 ${r.context_used} 轮对话作为上下文`;
+      }
+    } else {
+      typing.textContent = '错误: ' + r.msg;
+    }
   } catch(e) {
     typing.textContent = '请求失败: ' + e.message;
   }
 }
 $('#btn-send').onclick = sendChat;
 $('#chat-input').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } };
+
+// 清空对话
+$('#btn-chat-clear').onclick = async () => {
+  if (!confirm('确定清空所有对话?后端上下文也会一起清空。')) return;
+  try { await API('/api/chat/clear', {method:'POST'}); } catch(e) {}
+  localStorage.removeItem(STORAGE_KEY);
+  chatWindow.innerHTML = '';
+  $('#chat-meta').textContent = '对话已清空,下一轮冷启动';
+  addMsg('对话已清空。', 'bot', false);
+  toast('对话已清空', 'ok');
+};
 
 // ============ 训练 ============
 $('#btn-train-start').onclick = async () => {
