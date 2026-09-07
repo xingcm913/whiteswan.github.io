@@ -267,6 +267,53 @@
   .log .err { color: var(--danger); }
   .log .ok { color: var(--accent-2); }
   .log .info { color: var(--accent); }
+
+  /* ----- 帮助页 ----- */
+  .help { max-width: 920px; }
+  .help h3 {
+    font-size: 16px; margin: 22px 0 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border); color: var(--accent);
+  }
+  .help h3:first-child { margin-top: 0; }
+  .help h4 { font-size: 14px; margin: 14px 0 8px; color: var(--text); }
+  .help p, .help li { font-size: 13px; line-height: 1.85; color: var(--text); }
+  .help .muted { color: var(--muted); }
+  .help ol, .help ul { padding-left: 22px; margin: 6px 0 10px; }
+  .help li { margin: 4px 0; }
+  .help code {
+    background: var(--panel-2); border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 4px; font-family: 'SF Mono', Consolas, monospace;
+    font-size: 12px; color: var(--accent-2);
+  }
+  .help pre {
+    background: #000; color: #c9d1d9; padding: 12px; border-radius: 6px;
+    font-family: 'SF Mono', Consolas, monospace; font-size: 12px;
+    overflow-x: auto; line-height: 1.6; margin: 8px 0; border: 1px solid var(--border);
+  }
+  .help .tip {
+    background: rgba(63,185,80,0.08); border-left: 3px solid var(--accent-2);
+    padding: 10px 14px; margin: 10px 0; border-radius: 4px; font-size: 13px;
+  }
+  .help .warn {
+    background: rgba(240,136,62,0.08); border-left: 3px solid var(--warn);
+    padding: 10px 14px; margin: 10px 0; border-radius: 4px; font-size: 13px;
+  }
+  .help .toc {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 14px 18px; margin-bottom: 18px;
+  }
+  .help .toc a { color: var(--accent); text-decoration: none; font-size: 13px; }
+  .help .toc a:hover { text-decoration: underline; }
+  .help .toc ol { margin: 0; }
+  .help table {
+    width: 100%; border-collapse: collapse; margin: 8px 0 14px;
+    font-size: 12px;
+  }
+  .help th, .help td {
+    border: 1px solid var(--border); padding: 6px 10px; text-align: left;
+  }
+  .help th { background: var(--panel-2); color: var(--accent); }
+  .help td code { background: none; border: none; padding: 0; }
 </style>
 </head>
 <body>
@@ -286,6 +333,7 @@
   <button data-tab="train">训练</button>
   <button data-tab="debug">调试</button>
   <button data-tab="corpus">语料</button>
+  <button data-tab="help">帮助</button>
 </nav>
 
 <main>
@@ -406,6 +454,176 @@
         <button class="btn ghost" id="btn-load-corpus">重新加载</button>
         <span class="small-box" id="corpus-stats">-</span>
       </div>
+    </div>
+  </section>
+
+  <!-- ========== 帮助 ========== -->
+  <section class="tab" id="tab-help">
+    <div class="card help">
+
+      <div class="toc">
+        <strong style="font-size:13px;">目录</strong>
+        <ol>
+          <li><a href="#h-what">这是什么?能做什么?</a></li>
+          <li><a href="#h-quick">30 秒快速上手</a></li>
+          <li><a href="#h-chat">怎么和它对话?</a></li>
+          <li><a href="#h-train">怎么训练它?(核心)</a></li>
+          <li><a href="#h-params">训练参数怎么调?</a></li>
+          <li><a href="#h-debug">怎么调试 / 看模型内部?</a></li>
+          <li><a href="#h-corpus">怎么换自己的语料?</a></li>
+          <li><a href="#h-principle">训练原理通俗解释</a></li>
+          <li><a href="#h-faq">常见问题 FAQ</a></li>
+          <li><a href="#h-trouble">故障排查</a></li>
+        </ol>
+      </div>
+
+      <h3 id="h-what">1. 这是什么?能做什么?</h3>
+      <p>这是一个 <strong>完全用 numpy 从零手写的字符级 RNN 神经网络</strong>,没有调用任何外部 AI API,纯本地 CPU 运行,完全免费。</p>
+      <ul>
+        <li><strong>对话</strong>:输入一句话,它会模仿学过的语料风格,逐字符生成回答。</li>
+        <li><strong>训练</strong>:像真正训练 AI 模型一样,做前向传播 → 算损失 → 反向传播 → 更新权重。全程可见损失曲线。</li>
+        <li><strong>调试</strong>:查看模型结构、权重矩阵热力图、单步前向传播的概率分布。</li>
+        <li><strong>换语料</strong>:喂什么文本,模型就学什么风格。你可以让它学诗词、歌词、客服话术……</li>
+      </ul>
+      <div class="tip">模型默认带一份中文对话语料,并已预训练 3000 次。打开「对话」页即可直接聊天。</div>
+
+      <h3 id="h-quick">2. 30 秒快速上手</h3>
+      <ol>
+        <li>点顶部 <code>对话</code> 标签 → 输入框打字,例如「你好」→ 回车或点「发送」。</li>
+        <li>觉得回答不好?点 <code>训练</code> 标签 → 点「开始训练」→ 看绿线(损失)下降。</li>
+        <li>训练几百次后回到「对话」再问,会发现回答明显更通顺。</li>
+        <li>想看模型内部?点 <code>调试</code> 标签,看权重热力图和单步概率。</li>
+      </ol>
+
+      <h3 id="h-chat">3. 怎么和它对话?</h3>
+      <p>在「对话」页的输入框输入文字后回车发送。三个可调选项:</p>
+      <table>
+        <tr><th>选项</th><th>含义</th><th>推荐值</th></tr>
+        <tr><td>温度 temperature</td><td>越高越随机放飞,越低越确定保守。<code>0.5</code> 左右通常答得最稳。</td><td>0.5 ~ 0.8</td></tr>
+        <tr><td>Top-K</td><td>只在前 K 个高概率字符里采样。<code>5</code> 表示只在最可能的 5 个里挑。</td><td>3 ~ 8</td></tr>
+        <tr><td>续写模式</td><td>勾上后,不自动包「问:/答:」,直接接着你输入的文字往下写。适合写诗、续写故事。</td><td>看需求</td></tr>
+      </table>
+      <div class="tip">模型答非所问怎么办?多半是没训练够,或语料里没相关内容。去「训练」页加训,或在「语料」页补充相关问答。</div>
+
+      <h3 id="h-train">4. 怎么训练它?(核心)</h3>
+      <p>训练 = 让模型反复读语料、调整内部权重,使它能模仿语料风格。步骤:</p>
+      <ol>
+        <li>点 <code>训练</code> 标签。</li>
+        <li>设置参数(下面详解),新手可直接用默认值:<code>n_iter=500</code>、<code>hidden_size=128</code>、<code>lr=0.01</code>、<code>seq_len=50</code>。</li>
+        <li>点 <strong>开始训练</strong>。后台线程开始跑,进度条和损失曲线实时更新。</li>
+        <li>等绿线(平滑损失)持续下降。<strong>损失越低,模型越懂</strong>。</li>
+        <li>训练中可随时点 <strong>停止</strong>,权重会自动保存,不会丢。</li>
+        <li>训练结束自动保存到 <code>model.pkl</code>,下次启动会自动加载。</li>
+      </ol>
+      <div class="warn">注意:改 <code>hidden_size</code> 会清空已有权重从头训练(因为网络结构变了)。只想加训就别动它。</div>
+
+      <h3 id="h-params">5. 训练参数怎么调?</h3>
+      <table>
+        <tr><th>参数</th><th>作用</th><th>新手建议</th><th>调大的影响</th></tr>
+        <tr>
+          <td><code>n_iter</code><br>迭代次数</td>
+          <td>训练多少步</td>
+          <td>500 ~ 3000</td>
+          <td>学得越久越像样,但太久会过拟合(死记硬背)</td>
+        </tr>
+        <tr>
+          <td><code>hidden_size</code><br>隐藏层大小</td>
+          <td>模型"脑容量"</td>
+          <td>128</td>
+          <td>更聪明但更慢;改它=从头训练</td>
+        </tr>
+        <tr>
+          <td><code>lr</code><br>学习率</td>
+          <td>每次更新的步子大小</td>
+          <td>0.005 ~ 0.02</td>
+          <td>太大→震荡发散;太小→半天学不动</td>
+        </tr>
+        <tr>
+          <td><code>seq_len</code><br>BPTT长度</td>
+          <td>每次看多长的文本片段</td>
+          <td>30 ~ 80</td>
+          <td>更长记忆更远,但更慢且更难训</td>
+        </tr>
+      </table>
+      <h4>调参口诀</h4>
+      <ul>
+        <li>损失不下降 → <code>lr</code> 调大一点(0.01 → 0.02)。</li>
+        <li>损失乱跳/NaN → <code>lr</code> 调小(0.01 → 0.005)。</li>
+        <li>答得太死板 → 多训几轮 或 调大 <code>hidden_size</code>。</li>
+        <li>训练太慢 → 减小 <code>seq_len</code> 或 <code>hidden_size</code>。</li>
+      </ul>
+
+      <h3 id="h-debug">6. 怎么调试 / 看模型内部?</h3>
+      <p>「调试」页四个卡片:</p>
+      <ul>
+        <li><strong>模型结构</strong>:看词汇表大小、隐藏层、总参数量、当前损失。点「刷新」实时更新。</li>
+        <li><strong>单步前向传播</strong>:输入一个字符,看模型预测下一个字符的 Top-10 概率。连续输入多个字符可观察"记忆"如何累积(点「重置记忆」清空)。</li>
+        <li><strong>权重热力图</strong>:W_hh 矩阵前 16×16 的可视化,红=负、绿=正。训练后颜色会变化,反映权重在学习。</li>
+        <li><strong>权重统计</strong>:每个权重矩阵的均值/标准差/最小最大值。训练后 std 通常减小。</li>
+      </ul>
+      <div class="tip">这是这个工具最有教学价值的部分 —— 你能亲眼看见 AI 内部在变。</div>
+
+      <h3 id="h-corpus">7. 怎么换自己的语料?</h3>
+      <p>模型只会学你喂的文本。换语料步骤:</p>
+      <ol>
+        <li>点 <code>语料</code> 标签。</li>
+        <li>在文本框里粘贴/编辑你的文本。</li>
+        <li>点 <strong>保存并重建词汇表</strong>。系统会重新统计字符集。</li>
+        <li>切到 <code>训练</code> 标签,点「开始训练」(建议先点「重置权重」从头训)。</li>
+        <li>训练完回「对话」页,模型就是你的风格了。</li>
+      </ol>
+      <h4>语料格式建议</h4>
+      <p>想让它做问答,语料就用这种格式(每条问答之间换行):</p>
+<pre>问:你好
+答:你好,很高兴见到你。
+问:今天天气怎么样?
+答:今天阳光明媚,适合出门。</pre>
+      <p>想让它写诗,就直接粘一段诗词;想让它学客服话术,就粘对话记录。<strong>语料越多越规整,模型表现越好</strong>。</p>
+      <div class="warn">词汇表只在保存语料时重建。换语料后必须重新训练,否则模型还在用旧词汇表。</div>
+
+      <h3 id="h-principle">8. 训练原理通俗解释</h3>
+      <h4>① 模型在干什么</h4>
+      <p>给它前面几个字符,它预测下一个字符是什么。比如见「你好,」它该预测「我」概率高。这就是 <strong>语言模型</strong>。</p>
+      <h4>② 怎么预测</h4>
+      <p>把字符转 one-hot 向量 → 喂进 RNN 隐藏层(tanh 激活)→ 输出层算每个字符的分数 → softmax 转成概率。隐藏层就是模型的"短期记忆",会沿时间传递。</p>
+      <h4>③ 怎么知道预测得对不对</h4>
+      <p>用 <strong>交叉熵损失</strong>:预测概率越高(对了)损失越小,越低(错了)损失越大。这就是损失曲线上的数。</p>
+      <h4>④ 怎么变聪明 —— 反向传播 BPTT</h4>
+      <p>从损失出发,用 <strong>链式法则</strong> 一路倒推每个权重该往哪调,这个权重的"调多少+方向"叫 <strong>梯度</strong>。沿时间倒推 = Backpropagation Through Time。</p>
+      <h4>⑤ 怎么更新权重</h4>
+      <p>用 <strong>Adam 优化器</strong>:结合梯度的动量(历史方向)和自适应步长,比纯梯度下降更稳更快。这就是 <code>step()</code> 干的事。</p>
+      <h4>⑥ 一句话总结</h4>
+      <p class="muted">读文本 → 算预测 → 看差多远 → 倒推该调多少 → 调权重 → 重复几千次 → 它就"会"了。</p>
+
+      <h3 id="h-faq">9. 常见问题 FAQ</h3>
+      <h4>Q: 为什么回答里偶尔有乱码/不通顺?</h4>
+      <p>字符级 RNN 是从字符级别学的,没有词的概念,且参数量小(十万级 vs GPT 的几十亿)。训练不够或语料太少都会这样。多训几轮 + 调低温度能缓解。</p>
+      <h4>Q: 训练要多久?</h4>
+      <p>500 次迭代约 10~20 秒(CPU),3000 次约 1~2 分钟。损失降到 150~200 之间,回答就比较像样了。</p>
+      <h4>Q: 训练完关掉浏览器,下次还在吗?</h4>
+      <p>在。权重保存到 <code>model.pkl</code>,只要后端服务不重装,下次启动自动加载。彻底重置要点「重置权重」。</p>
+      <h4>Q: 能让它更聪明吗?</h4>
+      <p>能,三个方向:① 增大 <code>hidden_size</code>(128→256);② 喂更多更规整的语料;③ 训练更久(注意别过拟合)。</p>
+      <h4>Q: 温度怎么选?</h4>
+      <p>对话要稳就 0.5~0.7;创作要放飞就 0.9~1.2;要它最"像样"就 0.3~0.5。</p>
+      <h4>Q: 这个模型和 ChatGPT 什么关系?</h4>
+      <p>原理同源(都是神经网络、都用反向传播训练),但架构和规模天差地别:它是 RNN+字符级+十万参数,GPT 是 Transformer+词级+几百亿参数。它存在的意义是 <strong>透明可见</strong>,让你看清 AI 怎么"学"。</p>
+
+      <h3 id="h-trouble">10. 故障排查</h3>
+      <table>
+        <tr><th>现象</th><th>原因 / 解决</th></tr>
+        <tr><td>页面打不开</td><td>确认后端服务在跑(终端应有 Flask 启动日志)。重启:<code>cd /workspace/ai_lab && python3 app.py</code></td></tr>
+        <tr><td>对话返回"模型还没学会"</td><td>模型未训练或权重未加载。去「训练」页训练几百次。</td></tr>
+        <tr><td>损失变成 NaN</td><td>学习率太大。停止训练 → <code>lr</code> 调小到 0.005 → 重置权重 → 重训。</td></tr>
+        <tr><td>训练卡住不动</td><td>iteration 不增?可能是 CPU 太忙。降低 <code>hidden_size</code> 或 <code>seq_len</code>。</td></tr>
+        <tr><td>改了语料但模型没变</td><td>语料只影响词汇表,要让模型学到新内容必须重新训练。</td></tr>
+        <tr><td>调试页"字符不在词汇表"</td><td>你输入的字符没出现在语料里。先在「语料」页加上该字符再保存。</td></tr>
+      </table>
+
+      <div class="tip" style="margin-top:20px;">
+        <strong>记住一句话:</strong> 损失曲线往下走 = 模型在变聪明。看到绿线下降,你就成功了。
+      </div>
+
     </div>
   </section>
 </main>
