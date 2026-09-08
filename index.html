@@ -1,64 +1,327 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>WebCatX</title>
-	</head>
-    <style type="text/css">
-         body{
-             padding-top: 1px;
-             background-color: #E6E6E6;
-             margin: 0; 
-         }
-         .box{
-             width: 330px;
-             height: 100px;
-             background-color: #FFFFFF;
-             margin: 0 auto;
-             border-radius: 20px;
-             padding: 5px;
-             box-sizing: border-box;
-             display: flex;
-             align-items: center; 
-         }
-         .box img{
-             width: 170px; 
-             border-radius: 15px;
-             display: block;
-             margin-right: 15px; 
-             
-         }
-         .text-group{
-             display: flex;
-             flex-direction: column;
-             justify-content: center;
-             max-width: 120px; 
-         }
-         .title-main{
-             margin: 0; 
-             font-size: 18px; 
-             font-weight: bold;
-             white-space: nowrap; 
-             color: #000;
-         }
-         .title-sub{
-             margin: 0; 
-             font-size: 13px;
-             margin-top: 8px; 
-             color: #C2C2C2;
-         }
-    </style>
-       
-	<body>
-    <br>
-	  <div class="box">
-	  	<img id="1" src="https://map18.mini1.cn/map/18/20260430/399e132218080df3479febda9a4d7100.png" alt="游戏截图"/>
-          <div class="text-group">
-              <h6 id="2" class="title-main">勇敢者僵尸生存</h6>
-              <h6 id="3" class="title-sub">魂之绫</h6>
-          </div>
-	  </div>
-    	
-	</body>
+<html lang="zh-CN" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Alex Rivera — 全栈开发者与 UI 设计师个人作品集，展示项目、技能与经历。" />
+    <meta name="author" content="Alex Rivera" />
+    <title>Alex Rivera · 全栈开发者 & UI 设计师</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦢</text></svg>" />
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="nav" id="nav">
+        <div class="nav__inner">
+            <a href="#home" class="nav__logo" aria-label="首页">
+                <span class="nav__logo-mark">AR</span>
+                <span class="nav__logo-text">Alex Rivera</span>
+            </a>
+            <nav class="nav__links" id="navLinks">
+                <a href="#home" class="nav__link">首页</a>
+                <a href="#about" class="nav__link">关于</a>
+                <a href="#skills" class="nav__link">技能</a>
+                <a href="#projects" class="nav__link">作品</a>
+                <a href="#experience" class="nav__link">经历</a>
+                <a href="#contact" class="nav__link">联系</a>
+            </nav>
+            <div class="nav__actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="切换主题" title="切换深浅主题">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+                <button class="nav__burger" id="navBurger" aria-label="菜单" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- 首屏 Hero -->
+        <section class="hero" id="home">
+            <div class="hero__bg" aria-hidden="true">
+                <div class="blob blob--1"></div>
+                <div class="blob blob--2"></div>
+                <div class="blob blob--3"></div>
+                <div class="grid-overlay"></div>
+            </div>
+            <div class="container hero__inner">
+                <p class="hero__hi reveal"><span class="dot"></span> 你好，我是</p>
+                <h1 class="hero__title reveal">Alex Rivera</h1>
+                <h2 class="hero__subtitle reveal">
+                    <span class="grad">全栈开发者</span> &amp; <span class="grad">UI 设计师</span>
+                </h2>
+                <p class="hero__desc reveal">
+                    我设计并构建优雅、高性能的 Web 产品。<br />
+                    热爱将复杂问题转化为简洁、有温度的用户体验。
+                </p>
+                <div class="hero__cta reveal">
+                    <a href="#projects" class="btn btn--primary">查看作品
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
+                    <a href="#contact" class="btn btn--ghost">联系我</a>
+                </div>
+                <div class="hero__social reveal">
+                    <a href="https://github.com" target="_blank" rel="noopener" aria-label="GitHub">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.16c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.78 2.73 1.27 3.4.97.11-.75.41-1.27.74-1.56-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.06 11.06 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.25 5.68.42.36.79 1.07.79 2.16v3.2c0 .31.21.68.8.56A10.51 10.51 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+                    </a>
+                    <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+                    </a>
+                    <a href="mailto:hello@alexrivera.dev" aria-label="Email">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </a>
+                </div>
+                <div class="hero__scroll reveal">
+                    <span>向下滚动</span>
+                    <span class="hero__scroll-line"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 关于 -->
+        <section class="section" id="about">
+            <div class="container">
+                <div class="section__head reveal">
+                    <span class="section__tag">01 — 关于</span>
+                    <h2 class="section__title">少说几句，让作品说话</h2>
+                </div>
+                <div class="about__grid">
+                    <div class="about__text reveal">
+                        <p>我是 Alex，一名拥有 6 年经验的全栈开发者与 UI 设计师。过去几年里，我从 0 到 1 构建过 20+ 款面向百万级用户的产品，覆盖 SaaS、电商、创意工具等多个领域。</p>
+                        <p>我相信好的产品 = <strong>扎实的技术</strong> × <strong>克制的设计</strong> × <strong>对细节的偏执</strong>。无论是写一段优雅的状态管理，还是为按钮调一个像素的圆角，我都乐在其中。</p>
+                        <p>工作之外，我喜欢写技术博客、参与开源、以及在咖啡店里画界面草图。</p>
+                    </div>
+                    <div class="about__stats reveal">
+                        <div class="stat">
+                            <span class="stat__num" data-target="6">0</span><span class="stat__plus">+</span>
+                            <span class="stat__label">年开发经验</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat__num" data-target="20">0</span><span class="stat__plus">+</span>
+                            <span class="stat__label">交付项目</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat__num" data-target="48">0</span><span class="stat__label stat__label--m">开源仓库</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat__num" data-target="100">0</span><span class="stat__plus">%</span>
+                            <span class="stat__label">客户满意度</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 技能 -->
+        <section class="section section--alt" id="skills">
+            <div class="container">
+                <div class="section__head reveal">
+                    <span class="section__tag">02 — 技能</span>
+                    <h2 class="section__title">用得顺手的工具箱</h2>
+                </div>
+                <div class="skills__grid">
+                    <div class="skill-card reveal">
+                        <div class="skill-card__icon">🎨</div>
+                        <h3>前端开发</h3>
+                        <p>构建响应式、可访问、性能优异的界面。</p>
+                        <ul class="chips">
+                            <li>React</li><li>Next.js</li><li>TypeScript</li><li>Vue 3</li><li>Tailwind</li><li>Vite</li>
+                        </ul>
+                    </div>
+                    <div class="skill-card reveal">
+                        <div class="skill-card__icon">⚙️</div>
+                        <h3>后端开发</h3>
+                        <p>设计可扩展的 API 与服务端架构。</p>
+                        <ul class="chips">
+                            <li>Node.js</li><li>Python</li><li>Go</li><li>PostgreSQL</li><li>Redis</li><li>GraphQL</li>
+                        </ul>
+                    </div>
+                    <div class="skill-card reveal">
+                        <div class="skill-card__icon">☁️</div>
+                        <h3>DevOps & 云</h3>
+                        <p>自动化部署、容器化与可观测性。</p>
+                        <ul class="chips">
+                            <li>Docker</li><li>K8s</li><li>AWS</li><li>GitHub Actions</li><li>Terraform</li>
+                        </ul>
+                    </div>
+                    <div class="skill-card reveal">
+                        <div class="skill-card__icon">✏️</div>
+                        <h3>UI/UX 设计</h3>
+                        <p>从信息架构到像素级视觉的全流程设计。</p>
+                        <ul class="chips">
+                            <li>Figma</li><li>设计系统</li><li>原型</li><li>动效</li><li>用户研究</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 作品 -->
+        <section class="section" id="projects">
+            <div class="container">
+                <div class="section__head reveal">
+                    <span class="section__tag">03 — 作品</span>
+                    <h2 class="section__title">精选项目</h2>
+                </div>
+                <div class="projects__grid">
+                    <article class="project-card reveal">
+                        <div class="project-card__cover" style="--c1:#6366f1;--c2:#a855f7;">
+                            <span class="project-card__emoji">📊</span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__meta"><span>2025</span><span class="dot-sep"></span><span>SaaS 平台</span></div>
+                            <h3>Nebula Analytics</h3>
+                            <p>面向中小团队的实时数据分析平台，支持自定义看板、漏斗分析与异常告警。日处理事件量 2 亿+。</p>
+                            <ul class="chips chips--sm"><li>Next.js</li><li>ClickHouse</li><li>WebSocket</li></ul>
+                            <div class="project-card__links">
+                                <a href="#" target="_blank" rel="noopener">在线演示 →</a>
+                                <a href="https://github.com" target="_blank" rel="noopener" aria-label="源码">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.16c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.78 2.73 1.27 3.4.97.11-.75.41-1.27.74-1.56-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.06 11.06 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.25 5.68.42.36.79 1.07.79 2.16v3.2c0 .31.21.68.8.56A10.51 10.51 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="project-card reveal">
+                        <div class="project-card__cover" style="--c1:#0ea5e9;--c2:#10b981;">
+                            <span class="project-card__emoji">🛒</span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__meta"><span>2024</span><span class="dot-sep"></span><span>电商平台</span></div>
+                            <h3>Driftwood Market</h3>
+                            <p>面向独立设计师的手作电商平台，含多商户结算、直播带货与 AR 试穿功能，GMV 突破千万。</p>
+                            <ul class="chips chips--sm"><li>Vue 3</li><li>Node.js</li><li>Stripe</li></ul>
+                            <div class="project-card__links">
+                                <a href="#" target="_blank" rel="noopener">在线演示 →</a>
+                                <a href="https://github.com" target="_blank" rel="noopener" aria-label="源码">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.16c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.78 2.73 1.27 3.4.97.11-.75.41-1.27.74-1.56-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.06 11.06 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.25 5.68.42.36.79 1.07.79 2.16v3.2c0 .31.21.68.8.56A10.51 10.51 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="project-card reveal">
+                        <div class="project-card__cover" style="--c1:#f59e0b;--c2:#ef4444;">
+                            <span class="project-card__emoji">🎨</span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__meta"><span>2024</span><span class="dot-sep"></span><span>创意工具</span></div>
+                            <h3>Palette Lab</h3>
+                            <p>基于 AI 的配色方案生成器，支持从图片提取色板、可访问性检测与一键导出 CSS 变量。</p>
+                            <ul class="chips chips--sm"><li>React</li><li>Canvas</li><li>WebGPU</li></ul>
+                            <div class="project-card__links">
+                                <a href="#" target="_blank" rel="noopener">在线演示 →</a>
+                                <a href="https://github.com" target="_blank" rel="noopener" aria-label="源码">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.16c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.78 2.73 1.27 3.4.97.11-.75.41-1.27.74-1.56-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.06 11.06 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.25 5.68.42.36.79 1.07.79 2.16v3.2c0 .31.21.68.8.56A10.51 10.51 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="project-card reveal">
+                        <div class="project-card__cover" style="--c1:#8b5cf6;--c2:#ec4899;">
+                            <span class="project-card__emoji">🤖</span>
+                        </div>
+                        <div class="project-card__body">
+                            <div class="project-card__meta"><span>2023</span><span class="dot-sep"></span><span>AI 应用</span></div>
+                            <h3>Quill — AI 写作助手</h3>
+                            <p>为内容创作者打造的 AI 写作伙伴，支持长文续写、风格迁移与多端同步。月活用户 12 万。</p>
+                            <ul class="chips chips--sm"><li>Next.js</li><li>Python</li><li>LLM</li></ul>
+                            <div class="project-card__links">
+                                <a href="#" target="_blank" rel="noopener">在线演示 →</a>
+                                <a href="https://github.com" target="_blank" rel="noopener" aria-label="源码">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.16c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.78 2.73 1.27 3.4.97.11-.75.41-1.27.74-1.56-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.06 11.06 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.25 5.68.42.36.79 1.07.79 2.16v3.2c0 .31.21.68.8.56A10.51 10.51 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- 经历 -->
+        <section class="section section--alt" id="experience">
+            <div class="container">
+                <div class="section__head reveal">
+                    <span class="section__tag">04 — 经历</span>
+                    <h2 class="section__title">职业旅程</h2>
+                </div>
+                <div class="timeline">
+                    <div class="timeline__item reveal">
+                        <div class="timeline__dot"></div>
+                        <div class="timeline__content">
+                            <span class="timeline__date">2023 — 至今</span>
+                            <h3>高级全栈工程师 · Lumen Tech</h3>
+                            <p>主导数据可视化产品线，带领 5 人小组从设计到上线全流程，核心指标提升 40%。</p>
+                        </div>
+                    </div>
+                    <div class="timeline__item reveal">
+                        <div class="timeline__dot"></div>
+                        <div class="timeline__content">
+                            <span class="timeline__date">2020 — 2023</span>
+                            <h3>前端负责人 · Driftwood Studio</h3>
+                            <p>搭建电商前端架构与设计系统，支撑千万级 GMV，团队效率提升 3 倍。</p>
+                        </div>
+                    </div>
+                    <div class="timeline__item reveal">
+                        <div class="timeline__dot"></div>
+                        <div class="timeline__content">
+                            <span class="timeline__date">2019 — 2020</span>
+                            <h3>全栈开发者 · 自由职业</h3>
+                            <p>为 10+ 创业团队交付从 0 到 1 的 MVP，覆盖 SaaS、工具型与内容型产品。</p>
+                        </div>
+                    </div>
+                    <div class="timeline__item reveal">
+                        <div class="timeline__dot"></div>
+                        <div class="timeline__content">
+                            <span class="timeline__date">2018</span>
+                            <h3>计算机科学学士 · 某大学</h3>
+                            <p>主修软件工程与人机交互，毕业设计获校级优秀。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 联系 -->
+        <section class="section" id="contact">
+            <div class="container">
+                <div class="contact reveal">
+                    <span class="section__tag">05 — 联系</span>
+                    <h2 class="section__title">有项目想法？聊聊吧</h2>
+                    <p class="contact__lead">无论是合作开发、外包项目，还是单纯想交个朋友，我都很乐意收到你的消息。通常 24 小时内回复。</p>
+                    <div class="contact__cta">
+                        <a href="mailto:hello@alexrivera.dev" class="btn btn--primary btn--lg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            hello@alexrivera.dev
+                        </a>
+                    </div>
+                    <div class="contact__socials">
+                        <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+                        <span class="dot-sep"></span>
+                        <a href="https://linkedin.com" target="_blank" rel="noopener">LinkedIn</a>
+                        <span class="dot-sep"></span>
+                        <a href="https://twitter.com" target="_blank" rel="noopener">Twitter</a>
+                        <span class="dot-sep"></span>
+                        <a href="https://dribbble.com" target="_blank" rel="noopener">Dribbble</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer__inner">
+            <p>© <span id="year"></span> Alex Rivera. 用 ❤️ 与代码构建。</p>
+            <a href="#home" class="footer__top">回到顶部 ↑</a>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
 </html>
