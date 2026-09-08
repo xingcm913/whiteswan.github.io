@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>帮助文档 - AI 助手</title>
+<style>
+  body {
+    font: 15px/1.7 "PingFang SC","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+    color: #1a1a1a; background: #fff; margin: 0; padding: 24px 32px;
+  }
+  h1 { font-size: 24px; border-bottom: 3px solid #4f8cff; padding-bottom: 8px; margin-top: 32px; }
+  h1:first-child { margin-top: 0; }
+  h2 { font-size: 19px; color: #2c3e50; margin-top: 28px; border-left: 4px solid #6ee7ff; padding-left: 10px; }
+  h3 { font-size: 16px; color: #345; margin-top: 18px; }
+  code {
+    background: #f0f3f8; color: #c7254e; padding: 2px 6px; border-radius: 4px;
+    font-family: "SF Mono", Consolas, Menlo, monospace; font-size: 13px;
+  }
+  pre {
+    background: #1e2230; color: #d4d8e0; padding: 14px 16px; border-radius: 8px;
+    overflow-x: auto; font-size: 13px; line-height: 1.55;
+  }
+  pre code { background: transparent; color: inherit; padding: 0; }
+  .note {
+    background: #fff8e1; border-left: 4px solid #fbbf24; padding: 10px 14px;
+    margin: 12px 0; border-radius: 4px; font-size: 14px;
+  }
+  .tip {
+    background: #e8f5e9; border-left: 4px solid #34d399; padding: 10px 14px;
+    margin: 12px 0; border-radius: 4px; font-size: 14px;
+  }
+  .warn {
+    background: #fdecea; border-left: 4px solid #f87171; padding: 10px 14px;
+    margin: 12px 0; border-radius: 4px; font-size: 14px;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 14px; }
+  th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
+  th { background: #f5f7fa; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  .toc {
+    background: #f8f9fb; border: 1px solid #e0e4ec; border-radius: 8px; padding: 16px 24px;
+    margin-bottom: 24px;
+  }
+  .toc ol { margin: 0; }
+  .toc a { color: #4f8cff; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .kbd { display: inline-block; padding: 2px 8px; background: #eef; border: 1px solid #ccd; border-radius: 4px; font-family: monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<h1>📖 AI 助手 — 帮助文档</h1>
+
+<div class="toc">
+  <strong>目录</strong>
+  <ol>
+    <li><a href="#quick">快速开始（3 步用起来）</a></li>
+    <li><a href="#train">AI 训练：让模型按你的方式回答</a></li>
+    <li><a href="#train-examples">训练文本怎么写（含完整示例）</a></li>
+    <li><a href="#params">参数调节详解</a></li>
+    <li><a href="#time">为什么问"现在是几几年"会答对</a></li>
+    <li><a href="#apikey">创建 API Key</a></li>
+    <li><a href="#external">外部软件接入（OpenAI 兼容）</a></li>
+    <li><a href="#faq">常见问题</a></li>
+  </ol>
+</div>
+
+<h1 id="quick">一、快速开始（3 步用起来）</h1>
+
+<ol>
+  <li><strong>打开右上角「⚙ 设置」</strong>，填写：
+    <ul>
+      <li>上游 Base URL（推荐智谱 GLM：<code>https://open.bigmodel.cn/api/paas/v4/</code>）</li>
+      <li>上游模型（如 <code>glm-4-plus</code>）</li>
+      <li>上游 API Key（在对应平台注册后获取，<code>sk-...</code>）</li>
+      <li>默认系统提示词</li>
+    </ul>
+    保存即可。
+  </li>
+  <li><strong>在中间对话框输入内容</strong>，按 <span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> 或点击「发送」。</li>
+  <li><strong>如果想给别人用</strong>：打开右上角「🔑 API Key」创建一个 Key，把 base_url + api_key 给对方即可（见第六节）。</li>
+</ol>
+
+<div class="tip">
+本服务是一个<strong>应用层</strong>：真正的 AI 能力来自你填写的上游模型 API。
+所以你不需要 GPU、不需要训练大模型 —— 上游已经训练好了，本服务负责参数调节、训练样本注入、API Key 分发与时间修正。
+</div>
+
+<h1 id="train">二、AI 训练：让模型按你的方式回答</h1>
+
+<h2>2.1 这里的"训练"是什么</h2>
+<p>
+本服务的"训练"是<strong>提示词注入式软训练</strong>（in-context learning），
+不是从零训练一个新模型（那需要 GPU 集群）。具体做法：你写的每条"训练样本"
+在每次对话时都会被自动拼到系统提示词里，模型会按你设定的风格、规则、
+人设、知识来回答。改完<strong>立即生效</strong>，无需重启。
+</p>
+
+<h2>2.2 三种样本角色</h2>
+<table>
+  <tr><th>角色</th><th>用途</th><th>示例</th></tr>
+  <tr><td><code>system</code></td><td>规则/约束/人设，模型必须遵守</td><td>"回答必须分点列出"</td></tr>
+  <tr><td><code>user</code></td><td>示例问题（输入）</td><td>"帮我写周报"</td></tr>
+  <tr><td><code>assistant</code></td><td>示例回答（输出），告诉模型该这么答</td><td>"# 本周工作……\n1. …"</td></tr>
+</table>
+<p>
+配对使用 <code>user</code>+<code>assistant</code>（few-shot）效果最好。
+<code>system</code> 类样本适合放硬规则。
+</p>
+
+<h2>2.3 怎么添加训练样本</h2>
+<ol>
+  <li>点右上角「📚 训练」</li>
+  <li>选择角色（system / user / assistant）</li>
+  <li>填分组标签（可选，方便管理，比如 <code>周报风格</code>）</li>
+  <li>填内容，点「添加」</li>
+</ol>
+<div class="note">开关「注入训练样本」可临时关闭训练（仍保留样本数据），下次打开又生效。</div>
+
+<h1 id="train-examples">三、训练文本怎么写（含完整示例）</h1>
+
+<h2>3.1 写得好的原则</h2>
+<ul>
+  <li><strong>具体</strong>：不要写"态度好一点"，要写"回答开头先复述用户问题，结尾问一句'是否还需要补充'"。</li>
+  <li><strong>可验证</strong>：写得出就能判断对错，比如"输出格式必须为 Markdown 表格"。</li>
+  <li><strong>给反例</strong>：告诉模型不要做什么，比只告诉它要做什么更有效。</li>
+  <li><strong>给例子</strong>：一条 user+assistant 配对样本，胜过十句抽象指令。</li>
+</ul>
+
+<h2>3.2 完整示例 1：把 AI 调教成"周报助手"</h2>
+<p>依次添加以下 3 条样本：</p>
+
+<h3>样本 ①（system 规则）</h3>
+<pre><code>你是一个专业的"周报助手"。请严格遵守：
+1. 输出固定使用 Markdown 格式
+2. 结构必须是：## 本周工作 / ## 遇到问题 / ## 下周计划
+3. 每条工作前用 "-" 列表，每条不超过 30 字
+4. 不要寒暄、不要问"需要我做什么"，直接给报告
+5. 如果用户输入太短，请基于已知信息合理扩写，但不得编造具体数字</code></pre>
+
+<h3>样本 ②（user 示例）</h3>
+<pre><code>本周做了登录模块联调，修了 2 个 bug，下周要做权限管理</code></pre>
+
+<h3>样本 ③（assistant 示例，对应样本②的回答）</h3>
+<pre><code>## 本周工作
+- 登录模块前后端联调完成
+- 修复 2 个已知 bug
+
+## 遇到问题
+- 联调过程中接口字段对齐耗时较长
+
+## 下周计划
+- 启动权限管理模块开发
+- 完成接口设计评审</code></pre>
+
+<div class="tip">把 ②③ 配成一对，模型就学会了"输入这种乱糟糟的话 → 输出这种结构化报告"。
+下次用户随便说几句，AI 也会自动按这个格式答。</div>
+
+<h2>3.3 完整示例 2：把 AI 调教成"客服话术"</h2>
+<pre><code>[system] 你是某品牌客服。规则：
+1. 永远先共情："非常抱歉给您带来困扰"
+2. 不确定的事不要承诺，改说"我帮您核实后回复您"
+3. 涉及退款/赔偿，必须先问订单号
+4. 全程用"您"，不用"你"
+
+[user] 你们东西坏了！退款！
+
+[assistant] 非常抱歉给您带来困扰，理解您的心情。
+为了帮您处理退款，请您提供一下订单号，我核实后立即为您处理。</code></pre>
+
+<h2>3.4 完整示例 3：让 AI 永远答对"现在是几几年"</h2>
+<pre><code>[system] 关于时间：系统提示词里已包含真实当前时间。
+当用户问"现在几几年/几月几号/星期几"时，必须用系统时间作答，
+绝对不能说 2024 年、不能编造日期。</code></pre>
+<div class="tip">其实只要打开"注入系统时间"开关，模型就已经能看到真实时间了。
+上面这条样本只是再加强一次"必须用真实时间"的硬约束。</div>
+
+<h2>3.5 常见"训练"模板速查</h2>
+<table>
+  <tr><th>目标</th><th>样本写法</th></tr>
+  <tr><td>固定输出格式</td><td>system: "输出必须是 JSON，字段为 {summary, tags}"</td></tr>
+  <tr><td>语气控制</td><td>system: "用幽默的语气，每段结尾加一个 Emoji"</td></tr>
+  <tr><td>限定领域</td><td>system: "只回答编程问题，非编程问题回复'我只能聊编程'"</td></tr>
+  <tr><td>few-shot 问答</td><td>user: "输入示例" + assistant: "想要的输出示例"</td></tr>
+  <tr><td>禁止 hallucination</td><td>system: "不知道就说不知道，不要编造"</td></tr>
+</table>
+
+<h1 id="params">四、参数调节详解</h1>
+
+<table>
+  <tr><th>参数</th><th>范围</th><th>作用</th><th>推荐值</th></tr>
+  <tr><td>temperature</td><td>0 ~ 2</td><td>越高越随机有创意，越低越确定严谨</td><td>创意 1.1 / 平衡 0.7 / 严谨 0.2</td></tr>
+  <tr><td>top_p</td><td>0 ~ 1</td><td>核采样，与 temperature 二选一调节</td><td>0.9</td></tr>
+  <tr><td>max_tokens</td><td>64 ~ 32768</td><td>回答最大长度</td><td>2048</td></tr>
+  <tr><td>presence_penalty</td><td>-2 ~ 2</td><td>正值鼓励谈新话题</td><td>0</td></tr>
+  <tr><td>frequency_penalty</td><td>-2 ~ 2</td><td>正值降低重复用词</td><td>0</td></tr>
+  <tr><td>system_prompt</td><td>文本</td><td>人设/全局指令</td><td>按需</td></tr>
+</table>
+<p>参数面板里可「存为预设」一键切换：比如存一个"创意""严谨"预设，按需应用。</p>
+
+<h1 id="time">五、为什么问"现在是几几年"会答对</h1>
+<p>
+大模型本身有"知识截止时间"，所以你直接问"今天几号"它可能答 2024 年。
+本服务做了两件事修复这个问题：
+</p>
+<ol>
+  <li><strong>每次对话都把真实系统时间</strong>（含年月日时分秒、星期、ISO 格式）拼进系统提示词。</li>
+  <li><strong>用一段硬指令</strong>告诉模型：遇到时间问题必须用这个时间回答，不要用训练数据里的旧时间。</li>
+</ol>
+<p>开关在左侧面板「注入系统时间」，默认开启。</p>
+
+<h1 id="apikey">六、创建 API Key</h1>
+<ol>
+  <li>右上角「🔑 API Key」→ 输入名称 → 「创建」</li>
+  <li>得到形如 <code>sk-assistant-xxxx...</code> 的 Key</li>
+  <li>可随时启用/停用/删除</li>
+</ol>
+<div class="warn">API Key 是别人调用你服务的凭证，请妥善保管，不要泄露到公开仓库。</div>
+
+<h1 id="external">七、外部软件接入（OpenAI 兼容）</h1>
+<p>本服务暴露的接口完全兼容 OpenAI 协议，凡是支持自定义 base_url 的客户端都能接。</p>
+
+<h2>7.1 通用配置</h2>
+<pre><code>Base URL:  http://&lt;你的服务器IP&gt;:8000/v1
+API Key:   在第六节创建的 sk-assistant-xxx
+Endpoint:  POST /v1/chat/completions
+模型名:    任意填（本服务会用设置里的"上游模型"）</code></pre>
+
+<h2>7.2 Python 调用示例</h2>
+<pre><code>from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="sk-assistant-你的key",
+)
+
+resp = client.chat.completions.create(
+    model="any",
+    messages=[
+        {"role": "system", "content": "你是一个简洁的助手"},
+        {"role": "user", "content": "现在几几年几月几号？"},
+    ],
+)
+print(resp.choices[0].message.content)</code></pre>
+
+<h2>7.3 curl 调用示例</h2>
+<pre><code>curl http://localhost:8000/v1/chat/completions \
+  -H "Authorization: Bearer sk-assistant-你的key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "any",
+    "messages": [{"role":"user","content":"你好"}],
+    "stream": false
+  }'</code></pre>
+
+<h2>7.4 接入常见客户端</h2>
+<table>
+  <tr><th>客户端</th><th>填法</th></tr>
+  <tr><td>NextChat / LobeChat</td><td>OpenAI 厂商，Base URL 填上面的，Key 填本服务创建的</td></tr>
+  <tr><td>Open WebUI</td><td>设置→连接→OpenAI API，Base URL 填上面的</td></tr>
+  <tr><td>SillyTavern</td><td>Chat Completion 模式，自定义端点</td></tr>
+  <tr><td>任意 OpenAI SDK</td><td>见 7.2 Python 示例</td></tr>
+</table>
+
+<div class="note">注意：本服务的"上游 API Key"（设置里那个）和"对外的 API Key"（第六节那个）是两回事：
+前者是你调用上游大模型的钥匙，后者是别人调用你这个服务的钥匙。</div>
+
+<h1 id="faq">八、常见问题</h1>
+
+<h3>Q1: 启动后聊天报错"尚未配置上游模型 API Key"</h3>
+<p>去右上角「⚙ 设置」填上游 API Key（来自智谱/OpenAI 等），保存。</p>
+
+<h3>Q2: 问"现在几号"还是答 2024 年？</h3>
+<p>检查左侧面板「注入系统时间」是否开启；同时点顶部「⏱ 时间」确认服务端时间正确。也可加一条训练样本强化（见 3.4）。</p>
+
+<h3>Q3: 训练样本越多越好吗？</h3>
+<p>不是。样本太多会让系统提示词过长、拖慢响应、还可能互相冲突。建议 5~30 条精选样本即可。</p>
+
+<h3>Q4: 想让模型记住某个人设？</h3>
+<p>两种方式：①在设置里改"默认系统提示词"；②加一条 <code>system</code> 类训练样本。效果叠加。</p>
+
+<h3>Q5: 对外的 API Key 调用次数限制？</h3>
+<p>本服务完全免费，不限制次数。但你调用上游模型（如智谱）的额度受上游平台限制。</p>
+
+<h3>Q6: 数据存在哪？</h3>
+<p>SQLite 文件 <code>data/assistant.db</code>，跟着项目走，可备份/迁移。</p>
+
+<hr>
+<p style="color:#999;font-size:13px;text-align:center;margin-top:32px">
+AI 助手 · 帮助文档 · 由 FastAPI + SQLite 构建
+</p>
+
+</body>
+</html>

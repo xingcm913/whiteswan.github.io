@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 助手</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">AI</span>
+      <span class="title">AI 助手控制台</span>
+    </div>
+    <div class="top-actions">
+      <button id="btnTime" class="chip" title="当前系统时间">⏱ 时间</button>
+      <button id="btnSettings" class="chip">⚙ 设置</button>
+      <button id="btnTraining" class="chip">📚 训练</button>
+      <button id="btnKeys" class="chip">🔑 API Key</button>
+      <button id="btnHelp" class="chip primary">❓ 帮助文档</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 左侧参数面板 -->
+    <aside class="side" id="sidePanel">
+      <div class="panel">
+        <h3>参数调节</h3>
+        <label>模型
+          <input id="pModel" type="text" placeholder="glm-4-plus">
+        </label>
+        <label>Temperature <span id="vTemp" class="num">0.7</span>
+          <input id="pTemp" type="range" min="0" max="2" step="0.1" value="0.7">
+        </label>
+        <label>Top P <span id="vTopP" class="num">0.9</span>
+          <input id="pTopP" type="range" min="0" max="1" step="0.05" value="0.9">
+        </label>
+        <label>Max Tokens
+          <input id="pMaxTok" type="number" min="64" max="32768" step="64" value="2048">
+        </label>
+        <label>Presence Penalty <span id="vPP" class="num">0</span>
+          <input id="pPP" type="range" min="-2" max="2" step="0.1" value="0">
+        </label>
+        <label>Frequency Penalty <span id="vFP" class="num">0</span>
+          <input id="pFP" type="range" min="-2" max="2" step="0.1" value="0">
+        </label>
+        <label>系统提示词
+          <textarea id="pSys" rows="3" placeholder="你是一个乐于助人的中文 AI 助手。"></textarea>
+        </label>
+        <div class="toggles">
+          <label class="switch"><input id="pUseTrain" type="checkbox" checked> 注入训练样本</label>
+          <label class="switch"><input id="pUseTime" type="checkbox" checked> 注入系统时间</label>
+        </div>
+        <div class="preset-row">
+          <select id="presetSel"></select>
+          <button id="btnApplyPreset" class="btn small">应用</button>
+          <button id="btnSavePreset" class="btn small">存为预设</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 中间对话区 -->
+    <section class="chat">
+      <div class="chat-head">
+        <button id="btnToggleSide" class="iconbtn" title="折叠参数">☰</button>
+        <span id="statusDot" class="dot"></span>
+        <span id="statusText">就绪</span>
+        <button id="btnClear" class="btn small ghost">清空对话</button>
+      </div>
+      <div id="messages" class="messages"></div>
+      <div class="composer">
+        <textarea id="input" rows="2" placeholder="输入消息，Ctrl+Enter 发送……"></textarea>
+        <button id="btnSend" class="btn primary">发送</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- 设置弹窗 -->
+  <dialog id="dlgSettings" class="modal">
+    <form method="dialog" class="modal-form">
+      <h2>⚙ 全局设置</h2>
+      <label>上游 Base URL
+        <input id="sBaseUrl" type="text" placeholder="https://open.bigmodel.cn/api/paas/v4/">
+      </label>
+      <label>上游模型
+        <input id="sModel" type="text">
+      </label>
+      <label>上游 API Key（仅本服务使用，不会下发）
+        <input id="sApiKey" type="password" placeholder="sk-...">
+      </label>
+      <label>默认系统提示词
+        <textarea id="sSys" rows="3"></textarea>
+      </label>
+      <p class="hint">支持的 base_url 示例：<br>
+        智谱 GLM: https://open.bigmodel.cn/api/paas/v4/<br>
+        DeepSeek: https://api.deepseek.com/v1/<br>
+        通义千问: https://dashscope.aliyuncs.com/compatible-mode/v1/<br>
+        OpenAI:   https://api.openai.com/v1/<br>
+        本地 Ollama: http://localhost:11434/v1/
+      </p>
+      <div class="modal-actions">
+        <button type="button" id="btnSaveSettings" class="btn primary">保存</button>
+        <button type="button" class="btn ghost" onclick="document.getElementById('dlgSettings').close()">取消</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 训练样本弹窗 -->
+  <dialog id="dlgTraining" class="modal">
+    <div class="modal-form">
+      <h2>📚 训练样本</h2>
+      <p class="hint">这里存放"软训练"样本：每次对话时会把样本拼进系统提示词，引导模型按你设定的风格/规则回答。不需要 GPU，立即生效。</p>
+      <div class="train-add">
+        <select id="trRole">
+          <option value="system">system 规则</option>
+          <option value="user">user 示例问</option>
+          <option value="assistant">assistant 示例答</option>
+        </select>
+        <input id="trTag" type="text" placeholder="分组标签（可选）">
+      </div>
+      <textarea id="trContent" rows="3" placeholder="样本内容……"></textarea>
+      <div class="modal-actions">
+        <button id="btnAddTraining" class="btn small">添加</button>
+        <label>筛选 <select id="trFilter"><option value="">全部</option></select></label>
+      </div>
+      <ul id="trList" class="train-list"></ul>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="document.getElementById('dlgTraining').close()">关闭</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- API Key 弹窗 -->
+  <dialog id="dlgKeys" class="modal">
+    <div class="modal-form">
+      <h2>🔑 API Key 管理</h2>
+      <p class="hint">在这里创建 Key，外部软件填好 base_url 与 api_key 即可调用本服务的 OpenAI 兼容接口。</p>
+      <div class="train-add">
+        <input id="keyName" type="text" placeholder="Key 名称（如：我的客户端）">
+        <button id="btnCreateKey" class="btn small primary">创建</button>
+      </div>
+      <ul id="keyList" class="train-list"></ul>
+      <div class="key-info">
+        <p>外部调用方式（OpenAI 兼容）：</p>
+        <pre>base_url: http://&lt;服务器IP&gt;:8000/v1
+api_key:  在上方列表创建的 sk-assistant-xxx
+endpoint: POST /v1/chat/completions
+模型名:   自定义，会被本服务忽略，统一用配置里的上游模型</pre>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="document.getElementById('dlgKeys').close()">关闭</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 帮助文档 -->
+  <dialog id="dlgHelp" class="modal modal-lg">
+    <div class="modal-form">
+      <iframe id="helpFrame" src="about:blank"></iframe>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="document.getElementById('dlgHelp').close()">关闭</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
